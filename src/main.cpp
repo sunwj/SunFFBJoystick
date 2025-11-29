@@ -9,7 +9,7 @@
 #include "ffb_report_handler.h"
 #include "ffb_device_input.h"
 #include "ffb_force_calculator.h"
-#include "serial_communication.h"
+#include "simple_serial_communication.h"
 
 // #define SERIAL_PRINT
 
@@ -246,47 +246,46 @@ void lcd_task(void* params)
 
 void joystick_task(void* params)
 {
-    ffbDeviceInput.reset();
-    TickType_t wakeupTime = xTaskGetTickCount();
-    while (true)
-    {
-      int16_t coords[NUM_AXIS];
-      coords[0] = analogRead(VRX_PIN) - offsetX;
-      coords[1] = analogRead(VRY_PIN) - offsetY;
-      coords[0] = std::clamp(coords[0], int16_t(-2048), int16_t(2048));
-      coords[1] = std::clamp(coords[1], int16_t(-2048), int16_t(2048));
-
-      coords[0] = coords[0] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
-      coords[1] = coords[1] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
-
-      xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-      ffbDeviceInput.update_axis(coords, 50, 4);
-      xSemaphoreGive(semaphoreFFBDeviceInput);
-
-      usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
-
-      vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
-    }
-
     // ffbDeviceInput.reset();
-
-    // int32_t speedDeadBand[NUM_AXIS] = {30, 30};
-    // ffbDeviceInput.update_speed_deadband(speedDeadBand);
-    
     // TickType_t wakeupTime = xTaskGetTickCount();
     // while (true)
     // {
-    //     int16_t coords[NUM_AXIS] = {0};
-    //     xQueuePeek(gPositions, coords, portMAX_DELAY);
+    //   int16_t coords[NUM_AXIS];
+    //   coords[0] = analogRead(VRX_PIN) - offsetX;
+    //   coords[1] = analogRead(VRY_PIN) - offsetY;
+    //   coords[0] = std::clamp(coords[0], int16_t(-2048), int16_t(2048));
+    //   coords[1] = std::clamp(coords[1], int16_t(-2048), int16_t(2048));
 
-    //     xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-    //     ffbDeviceInput.update_axis(coords, 0, 4, 100);
-    //     xSemaphoreGive(semaphoreFFBDeviceInput);
+    //   coords[0] = coords[0] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+    //   coords[1] = coords[1] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
 
-    //     usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+    //   xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+    //   ffbDeviceInput.update_axis(coords, 50, 4);
+    //   xSemaphoreGive(semaphoreFFBDeviceInput);
 
-    //     vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+    //   usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+
+    //   vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     // }
+
+    ffbDeviceInput.reset();
+    int32_t speedDeadBand[NUM_AXIS] = {30, 30};
+    ffbDeviceInput.update_speed_deadband(speedDeadBand);
+    
+    TickType_t wakeupTime = xTaskGetTickCount();
+    while (true)
+    {
+        int16_t coords[NUM_AXIS] = {0};
+        xQueuePeek(gPositions, coords, portMAX_DELAY);
+
+        xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+        ffbDeviceInput.update_axis(coords, 0, 4, 100);
+        xSemaphoreGive(semaphoreFFBDeviceInput);
+
+        usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+    }
 }
 
 void force_calculation_task(void* params)
@@ -326,7 +325,7 @@ void send_force_task(void* params)
     {
         int32_t forces[NUM_AXIS];
         xQueuePeek(gForces, forces, portMAX_DELAY);
-        SunFFB::send_packet(&forces[0], &forces[1], &comSerial);
+        send_packet_buffer(comSerial, (uint8_t*)forces, sizeof(forces));
 
         vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     }
@@ -338,7 +337,7 @@ void receive_position_task(void* params)
     while (true)
     {
         uint16_t pos[NUM_AXIS];
-        if(SunFFB::receive_packet(&pos[0], &pos[1], &comSerial))
+        if(receive_packet_buffer(comSerial, (uint8_t*)pos, sizeof(pos)))
         {
             xQueueOverwrite(gPositions, pos);
             continue;

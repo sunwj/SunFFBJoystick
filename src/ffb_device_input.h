@@ -81,8 +81,8 @@ namespace SunFFB
         memset((void*)&metrics, 0, sizeof(Metrics));
         metrics.maxPosition[0] = USB_AXIS_MAX_ABSOLUTE;
         metrics.maxPosition[1] = USB_AXIS_MAX_ABSOLUTE;
-        metrics.maxSpeed[0] = USB_AXIS_MAX_ABSOLUTE * 0.1f;
-        metrics.maxSpeed[1] = USB_AXIS_MAX_ABSOLUTE * 0.1f;
+        metrics.maxSpeed[0] = USB_AXIS_MAX_ABSOLUTE * 0.5f;
+        metrics.maxSpeed[1] = USB_AXIS_MAX_ABSOLUTE * 0.5f;
         metrics.maxAcceleration[0] = USB_AXIS_MAX_ABSOLUTE;
         metrics.maxAcceleration[1] = USB_AXIS_MAX_ABSOLUTE;
         tPrev = millis();
