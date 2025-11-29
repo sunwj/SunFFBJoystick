@@ -83,7 +83,7 @@ namespace SunFFB
         return force;
     }
 
-    float FFBForceCalculator::apply_condition(const SetConditionReportData& conditionData, int32_t metric) const
+    float FFBForceCalculator::apply_condition(const SetConditionReportData& conditionData, float metric) const
     {
         int16_t cpOffset = conditionData.cpOffset;
         int16_t postiveCoeff = conditionData.positiveCoefficient;
@@ -94,21 +94,22 @@ namespace SunFFB
 
         float force = 0.f;
 
-        if(metric < (cpOffset - deadBand))
+        const float invRange =  1.f / USB_AXIS_MAX_ABSOLUTE;
+        if(metric < (cpOffset - deadBand) * invRange)
         {
-            force = (metric - (cpOffset - deadBand)) * negativeCoeff / (float)USB_AXIS_MAX_ABSOLUTE;
+            force = (metric - (cpOffset - deadBand) * invRange) * negativeCoeff;
             force = force < negativeSaturation ? negativeSaturation : force;
         }
-        else if(metric > (cpOffset + deadBand))
+        else if(metric > (cpOffset + deadBand) * invRange)
         {
-            force = (metric - (cpOffset + deadBand)) * postiveCoeff / (float)USB_AXIS_MAX_ABSOLUTE;
+            force = (metric - (cpOffset + deadBand) * invRange) * postiveCoeff;
             force = force > postiveSaturation ? postiveSaturation : force;
         }
 
         return -force;
     }
 
-    void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const int32_t metrics[NUM_AXIS], float forces[NUM_AXIS]) const
+    void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const int32_t metrics[NUM_AXIS], const int32_t maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
     {
         uint8_t axisEnable = effectBlock.effectData.axisEnable;
         uint8_t conditionBlockCount = effectBlock.conditionBlockCount;
@@ -123,7 +124,7 @@ namespace SunFFB
             for(uint8_t i = 0; i < NUM_AXIS; ++i)
                 metric += metrics[i] * directionUnitVector[i];
             
-            float force = apply_condition(conditionData, metric);
+            float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]));
 
             #pragma unroll
             for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -139,7 +140,7 @@ namespace SunFFB
             if(((axisEnable & DIRECTION_ENABLE) && (conditionBlockCount > 1)) || ((axisEnable >> i) & 0x01))
             {
                 const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
-                forces[i] = apply_condition(conditionData, metrics[i]);
+                forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]));
             }
         }
     }
@@ -192,16 +193,16 @@ namespace SunFFB
                     break;
 
                     case ET_SPRING:
-                        condition_force_calculator(effectBlock, ffbDeviceInput.get_position(), forcesCondition);
+                        condition_force_calculator(effectBlock, ffbDeviceInput.get_position(), ffbDeviceInput.get_max_position(), forcesCondition);
                     break;
 
                     case ET_FRICTION:
                     case ET_DAMPER:
-                        condition_force_calculator(effectBlock, ffbDeviceInput.get_speed(), forcesCondition);
+                        condition_force_calculator(effectBlock, ffbDeviceInput.get_speed(), ffbDeviceInput.get_max_speed(), forcesCondition);
                     break;
 
                     case ET_INERTIA:
-                        condition_force_calculator(effectBlock, ffbDeviceInput.get_acceleration(), forcesCondition);
+                        condition_force_calculator(effectBlock, ffbDeviceInput.get_acceleration(), ffbDeviceInput.get_max_acceleration(), forcesCondition);
                     break;
 
                     default:

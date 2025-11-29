@@ -20,6 +20,10 @@ namespace SunFFB
         const int32_t* get_speed() const {return (const int32_t*)metrics.speed;};
         const int32_t* get_acceleration() const {return (const int32_t*)metrics.acceleration;};
 
+        const int32_t* get_max_position() const {return (const int32_t*)metrics.maxPosition;};
+        const int32_t* get_max_speed() const {return (const int32_t*)metrics.maxSpeed;};
+        const int32_t* get_max_acceleration() const {return (const int32_t*)metrics.maxAcceleration;};
+
         void reset();
 
         public:
@@ -75,6 +79,12 @@ namespace SunFFB
     {
         memset((void*)&inputData, 0, sizeof(JoystickInputReportData));
         memset((void*)&metrics, 0, sizeof(Metrics));
+        metrics.maxPosition[0] = USB_AXIS_MAX_ABSOLUTE;
+        metrics.maxPosition[1] = USB_AXIS_MAX_ABSOLUTE;
+        metrics.maxSpeed[0] = USB_AXIS_MAX_ABSOLUTE * 0.1f;
+        metrics.maxSpeed[1] = USB_AXIS_MAX_ABSOLUTE * 0.1f;
+        metrics.maxAcceleration[0] = USB_AXIS_MAX_ABSOLUTE;
+        metrics.maxAcceleration[1] = USB_AXIS_MAX_ABSOLUTE;
         tPrev = millis();
     }
 }
