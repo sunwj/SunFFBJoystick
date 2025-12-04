@@ -1,0 +1,67 @@
+#ifndef _CONSTANTS_H_
+#define _CONSTANTS_H_
+
+#define NUM_AXIS 2
+#define X_AXIS_ENABLE 0x01
+#define Y_AXIS_ENABLE 0x02
+#define DIRECTION_ENABLE 0x04
+#define TYPE_SPECIFIC_BLOCK_OFFSET_1 0
+#define TYPE_SPECIFIC_BLOCK_OFFSET_2 1
+
+#define USB_DURATION_INFINITE 0xFFFF
+#define USB_MAX_EFFECT_GAIN 255
+#define USB_MAX_DEVICE_GAIN 255
+#define USB_NO_TRIGGER_BUTTON 0xFF
+#define USB_MAX_MAGNITUDE 10000
+#define USB_NORMALIZATION_MAGNITUDE 0.0001f
+#define USB_AXIS_MAX_ABSOLUTE 32767
+#define USB_MAX_PHASE 62830
+#define USB_NORMALIZATION_RAD 0.0001f
+
+#define EFFECT_STATE_FREE 0x00
+#define EFFECT_STATE_ALLOCATED 0x01
+#define EFFECT_STATE_PLAYING 0x02
+
+#define DEVICE_STATE_DEFAULT_SPRING 0x01
+
+// order must be kept the same with the set effect report definition
+#define ET_CONSTANT 0x01
+#define ET_RAMP 0x02
+#define ET_SQUARE 0x03
+#define ET_SINE 0x04
+#define ET_TRIANGLE 0x05
+#define ET_SAWTOOTH_UP 0x06
+#define ET_SAWTOOTH_DOWN 0x07
+#define ET_SPRING 0x08
+#define ET_DAMPER 0x09
+#define ET_INERTIA 0x0A
+#define ET_FRICTION 0x0B
+
+
+/* constants for USB HID descriptor*/
+#define MAX_EFFECTS 40
+#define NUM_SUPPORTED_EFFECTS                           11
+
+#define HID_UNIT_SECONDS 0x1003 // Documented as "Eng Lin:Time" in the PID spec
+
+#define REPORT_ID_JOYSTICK                              1
+#define REPORT_ID_PID_STATE                             2
+
+#define REPORT_ID_SET_EFFECT_REPORT                     3
+#define REPORT_ID_SET_ENVELOPE_REPORT                   4
+#define REPORT_ID_SET_CONDITION_REPORT                  5
+#define REPORT_ID_SET_PERIODIC_REPORT                   6
+#define REPORT_ID_SET_CONSTANT_FORCE_REPORT             7
+#define REPORT_ID_SET_RAMP_FROCE_REPORT                 8
+#define REPORT_ID_CUSTOM_FORCE_DATA_REPORT              9
+#define REPORT_ID_DOWNLOAD_FORCE_SAMPLE                 10
+#define REPORT_ID_EFFECT_OPERATION_REPORT               11
+#define REPORT_ID_BLOCK_FREE_REPORT                     12
+#define REPORT_ID_DEVICE_CONTROL_REPORT                 13
+#define REPORT_ID_DEVICE_GAIN_REPORT                    14
+#define REPORT_ID_SET_CUSTOM_FORCE_REPORT               15
+#define REPORT_ID_CREATE_NEW_EFFECT_REPORT              16
+#define REPORT_ID_BLOCK_LOAD_REPORT                     17
+#define REPORT_ID_POOL_REPORT                           18
+
+#endif

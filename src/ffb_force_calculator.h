@@ -24,8 +24,6 @@ namespace SunFFB
         bool is_effect_playing(const EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const;
     };
 
-    // template <typename T>
-    // inline float normalize_range(T x, T maxVal) { return float(x) / maxVal; }
     inline float normalize_range(float x, float maxVal) { return x / maxVal; }
 } // namespace SunFFB
 

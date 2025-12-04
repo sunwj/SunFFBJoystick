@@ -279,7 +279,7 @@ void joystick_task(void* params)
         xQueuePeek(gPositions, coords, portMAX_DELAY);
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-        ffbDeviceInput.update_axis(coords, 0, 4, 100);
+        ffbDeviceInput.update_axis(coords, 0, 4);
         xSemaphoreGive(semaphoreFFBDeviceInput);
 
         usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));

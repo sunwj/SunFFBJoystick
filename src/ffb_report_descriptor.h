@@ -3,33 +3,7 @@
 
 #include <Adafruit_TinyUSB.h>
 #include "hid_pid.h"
-#include "ffb_report_types.h"
-
-#define MAX_EFFECTS 40
-#define NUM_SUPPORTED_EFFECTS                           11
-
-#define HID_UNIT_SECONDS 0x1003 // Documented as "Eng Lin:Time" in the PID spec
-
-#define REPORT_ID_JOYSTICK                              1
-#define REPORT_ID_PID_STATE                             2
-
-#define REPORT_ID_SET_EFFECT_REPORT                     3
-#define REPORT_ID_SET_ENVELOPE_REPORT                   4
-#define REPORT_ID_SET_CONDITION_REPORT                  5
-#define REPORT_ID_SET_PERIODIC_REPORT                   6
-#define REPORT_ID_SET_CONSTANT_FORCE_REPORT             7
-#define REPORT_ID_SET_RAMP_FROCE_REPORT                 8
-#define REPORT_ID_CUSTOM_FORCE_DATA_REPORT              9
-#define REPORT_ID_DOWNLOAD_FORCE_SAMPLE                 10
-#define REPORT_ID_EFFECT_OPERATION_REPORT               11
-#define REPORT_ID_BLOCK_FREE_REPORT                     12
-#define REPORT_ID_DEVICE_CONTROL_REPORT                 13
-#define REPORT_ID_DEVICE_GAIN_REPORT                    14
-#define REPORT_ID_SET_CUSTOM_FORCE_REPORT               15
-#define REPORT_ID_CREATE_NEW_EFFECT_REPORT              16
-#define REPORT_ID_BLOCK_LOAD_REPORT                     17
-#define REPORT_ID_POOL_REPORT                           18
-
+#include "constants.h"
 
 
 /////////////////////////////////////////////////////////////////////

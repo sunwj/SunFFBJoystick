@@ -11,7 +11,7 @@ namespace SunFFB
     {
         public:
         void update_buttons(uint8_t buttonState) {inputData.buttons = buttonState;};
-        void update_axis(const int16_t axis[NUM_AXIS], float cutOffFreqPos, float cutOffFreqSpeed, float speedScale = 1.f, float accelerationScale = 1.f);
+        void update_axis(const int16_t axis[NUM_AXIS], float cutOffFreqPos, float cutOffFreqSpeed);
         void update_position_deadband(const int32_t posDeadBand[NUM_AXIS]) {memcpy((void*)metrics.positionDeadBand, posDeadBand, sizeof(metrics.positionDeadBand));};
         void update_speed_deadband(const int32_t speedDeadBand[NUM_AXIS]) {memcpy((void*)metrics.speedDeadBand, speedDeadBand, sizeof(metrics.speedDeadBand));};
         void update_acceleration_deadband(const int32_t accelerationDeadBand[NUM_AXIS]) {memcpy((void*)metrics.accelerationDeadBand, accelerationDeadBand, sizeof(metrics.accelerationDeadBand));};
@@ -34,7 +34,7 @@ namespace SunFFB
         uint32_t tPrev = 0;
     };
 
-    inline void FFBDeviceInput::update_axis(const int16_t axis[NUM_AXIS], float cutOffFreqPos, float cutOffFreqSpeed, float speedScale, float accelerationScale)
+    inline void FFBDeviceInput::update_axis(const int16_t axis[NUM_AXIS], float cutOffFreqPos, float cutOffFreqSpeed)
     {
         uint32_t currentTime = micros();
         float dt = (currentTime - tPrev) & 0xFFFFFFFF;
@@ -59,11 +59,11 @@ namespace SunFFB
             inputData.axis[i] += (axis[i] - inputData.axis[i]) * alphaPos;
             if(inputData.axis[i] > -metrics.positionDeadBand[0] && inputData.axis[i] < metrics.positionDeadBand[i]) inputData.axis[i] = 0;
 
-            float newSpeed = (inputData.axis[i] - metrics.postion[i]) * speedScale / (dt * 1e-3f);
+            float newSpeed = (inputData.axis[i] - metrics.postion[i]) / (dt * 1e-3f);
             newSpeed = metrics.speed[i] + alphaSpeed * (newSpeed - metrics.speed[i]);
             if(newSpeed > -metrics.speedDeadBand[i] && newSpeed < metrics.speedDeadBand[i]) newSpeed = 0;
 
-            float newAccel = (newSpeed - metrics.speed[i]) * accelerationScale / (dt * 1e-3f);
+            float newAccel = (newSpeed - metrics.speed[i]) / (dt * 1e-3f);
             newAccel = metrics.acceleration[i] + alphaSpeed * (newAccel - metrics.acceleration[i]);
             if(newAccel > -metrics.accelerationDeadBand[i] && newAccel < metrics.accelerationDeadBand[i]) newAccel = 0;
 

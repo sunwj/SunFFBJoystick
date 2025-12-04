@@ -1,4 +1,3 @@
-#include <algorithm>
 #include "ffb_force_calculator.h"
 
 namespace SunFFB
@@ -94,7 +93,7 @@ namespace SunFFB
 
         float force = 0.f;
 
-        const float invRange =  1.f / USB_AXIS_MAX_ABSOLUTE;
+        constexpr float invRange =  1.f / USB_AXIS_MAX_ABSOLUTE;
         if(metric < (cpOffset - deadBand) * invRange)
         {
             force = (metric - (cpOffset - deadBand) * invRange) * negativeCoeff;

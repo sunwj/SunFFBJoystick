@@ -1,44 +1,8 @@
 #ifndef _FFB_REPORT_TYPES_H_
 #define _FFB_REPORT_TYPES_H_
 
-#include <Arduino.h>
-
-
-#define NUM_AXIS 2
-#define X_AXIS_ENABLE 0x01
-#define Y_AXIS_ENABLE 0x02
-#define DIRECTION_ENABLE 0x04
-#define TYPE_SPECIFIC_BLOCK_OFFSET_1 0
-#define TYPE_SPECIFIC_BLOCK_OFFSET_2 1
-
-#define USB_DURATION_INFINITE 0xFFFF
-#define USB_MAX_EFFECT_GAIN 255
-#define USB_MAX_DEVICE_GAIN 255
-#define USB_NO_TRIGGER_BUTTON 0xFF
-#define USB_MAX_MAGNITUDE 10000
-#define USB_NORMALIZATION_MAGNITUDE 0.0001f
-#define USB_AXIS_MAX_ABSOLUTE 32767
-#define USB_MAX_PHASE 62830
-#define USB_NORMALIZATION_RAD 0.0001f
-
-#define EFFECT_STATE_FREE 0x00
-#define EFFECT_STATE_ALLOCATED 0x01
-#define EFFECT_STATE_PLAYING 0x02
-
-#define DEVICE_STATE_DEFAULT_SPRING 0x01
-
-// order must be kept the same with the set effect report definition
-#define ET_CONSTANT 0x01
-#define ET_RAMP 0x02
-#define ET_SQUARE 0x03
-#define ET_SINE 0x04
-#define ET_TRIANGLE 0x05
-#define ET_SAWTOOTH_UP 0x06
-#define ET_SAWTOOTH_DOWN 0x07
-#define ET_SPRING 0x08
-#define ET_DAMPER 0x09
-#define ET_INERTIA 0x0A
-#define ET_FRICTION 0x0B
+#include <stdint.h>
+#include "constants.h"
 
 namespace SunFFB
 {

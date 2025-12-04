@@ -46,14 +46,13 @@ namespace SunFFB
         void stop_effect(volatile EffectBlock* effectBlock) {effectBlock->state &= ~EFFECT_STATE_PLAYING;};
         void stop_all_effects();
 
-        volatile uint8_t nextEffectIdx = 0;
-        volatile EffectBlock effectBlocks[MAX_EFFECTS];
+        uint32_t pauseTime;
+        uint8_t nextEffectIdx = 0;
 
+        volatile EffectBlock effectBlocks[MAX_EFFECTS];
         volatile PIDStateReportData pidStates = {0x1E, 0};
         volatile BlockLoadReportData blockLoadData;
         volatile PoolReportData poolData;
-
-        volatile uint32_t pauseTime;
     };
 } // namespace SunFFB
 
