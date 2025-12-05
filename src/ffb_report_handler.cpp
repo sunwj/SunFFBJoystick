@@ -104,13 +104,13 @@ namespace SunFFB
             stop_effect(&effectBlocks[i]);
     }
 
-    PoolReportData* FFBReportHandler::get_pool_report_data()
+    const PoolReportData* FFBReportHandler::get_pool_report_data()
     {
         poolData.ramPoolSize = sizeof(effectBlocks);
         poolData.maxSimultaneousEffects = MAX_EFFECTS;
         poolData.managedPool = 3;
 
-        return (PoolReportData*)&poolData;
+        return (const PoolReportData*)&poolData;
     }
 
     void FFBReportHandler::set_effect(SetEffectReportData* data)

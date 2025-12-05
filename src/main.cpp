@@ -97,7 +97,7 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                 // Pool size, max simultaneous effects, etc.
                 case REPORT_ID_POOL_REPORT:
                 {
-                    SunFFB::PoolReportData* data = ffbHandler.get_pool_report_data();
+                    const SunFFB::PoolReportData* data = ffbHandler.get_pool_report_data();
                     memcpy(buffer, data, sizeof(SunFFB::PoolReportData));
 
                     #ifdef SERIAL_PRINT
@@ -269,8 +269,9 @@ void joystick_task(void* params)
     // }
 
     ffbDeviceInput.reset();
-    int32_t speedDeadBand[NUM_AXIS] = {30, 30};
-    ffbDeviceInput.update_speed_deadband(speedDeadBand);
+    // int32_t speedDeadBand[NUM_AXIS] = {30, 30};
+    // ffbDeviceInput.update_speed_deadband(speedDeadBand);
+    ffbDeviceInput.set_tf_speed(0.025f);
     
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
@@ -279,7 +280,7 @@ void joystick_task(void* params)
         xQueuePeek(gPositions, coords, portMAX_DELAY);
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-        ffbDeviceInput.update_axis(coords, 0, 4);
+        ffbDeviceInput.update_axis(coords);
         xSemaphoreGive(semaphoreFFBDeviceInput);
 
         usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));

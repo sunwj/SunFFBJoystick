@@ -16,7 +16,7 @@ namespace SunFFB
         void init();
         const PIDStateReportData* get_pid_state_report_data() const {return (const PIDStateReportData*)&pidStates;};
         const BlockLoadReportData* get_block_load_report_data() const {return (const BlockLoadReportData*)&blockLoadData;};
-        PoolReportData* get_pool_report_data();
+        const PoolReportData* get_pool_report_data();
 
         void create_new_effect();
         uint8_t get_next_free_effect_block_index();
@@ -46,9 +46,8 @@ namespace SunFFB
         void stop_effect(volatile EffectBlock* effectBlock) {effectBlock->state &= ~EFFECT_STATE_PLAYING;};
         void stop_all_effects();
 
-        uint32_t pauseTime;
         uint8_t nextEffectIdx = 0;
-
+        volatile uint32_t pauseTime;
         volatile EffectBlock effectBlocks[MAX_EFFECTS];
         volatile PIDStateReportData pidStates = {0x1E, 0};
         volatile BlockLoadReportData blockLoadData;
