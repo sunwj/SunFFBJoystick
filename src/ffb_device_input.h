@@ -15,7 +15,7 @@ namespace SunFFB
         void update_speed_deadband(const int32_t speedDeadBand[NUM_AXIS]) { memcpy((void*)metrics.speedDeadBand, speedDeadBand, sizeof(metrics.speedDeadBand)); };
         void update_acceleration_deadband(const int32_t accelerationDeadBand[NUM_AXIS]) { memcpy((void*)metrics.accelerationDeadBand, accelerationDeadBand, sizeof(metrics.accelerationDeadBand)); };
 
-        const int32_t* get_position() const { return (const int32_t*)metrics.postion; };
+        const int32_t* get_position() const { return (const int32_t*)metrics.position; };
         const int32_t* get_speed() const { return (const int32_t*)metrics.speed; };
         const int32_t* get_acceleration() const { return (const int32_t*)metrics.acceleration; };
 
@@ -57,7 +57,7 @@ namespace SunFFB
             inputData.axis[i] += (axis[i] - inputData.axis[i]) * alphaPos;
             if(inputData.axis[i] > -metrics.positionDeadBand[0] && inputData.axis[i] < metrics.positionDeadBand[i]) inputData.axis[i] = 0;
 
-            float newSpeed = (inputData.axis[i] - metrics.postion[i]) / (dt * 1e3f);
+            float newSpeed = (inputData.axis[i] - metrics.position[i]) / (dt * 1e3f);
             newSpeed = metrics.speed[i] + alphaSpeed * (newSpeed - metrics.speed[i]);
             if(newSpeed > -metrics.speedDeadBand[i] && newSpeed < metrics.speedDeadBand[i]) newSpeed = 0;
 
@@ -67,7 +67,7 @@ namespace SunFFB
 
             metrics.acceleration[i] = newAccel;
             metrics.speed[i] = newSpeed;
-            metrics.postion[i] = inputData.axis[i];
+            metrics.position[i] = inputData.axis[i];
         }
 
         tPrev = currentTime;

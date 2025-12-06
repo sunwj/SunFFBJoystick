@@ -141,7 +141,7 @@ namespace SunFFB
     
     struct __attribute__((packed)) Metrics
     {
-        int32_t postion[NUM_AXIS];
+        int32_t position[NUM_AXIS];
         int32_t speed[NUM_AXIS];
         int32_t acceleration[NUM_AXIS];
 
