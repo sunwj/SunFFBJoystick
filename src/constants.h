@@ -2,10 +2,21 @@
 #define _CONSTANTS_H_
 
 #define NUM_AXIS 2
+
+#if NUM_AXIS == 1
+#define X_AXIS_ENABLE 0x01
+#define DIRECTION_ENABLE 0x02
+#elif NUM_AXIS == 2
+#define X_AXIS_ENABLE 0x01
+#define Y_AXIS_ENABLE 0x02
+#define DIRECTION_ENABLE 0x04
+#elif NUM_AXIS == 3
 #define X_AXIS_ENABLE 0x01
 #define Y_AXIS_ENABLE 0x02
 #define Z_AXIS_ENABLE 0x04
 #define DIRECTION_ENABLE 0x08
+#endif
+
 #define TYPE_SPECIFIC_BLOCK_OFFSET_1 0
 #define TYPE_SPECIFIC_BLOCK_OFFSET_2 1
 

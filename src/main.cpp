@@ -4,6 +4,7 @@
 #include <memory.h>
 #include <algorithm>
 #include <TFT_eSPI.h>
+#include "constants.h"
 #include "ffb_report_types.h"
 #include "ffb_report_descriptor.h"
 #include "ffb_report_handler.h"
@@ -246,47 +247,48 @@ void lcd_task(void* params)
 
 void joystick_task(void* params)
 {
-    // ffbDeviceInput.reset();
-    // TickType_t wakeupTime = xTaskGetTickCount();
-    // while (true)
-    // {
-    //   int16_t coords[NUM_AXIS];
-    //   coords[0] = analogRead(VRX_PIN) - offsetX;
-    //   coords[1] = analogRead(VRY_PIN) - offsetY;
-    //   coords[0] = std::clamp(coords[0], int16_t(-2048), int16_t(2048));
-    //   coords[1] = std::clamp(coords[1], int16_t(-2048), int16_t(2048));
-
-    //   coords[0] = coords[0] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
-    //   coords[1] = coords[1] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
-
-    //   xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-    //   ffbDeviceInput.update_axis(coords, 50, 4);
-    //   xSemaphoreGive(semaphoreFFBDeviceInput);
-
-    //   usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
-
-    //   vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
-    // }
-
     ffbDeviceInput.reset();
-    // int32_t speedDeadBand[NUM_AXIS] = {30, 30};
-    // ffbDeviceInput.update_speed_deadband(speedDeadBand);
-    ffbDeviceInput.set_tf_speed(0.025f);
-    
+    ffbDeviceInput.set_tf_speed(0.01f);
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
     {
-        int16_t coords[NUM_AXIS] = {0};
-        xQueuePeek(gPositions, coords, portMAX_DELAY);
+      int16_t coords[NUM_AXIS];
+      coords[0] = analogRead(VRX_PIN) - offsetX;
+      coords[1] = analogRead(VRY_PIN) - offsetY;
+      coords[0] = std::clamp(coords[0], int16_t(-2048), int16_t(2048));
+      coords[1] = std::clamp(coords[1], int16_t(-2048), int16_t(2048));
 
-        xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-        ffbDeviceInput.update_axis(coords);
-        xSemaphoreGive(semaphoreFFBDeviceInput);
+      coords[0] = coords[0] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+      coords[1] = coords[1] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
 
-        usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+      xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+      ffbDeviceInput.update_axis(coords);
+      xSemaphoreGive(semaphoreFFBDeviceInput);
 
-        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+      usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+
+      vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     }
+
+    // ffbDeviceInput.reset();
+    // // int32_t speedDeadBand[NUM_AXIS] = {30, 30};
+    // // ffbDeviceInput.update_speed_deadband(speedDeadBand);
+    // ffbDeviceInput.set_tf_speed(0.025f);
+    
+    // TickType_t wakeupTime = xTaskGetTickCount();
+    // while (true)
+    // {
+    //     int16_t coords[NUM_AXIS] = {0};
+    //     xQueuePeek(gPositions, coords, portMAX_DELAY);
+
+    //     xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+    //     ffbDeviceInput.update_axis(coords);
+    //     xSemaphoreGive(semaphoreFFBDeviceInput);
+
+    //     usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+
+    //     vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+    // }
 }
 
 void force_calculation_task(void* params)

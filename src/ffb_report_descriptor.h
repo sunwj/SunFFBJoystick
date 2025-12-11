@@ -9,17 +9,23 @@
 #if (NUM_AXIS == 1)
 #define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X)
 #elif (NUM_AXIS == 2)
-#define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X), HID_USAGE(HID_USAGE_DESKTOP_Y)
+#define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X), \
+                     HID_USAGE(HID_USAGE_DESKTOP_Y)
 #elif (NUM_AXIS == 3)
-#define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X), HID_USAGE(HID_USAGE_DESKTOP_Y), , HID_USAGE(HID_USAGE_DESKTOP_Z)
+#define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X), \
+                     HID_USAGE(HID_USAGE_DESKTOP_Y), \
+                     HID_USAGE(HID_USAGE_DESKTOP_Z)
 #endif
 
 #if (NUM_AXIS == 1)
 #define DIRECTIONS HID_USAGE(1)
 #elif (NUM_AXIS == 2)
-#define DIRECTIONS HID_USAGE(1), HID_USAGE(2)
+#define DIRECTIONS HID_USAGE(1), \
+                   HID_USAGE(2)
 #elif (NUM_AXIS == 3)
-#define DIRECTIONS HID_USAGE(1), HID_USAGE(2), , HID_USAGE(3)
+#define DIRECTIONS HID_USAGE(1), \
+                   HID_USAGE(2), \
+                   HID_USAGE(3)
 #endif
 
 /////////////////////////////////////////////////////////////////////
