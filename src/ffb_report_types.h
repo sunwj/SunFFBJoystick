@@ -27,9 +27,8 @@ namespace SunFFB
         uint16_t samplePeriod;                          // min 0, max 0xFFFF
         uint8_t gain;                                   // min 0, max 255
         uint8_t triggerButton;                          // min 1, max 8
-        uint8_t axisEnable;                             // Bits: 0 = X, 1 = Y, 2 = Direction enable
-        uint16_t directionX;                            // min 0, max 62831 = 2PI * 10000 
-        uint16_t directionY;                            // min 0, max 62831 = 2PI * 10000
+        uint8_t axisEnable;                             // Bits: 0 = X, 1 = Y, 2 = Z, 3 = Direction enable
+        uint16_t directions[NUM_AXIS];                  // min 0, max 62831 = 2PI * 10000 
         uint16_t startDelay;                            // min 0, max 0xFFFF
     };
     

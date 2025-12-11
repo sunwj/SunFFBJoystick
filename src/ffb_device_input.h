@@ -77,12 +77,14 @@ namespace SunFFB
     {
         memset((void*)&inputData, 0, sizeof(JoystickInputReportData));
         memset((void*)&metrics, 0, sizeof(Metrics));
-        metrics.maxPosition[0] = USB_AXIS_MAX_ABSOLUTE;
-        metrics.maxPosition[1] = USB_AXIS_MAX_ABSOLUTE;
-        metrics.maxSpeed[0] = USB_AXIS_MAX_ABSOLUTE * 0.0025f;
-        metrics.maxSpeed[1] = USB_AXIS_MAX_ABSOLUTE * 0.0025f;
-        metrics.maxAcceleration[0] = USB_AXIS_MAX_ABSOLUTE;
-        metrics.maxAcceleration[1] = USB_AXIS_MAX_ABSOLUTE;
+
+        #pragma unroll
+        for (uint8_t i = 0; i < NUM_AXIS; ++i)
+        {
+            metrics.maxPosition[i] = USB_AXIS_MAX_ABSOLUTE;
+            metrics.maxSpeed[i] = USB_AXIS_MAX_ABSOLUTE * 0.0025f;
+            metrics.maxAcceleration[i] = USB_AXIS_MAX_ABSOLUTE;
+        }
         tPrev = millis();
     }
 }

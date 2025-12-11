@@ -124,14 +124,41 @@ namespace SunFFB
         uint8_t enableAxis = data->axisEnable;
         if(enableAxis & DIRECTION_ENABLE)
         {
-            float angle = data->directionX * USB_NORMALIZATION_RAD;
-            effectBlock->directionUnitVector[0] = cosf(angle);
-            effectBlock->directionUnitVector[1] = sinf(angle);
+            #if NUM_AXIS == 1
+            effectBlock->directionUnitVector[0] = 1.f;
+            #endif
+
+            #if NUM_AXIS == 2
+            float theta = data->directions[0] * USB_NORMALIZATION_RAD;
+            effectBlock->directionUnitVector[0] = cosf(theta);
+            effectBlock->directionUnitVector[1] = sinf(theta);
+            #endif
+
+            #if NUM_AXIS == 3
+            float theta = data->directions[0] * USB_NORMALIZATION_RAD;
+            float phi = data->directions[1] * USB_NORMALIZATION_RAD;
+            float sinPhi = sinf(phi);
+            effectBlock->directionUnitVector[0] = sinPhi * cosf(theta);
+            effectBlock->directionUnitVector[1] = sinPhi * sinf(theta);
+            effectBlock->directionUnitVector[2] = cosf(phi);
+            #endif
         }
         else
         {
-            effectBlock->directionUnitVector[0] = cosf(data->directionX * USB_NORMALIZATION_RAD);
-            effectBlock->directionUnitVector[1] = sinf(data->directionY * USB_NORMALIZATION_RAD);
+            #if NUM_AXIS == 1
+            effectBlock->directionUnitVector[0] = 1.f;
+            #endif
+
+            #if NUM_AXIS == 2
+            effectBlock->directionUnitVector[0] = 1.f;
+            effectBlock->directionUnitVector[1] = 1.f;
+            #endif
+
+            #if NUM_AXIS == 3
+            effectBlock->directionUnitVector[0] = 1.f;
+            effectBlock->directionUnitVector[1] = 1.f;
+            effectBlock->directionUnitVector[2] = 1.f;
+            #endif
         }
 
         #ifdef SERIAL_PRINT

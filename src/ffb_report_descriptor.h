@@ -6,6 +6,22 @@
 #include "constants.h"
 
 
+#if (NUM_AXIS == 1)
+#define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X)
+#elif (NUM_AXIS == 2)
+#define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X), HID_USAGE(HID_USAGE_DESKTOP_Y)
+#elif (NUM_AXIS == 3)
+#define ENABLED_AXIS HID_USAGE(HID_USAGE_DESKTOP_X), HID_USAGE(HID_USAGE_DESKTOP_Y), , HID_USAGE(HID_USAGE_DESKTOP_Z)
+#endif
+
+#if (NUM_AXIS == 1)
+#define DIRECTIONS HID_USAGE(1)
+#elif (NUM_AXIS == 2)
+#define DIRECTIONS HID_USAGE(1), HID_USAGE(2)
+#elif (NUM_AXIS == 3)
+#define DIRECTIONS HID_USAGE(1), HID_USAGE(2), , HID_USAGE(3)
+#endif
+
 /////////////////////////////////////////////////////////////////////
 // Input Report: Joystick postition, buttons, etc.
 /////////////////////////////////////////////////////////////////////
@@ -24,12 +40,11 @@
         \
         HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP),\
         HID_COLLECTION(HID_COLLECTION_PHYSICAL),\
-            HID_USAGE(HID_USAGE_DESKTOP_X), \
-            HID_USAGE(HID_USAGE_DESKTOP_Y), \
+            ENABLED_AXIS, \
             HID_LOGICAL_MIN_N(-USB_AXIS_MAX_ABSOLUTE, 2),\
             HID_LOGICAL_MAX_N(USB_AXIS_MAX_ABSOLUTE, 2),\
             HID_REPORT_SIZE(16),\
-            HID_REPORT_COUNT(2),\
+            HID_REPORT_COUNT(NUM_AXIS),\
             HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),\
         HID_COLLECTION_END,\
     HID_COLLECTION_END
@@ -160,12 +175,11 @@
         HID_USAGE(HID_USAGE_PID_AXES_ENABLE), \
         HID_COLLECTION(HID_COLLECTION_LOGICAL), \
             HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP), \
-            HID_USAGE(HID_USAGE_DESKTOP_X), \
-            HID_USAGE(HID_USAGE_DESKTOP_Y), \
+            ENABLED_AXIS, \
             HID_LOGICAL_MIN(0), \
             HID_LOGICAL_MAX(1), \
             HID_REPORT_SIZE(1), \
-            HID_REPORT_COUNT(2), \
+            HID_REPORT_COUNT(NUM_AXIS), \
             HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
         HID_COLLECTION_END, \
         \
@@ -175,7 +189,7 @@
         HID_REPORT_COUNT(1), \
         HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
         \
-        HID_REPORT_COUNT(5), \
+        HID_REPORT_COUNT(8 - NUM_AXIS - 1), \
         HID_OUTPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE), \
         \
         /* Direction */ \
@@ -184,8 +198,7 @@
             /* NOTE: The HID spec specifies these should be Joystick usages, but Windows expects Ordinal.*/ \
             /* TODO: check Linux and try to reconcile */ \
             HID_USAGE_PAGE(HID_USAGE_PAGE_ORDINAL), \
-            HID_USAGE(1), \
-            HID_USAGE(2), \
+            DIRECTIONS, \
             HID_UNIT(20), \
             HID_UNIT_EXPONENT(0xFE), \
             HID_LOGICAL_MIN(0), \
@@ -194,7 +207,7 @@
             HID_PHYSICAL_MAX_N(36000, 3), \
             HID_UNIT(0), \
             HID_REPORT_SIZE(16), \
-            HID_REPORT_COUNT(2), \
+            HID_REPORT_COUNT(NUM_AXIS), \
             HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
             HID_UNIT_EXPONENT(0), \
             HID_UNIT(0), \
