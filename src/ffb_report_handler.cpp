@@ -143,6 +143,7 @@ namespace SunFFB
             effectBlock->directionUnitVector[2] = cosf(phi);
             #endif
         }
+        // TODO: test the cartesian direction format
         else
         {
             #if NUM_AXIS == 1
@@ -150,20 +151,27 @@ namespace SunFFB
             #endif
 
             #if NUM_AXIS == 2
-            effectBlock->directionUnitVector[0] = 1.f;
-            effectBlock->directionUnitVector[1] = 1.f;
+            effectBlock->directionUnitVector[0] = int16_t(data->directions[0]) / USB_MAX_DIRECTION_CARTESIAN;
+            effectBlock->directionUnitVector[1] = int16_t(data->directions[1]) / USB_MAX_DIRECTION_CARTESIAN;
             #endif
 
             #if NUM_AXIS == 3
-            effectBlock->directionUnitVector[0] = 1.f;
-            effectBlock->directionUnitVector[1] = 1.f;
-            effectBlock->directionUnitVector[2] = 1.f;
+            effectBlock->directionUnitVector[0] = int16_t(data->directions[0]) / USB_MAX_DIRECTION_CARTESIAN;
+            effectBlock->directionUnitVector[1] = int16_t(data->directions[1]) / USB_MAX_DIRECTION_CARTESIAN;
+            effectBlock->directionUnitVector[2] = int16_t(data->directions[2]) / USB_MAX_DIRECTION_CARTESIAN;
             #endif
         }
 
         #ifdef SERIAL_PRINT
         Serial.printf("Set effect: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
             effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain, effectData->triggerButton, effectData->axisEnable, effectData->directionX, effectData->directionY, effectData->startDelay);
+        #endif
+        #if NUM_AXIS == 1
+        Serial.printf("Set effect: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
+            effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain, effectData->triggerButton, effectData->axisEnable, effectData->directions[0], effectData->startDelay);
+        #elif NUM_AXIS == 2
+        Serial.printf("Set effect: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
+            effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain, effectData->triggerButton, effectData->axisEnable, effectData->directions[0], effectData->directions[1], effectData->startDelay);
         #endif
     }
 

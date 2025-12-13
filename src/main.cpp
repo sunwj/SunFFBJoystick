@@ -14,16 +14,17 @@
 
 // #define SERIAL_PRINT
 
-#define VRX_PIN 18
-#define VRY_PIN 17
 #define SW_PIN 16
 #define TDX_PIN 4
 #define RDX_PIN 5
 
-uint32_t tmp;
+#if NUM_AXIS == 1
+constexpr uint8_t joystickPins[NUM_AXIS] = {18};
+#elif NUM_AXIS == 2
+constexpr uint8_t joystickPins[NUM_AXIS] = {18, 17};
+#endif
 
-uint16_t offsetX = 0;
-uint16_t offsetY = 0;
+uint16_t coordOffsets[NUM_AXIS] = {0};
 
 volatile uint32_t reportProcessTime = 0;
 volatile uint32_t effectProcessTime = 0;
@@ -189,37 +190,63 @@ void lcd_task(void* params)
 
         sprite.fillSprite(TFT_BLACK);
         sprite.drawRect(0, 0, 40, 40, TFT_RED);
-        uint8_t x = ffbDeviceInput.inputData.axis[0] / float(USB_AXIS_MAX_ABSOLUTE) * 20 + 20;
-        uint8_t y = ffbDeviceInput.inputData.axis[1] / float(USB_AXIS_MAX_ABSOLUTE) * 20 + 20;
-        x = x < 2 ? 2 : x;
-        x = x > 38 ? 38 : x;
-        y = y < 2 ? 2 : y;
-        y = y > 38 ? 38 : y;
-        sprite.fillSmoothCircle(x, y, 2, TFT_GREEN, TFT_BLACK);
+        uint8_t coords[NUM_AXIS];
+        #pragma unroll
+        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+        {
+            uint8_t c = ffbDeviceInput.inputData.axis[i] / float(USB_AXIS_MAX_ABSOLUTE) * 20 + 20;
+            c = c < 2 ? 2 : c;
+            c = c > 38 ? 38 : c;
+            coords[i] = c;
+        }
+        #if NUM_AXIS == 1
+        sprite.fillSmoothCircle(coords[0], 20, 2, TFT_GREEN, TFT_BLACK);
+        #elif NUM_AXIS == 2
+        sprite.fillSmoothCircle(coords[0], coords[1], 2, TFT_GREEN, TFT_BLACK);
+        #endif
 
         sprite.setCursor(40, 0);
         sprite.printf("Report time: %d us", reportProcessTime);
         sprite.setCursor(40, 11);
         sprite.printf("Effect time: %d us", effectProcessTime);
+        #if NUM_AXIS == 1
+        sprite.setCursor(40, 23);
+        sprite.printf("AX: %d", ffbDeviceInput.inputData.axis[0]);
+        #elif NUM_AXIS == 2
         sprite.setCursor(40, 23);
         sprite.printf("AX: %d", ffbDeviceInput.inputData.axis[0]);
         sprite.setCursor(100, 23);
         sprite.printf("AY: %d", ffbDeviceInput.inputData.axis[1]);
+        #endif
 
-        x = forces[0] / float(USB_MAX_MAGNITUDE) * 20 + 20;
-        y = forces[1] / float(USB_MAX_MAGNITUDE) * 20 + 60;
-        x = x < 2 ? 2 : x;
-        x = x > 38 ? 38 : x;
-        y = y < 42 ? 42 : y;
-        y = y > 78 ? 78 : y;
+        constexpr uint8_t yOffsets[2] = {20, 60};
+        constexpr uint8_t yLimitsOffsets[2] = {0, 40};
+        #pragma unroll
+        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+        {
+            uint8_t c = forces[i] / float(USB_MAX_MAGNITUDE) * 20 + yOffsets[i];
+            c = c < (2 + yLimitsOffsets[i]) ? (2 + yLimitsOffsets[i]) : c;
+            c = c > (38 + yLimitsOffsets[i]) ? (38 + yLimitsOffsets[i]) : c;
+            coords[i] = c;
+        }
         sprite.drawRect(0, 40, 40, 40, TFT_RED);
-        sprite.fillSmoothCircle(x, y, 2, TFT_GREEN, TFT_BLACK);
-        sprite.drawWideLine(20, 60, x, y, 2, TFT_GREEN, TFT_BLACK);
+        #if NUM_AXIS == 1
+        sprite.fillSmoothCircle(coords[0], 60, 2, TFT_GREEN, TFT_BLACK);
+        sprite.drawWideLine(20, 60, coords[0], 60, 2, TFT_GREEN, TFT_BLACK);
+        #elif NUM_AXIS == 2
+        sprite.fillSmoothCircle(coords[0], coords[1], 2, TFT_GREEN, TFT_BLACK);
+        sprite.drawWideLine(20, 60, coords[0], coords[1], 2, TFT_GREEN, TFT_BLACK);
+        #endif
 
+        #if NUM_AXIS == 1
+        sprite.setCursor(40, 35);
+        sprite.printf("FX: %d", forces[0]);
+        #elif NUM_AXIS == 2
         sprite.setCursor(40, 35);
         sprite.printf("FX: %d", forces[0]);
         sprite.setCursor(100, 35);
         sprite.printf("FY: %d", forces[1]);
+        #endif
 
         uint32_t currentTime = millis() * 1e-3;
         sprite.setCursor(124, 70);
@@ -248,18 +275,18 @@ void lcd_task(void* params)
 void joystick_task(void* params)
 {
     ffbDeviceInput.reset();
-    ffbDeviceInput.set_tf_speed(0.01f);
+    ffbDeviceInput.set_tf_speed(0.1f);
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
     {
       int16_t coords[NUM_AXIS];
-      coords[0] = analogRead(VRX_PIN) - offsetX;
-      coords[1] = analogRead(VRY_PIN) - offsetY;
-      coords[0] = std::clamp(coords[0], int16_t(-2048), int16_t(2048));
-      coords[1] = std::clamp(coords[1], int16_t(-2048), int16_t(2048));
-
-      coords[0] = coords[0] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
-      coords[1] = coords[1] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+      #pragma unroll
+      for(uint8_t i = 0; i < NUM_AXIS; ++i)
+      {
+        coords[i] = analogRead(joystickPins[i]) - coordOffsets[i];
+        coords[i] = std::clamp(coords[i], int16_t(-2048), int16_t(2048));
+        coords[i] = coords[i] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+      }
 
       xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
       ffbDeviceInput.update_axis(coords);
@@ -359,19 +386,19 @@ void setup()
     comSerial.begin(115200, SERIAL_8N1, RDX_PIN, TDX_PIN);
 
     // init joystick and calibrate
-    pinMode(VRX_PIN, INPUT);
-    pinMode(VRY_PIN, INPUT);
     pinMode(SW_PIN, INPUT);
-    uint32_t ox = 0;
-    uint32_t oy = 0;
-    for (auto i = 0; i < 1000; ++i)
+    #pragma unroll
+    for(uint8_t i = 0; i < NUM_AXIS; ++i)
     {
-        ox += analogRead(VRX_PIN);
-        oy += analogRead(VRY_PIN);
-        delay(1);
+        pinMode(joystickPins[i], INPUT);
+        uint32_t o = 0;
+        for (auto j = 0; j < 1000; ++j)
+        {
+            o += analogRead(joystickPins[i]);
+            delay(1);
+        }
+        coordOffsets[i] = o / 1000;
     }
-    offsetX = ox / 1000;
-    offsetY = oy / 1000;
 
     lcd.init();
     lcd.setRotation(1);

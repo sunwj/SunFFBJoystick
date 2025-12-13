@@ -208,7 +208,7 @@
             HID_UNIT(20), \
             HID_UNIT_EXPONENT(0xFE), \
             HID_LOGICAL_MIN(0), \
-            HID_LOGICAL_MAX_N(62831, 3), \
+            HID_LOGICAL_MAX_N(36000, 3), \
             HID_PHYSICAL_MIN(0), \
             HID_PHYSICAL_MAX_N(36000, 3), \
             HID_UNIT(0), \
@@ -408,7 +408,7 @@
         HID_UNIT(20), \
         HID_UNIT_EXPONENT(0xFE), \
         HID_LOGICAL_MIN(0), \
-        HID_LOGICAL_MAX_N(6283, 2), \
+        HID_LOGICAL_MAX_N(35999, 3), \
         HID_PHYSICAL_MIN(0), \
         HID_PHYSICAL_MAX_N(35999, 3), \
         HID_REPORT_SIZE(16), \

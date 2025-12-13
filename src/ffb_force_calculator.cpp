@@ -113,33 +113,46 @@ namespace SunFFB
         uint8_t axisEnable = effectBlock.effectData.axisEnable;
         uint8_t conditionBlockCount = effectBlock.conditionBlockCount;
 
-        if((axisEnable & DIRECTION_ENABLE) && (1 == conditionBlockCount))
+        if(axisEnable & DIRECTION_ENABLE)
         {
-            const SetConditionReportData& conditionData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].conditionData;
-            const float* directionUnitVector = effectBlock.directionUnitVector;
-
-            float metric = 0.f;
-            #pragma unroll
-            for(uint8_t i = 0; i < NUM_AXIS; ++i)
-                metric += metrics[i] * directionUnitVector[i];
-            
-            float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]));
-
-            #pragma unroll
-            for(uint8_t i = 0; i < NUM_AXIS; ++i)
-                forces[i] = force * directionUnitVector[i];
-            
-            return;
-        }
-
-        #pragma unroll
-        for(uint8_t i = 0; i < NUM_AXIS; ++i)
-        {
-            forces[i] = 0.f;
-            if(((axisEnable & DIRECTION_ENABLE) && (conditionBlockCount > 1)) || ((axisEnable >> i) & 0x01))
+            if(conditionBlockCount > 1)
             {
-                const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
-                forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]));
+                #pragma unroll
+                for(uint8_t i = 0; i < NUM_AXIS; ++i)
+                {
+                    const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
+                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]));
+                }
+            }
+            else
+            {
+                const SetConditionReportData& conditionData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].conditionData;
+                const float* directionUnitVector = effectBlock.directionUnitVector;
+
+                float metric = 0.f;
+                #pragma unroll
+                for(uint8_t i = 0; i < NUM_AXIS; ++i)
+                    metric += metrics[i] * directionUnitVector[i];
+                
+                float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]));
+
+                #pragma unroll
+                for(uint8_t i = 0; i < NUM_AXIS; ++i)
+                    forces[i] = force * directionUnitVector[i];
+            }
+        }
+        else
+        {
+            const float* directionUnitVector = effectBlock.directionUnitVector;
+            #pragma unroll
+            for(uint8_t i = 0; i < NUM_AXIS; ++i)
+            {
+                forces[i] = 0.f;
+                if((axisEnable >> i) & 0x01)
+                {
+                    const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
+                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i])) * directionUnitVector[i];
+                }
             }
         }
     }
@@ -229,9 +242,8 @@ namespace SunFFB
                         #pragma unroll
                         for(uint8_t i = 0; i < NUM_AXIS; ++i)
                         {
-                            if(effectBlock.effectData.axisEnable & DIRECTION_ENABLE)
-                                forcesSum[i] += force * effectBlock.directionUnitVector[i];
-                            else if((effectBlock.effectData.axisEnable >> i) & 0x01)
+                            // TODO: test
+                            if((effectBlock.effectData.axisEnable & DIRECTION_ENABLE) || ((effectBlock.effectData.axisEnable >> i) & 0x01))
                                 forcesSum[i] += force * effectBlock.directionUnitVector[i];
                         }
                     }

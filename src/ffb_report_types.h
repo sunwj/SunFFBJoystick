@@ -28,7 +28,7 @@ namespace SunFFB
         uint8_t gain;                                   // min 0, max 255
         uint8_t triggerButton;                          // min 1, max 8
         uint8_t axisEnable;                             // Bits: X, Y (optional), Z (optional), Direction enable
-        uint16_t directions[NUM_AXIS];                  // min 0, max 62831 = 2PI * 10000 
+        uint16_t directions[NUM_AXIS];                  // min 0, max 36000
         uint16_t startDelay;                            // min 0, max 0xFFFF
     };
     
@@ -58,7 +58,7 @@ namespace SunFFB
         uint8_t effectBlockIndex;                       // min 1, max 40
         uint16_t magnitude;                             // min 0, max 10000
         int16_t offset;                                 // min -10000, max 10000
-        uint16_t phase;                                 // min 0, max 62831
+        uint16_t phase;                                 // min 0, max 35999
         uint16_t period;                                // min 0, max 0xFFFF
     };
     
