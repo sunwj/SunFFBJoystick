@@ -1,4 +1,5 @@
 #include "ffb_force_calculator.h"
+#include "math_utils.h"
 
 namespace SunFFB
 {
@@ -41,7 +42,12 @@ namespace SunFFB
             case ET_SINE:
             {
                 float angle = 2 * (float)M_PI * (elapsedTime / float(period) + phaseNormalized);
+                #ifndef USE_FAST_MATH
                 force = sinf(angle) * magnitude;
+                #else
+                angle = normalize_angle(angle);
+                force = _sinf(angle) * magnitude;
+                #endif
                 force += offset;
             }
             break;
@@ -111,11 +117,11 @@ namespace SunFFB
     void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const int32_t metrics[NUM_AXIS], const int32_t maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
     {
         uint8_t axisEnable = effectBlock.effectData.axisEnable;
-        uint8_t conditionBlockCount = effectBlock.conditionBlockCount;
+        uint8_t conditionBlockFlags = effectBlock.conditionBlockFlags;
 
         if(axisEnable & DIRECTION_ENABLE)
         {
-            if(conditionBlockCount > 1)
+            if(conditionBlockFlags > 1)
             {
                 #pragma unroll
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -272,7 +278,7 @@ namespace SunFFB
         for(uint8_t i = 0; i < NUM_AXIS; ++i)
         {
             forcesSum[i] *= ffbReportHandler.deviceGain / float(USB_MAX_DEVICE_GAIN);
-            forces[i] = std::clamp(forcesSum[i], float(-USB_MAX_MAGNITUDE), float(USB_MAX_MAGNITUDE));
+            forces[i] = clamp(forcesSum[i], float(-USB_MAX_MAGNITUDE), float(USB_MAX_MAGNITUDE));
         }
     }
 

@@ -1,4 +1,5 @@
 #include "ffb_report_handler.h"
+#include "math_utils.h"
 
 // #define SERIAL_PRINT
 
@@ -130,17 +131,29 @@ namespace SunFFB
 
             #if NUM_AXIS == 2
             float theta = data->directions[0] * USB_NORMALIZATION_RAD;
+            #ifndef USE_FAST_MATH
             effectBlock->directionUnitVector[0] = cosf(theta);
             effectBlock->directionUnitVector[1] = sinf(theta);
+            #else
+            effectBlock->directionUnitVector[0] = _cosf(theta);
+            effectBlock->directionUnitVector[1] = _sinf(theta);
+            #endif
             #endif
 
             #if NUM_AXIS == 3
             float theta = data->directions[0] * USB_NORMALIZATION_RAD;
             float phi = data->directions[1] * USB_NORMALIZATION_RAD;
+            #ifndef USE_FAST_MATH
             float sinPhi = sinf(phi);
             effectBlock->directionUnitVector[0] = sinPhi * cosf(theta);
             effectBlock->directionUnitVector[1] = sinPhi * sinf(theta);
             effectBlock->directionUnitVector[2] = cosf(phi);
+            #else
+            float sinPhi = _sinf(phi);
+            effectBlock->directionUnitVector[0] = sinPhi * _cosf(theta);
+            effectBlock->directionUnitVector[1] = sinPhi * _sinf(theta);
+            effectBlock->directionUnitVector[2] = _cosf(phi);
+            #endif
             #endif
         }
         // TODO: test the cartesian direction format
@@ -198,8 +211,7 @@ namespace SunFFB
         volatile SetConditionReportData* conditionData = &(effectBlock->typeSpecificData[parameterBlockOffset].conditionData);
         memcpy((void*)conditionData, data, sizeof(SetConditionReportData));
 
-        effectBlock->conditionBlockCount++;
-        if(effectBlock->conditionBlockCount > 254) effectBlock->conditionBlockCount = 254;
+        effectBlock->conditionBlockFlags |= (0x01 << parameterBlockOffset);
 
         #ifdef SERIAL_PRINT
         Serial.printf("Set condition. %d, %d, %d, %d, %d, %d, %d, %d \n", conditionData->effectBlockIndex, conditionData->parameterBlockOffset, conditionData->cpOffset, \
@@ -311,7 +323,7 @@ namespace SunFFB
         {
             case 1:                 // start
             {
-                if(USB_DURATION_INFINITE == effectBlock->effectData.duration || 0xFF == data->loopCount)
+                if(0xFF == data->loopCount)
                     effectBlock->effectData.duration = USB_DURATION_INFINITE;
                 else if(data->loopCount > 0)
                     effectBlock->effectData.duration *= data->loopCount;

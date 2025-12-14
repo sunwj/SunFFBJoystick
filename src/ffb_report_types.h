@@ -22,14 +22,14 @@ namespace SunFFB
     {
         uint8_t effectBlockIndex;                       // min 1, max 40
         uint8_t effectType;                             // min 1, max NUM_SUPPORTED_EFFECTS
-        uint16_t duration;                              // min 0, max 0xFFFF
-        uint16_t triggerRepeatInterval;                 // min 0, max 0xFFFF
-        uint16_t samplePeriod;                          // min 0, max 0xFFFF
+        uint16_t duration;                              // min 0, max 0xFFFE
+        uint16_t triggerRepeatInterval;                 // min 0, max 0xFFFE
+        uint16_t samplePeriod;                          // min 0, max 0xFFFE
         uint8_t gain;                                   // min 0, max 255
         uint8_t triggerButton;                          // min 1, max 8
         uint8_t axisEnable;                             // Bits: X, Y (optional), Z (optional), Direction enable
         uint16_t directions[NUM_AXIS];                  // min 0, max 36000
-        uint16_t startDelay;                            // min 0, max 0xFFFF
+        uint16_t startDelay;                            // min 0, max 0xFFFE
     };
     
     struct __attribute__((packed)) SetEnvelopeReportData
@@ -37,8 +37,8 @@ namespace SunFFB
         uint8_t effectBlockIndex;                       // min 1, max 40
         uint16_t attackLevel;                           // min 0, max 10000
         uint16_t fadeLevel;                             // min 0, max 10000
-        uint16_t attackTime;                            // min 0, max 0xFFFF
-        uint16_t fadeTime;                              // min 0, max 0xFFFF
+        uint16_t attackTime;                            // min 0, max 0xFFFE
+        uint16_t fadeTime;                              // min 0, max 0xFFFE
     };
     
     struct __attribute__((packed)) SetConditionReportData
@@ -59,7 +59,7 @@ namespace SunFFB
         uint16_t magnitude;                             // min 0, max 10000
         int16_t offset;                                 // min -10000, max 10000
         uint16_t phase;                                 // min 0, max 35999
-        uint16_t period;                                // min 0, max 0xFFFF
+        uint16_t period;                                // min 0, max 0xFFFE
     };
     
     struct __attribute__((packed)) SetConstantForceReportData
@@ -132,7 +132,7 @@ namespace SunFFB
         float directionUnitVector[NUM_AXIS];
         bool envelopParameter;
         bool triggerButtonLatch;
-        uint8_t conditionBlockCount = 0;
+        uint8_t conditionBlockFlags = 0x00;
     
         SetEffectReportData effectData;
         TypeSpecificParameterBlock typeSpecificData[NUM_AXIS];

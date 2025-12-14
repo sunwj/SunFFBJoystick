@@ -148,9 +148,9 @@
         HID_UNIT_N(HID_UNIT_SECONDS, 2), \
         HID_UNIT_EXPONENT(0xFD), \
         HID_LOGICAL_MIN(0), \
-        HID_LOGICAL_MAX_N(0xFFFF, 3), \
+        HID_LOGICAL_MAX_N(0xFFFE, 3), \
         HID_PHYSICAL_MIN(0), \
-        HID_PHYSICAL_MAX_N(0xFFFF, 3), \
+        HID_PHYSICAL_MAX_N(0xFFFE, 3), \
         HID_REPORT_SIZE(16), \
         HID_REPORT_COUNT(3), \
         HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
@@ -225,9 +225,9 @@
         HID_UNIT_N(HID_UNIT_SECONDS, 2), \
         HID_UNIT_EXPONENT(0xFD), \
         HID_LOGICAL_MIN(0), \
-        HID_LOGICAL_MAX_N(0xFFFF, 3), \
+        HID_LOGICAL_MAX_N(0xFFFE, 3), \
         HID_PHYSICAL_MIN(0), \
-        HID_PHYSICAL_MAX_N(0xFFFF, 3), \
+        HID_PHYSICAL_MAX_N(0xFFFE, 3), \
         HID_REPORT_SIZE(16), \
         HID_REPORT_COUNT(1), \
         HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
@@ -274,9 +274,9 @@
         HID_UNIT_N(HID_UNIT_SECONDS, 2), \
         HID_UNIT_EXPONENT(0xFD), \
         HID_LOGICAL_MIN(0), \
-        HID_LOGICAL_MAX_N(0xFFFF, 3), \
+        HID_LOGICAL_MAX_N(0xFFFE, 3), \
         HID_PHYSICAL_MIN(0), \
-        HID_PHYSICAL_MAX_N(0xFFFF, 3), \
+        HID_PHYSICAL_MAX_N(0xFFFE, 3), \
         HID_REPORT_SIZE(16), \
         HID_REPORT_COUNT(2), \
         HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
@@ -420,9 +420,9 @@
         HID_UNIT_N(HID_UNIT_SECONDS, 2), \
         HID_UNIT_EXPONENT(0xFD), \
         HID_LOGICAL_MIN(0), \
-        HID_LOGICAL_MAX_N(0xFFFF, 3), \
+        HID_LOGICAL_MAX_N(0xFFFE, 3), \
         HID_PHYSICAL_MIN(0), \
-        HID_PHYSICAL_MAX_N(0xFFFF, 3), \
+        HID_PHYSICAL_MAX_N(0xFFFE, 3), \
         HID_REPORT_SIZE(16), \
         HID_REPORT_COUNT(1), \
         HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \

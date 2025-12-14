@@ -1,6 +1,8 @@
 #ifndef _CONSTANTS_H_
 #define _CONSTANTS_H_
 
+// #define USE_FAST_MATH
+
 #define NUM_AXIS 2
 
 #if NUM_AXIS == 1
