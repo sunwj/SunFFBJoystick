@@ -44,11 +44,11 @@ namespace SunFFB
 
     inline void FFBDeviceInput::update_axis(const int16_t axis[NUM_AXIS])
     {
-        uint32_t currentTime = micros();
-        float dt = (currentTime - tPrev) * 1e-6f;
+        const uint32_t currentTime = micros();
+        const float dt = (currentTime - tPrev) * 1e-6f;
 
-        float alphaPos = dt / (tFPos + dt);
-        float alphaSpeed = dt / (tFSpeed + dt);
+        const float alphaPos = dt / (tFPos + dt);
+        const float alphaSpeed = dt / (tFSpeed + dt);
 
         #pragma unroll
         for(uint8_t i = 0; i < NUM_AXIS; ++i)

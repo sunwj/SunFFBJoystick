@@ -18,13 +18,13 @@ namespace SunFFB
     {
         const SetPeriodicReportData& periodicData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData;
 
-        int16_t offset = periodicData.offset;
-        int16_t magnitude = periodicData.magnitude;
-        uint16_t phase = periodicData.phase;
-        uint16_t period = periodicData.period > 0 ? periodicData.period : 1;
+        const int16_t offset = periodicData.offset;
+        const int16_t magnitude = periodicData.magnitude;
+        const uint16_t phase = periodicData.phase;
+        const uint16_t period = periodicData.period > 0 ? periodicData.period : 1;
 
-        float phaseNormalized = phase / (float)(USB_MAX_PHASE);
-        uint16_t timeRemaind = uint32_t(phaseNormalized * period + elapsedTime) % period;
+        const float phaseNormalized = phase / (float)(USB_MAX_PHASE);
+        const uint16_t timeRemaind = uint32_t(phaseNormalized * period + elapsedTime) % period;
 
         float force = 0.f;
         switch (effectType)
@@ -41,11 +41,11 @@ namespace SunFFB
 
             case ET_SINE:
             {
-                float angle = 2 * (float)M_PI * (elapsedTime / float(period) + phaseNormalized);
                 #ifndef USE_FAST_MATH
+                const float angle = 2 * (float)M_PI * (elapsedTime / float(period) + phaseNormalized);
                 force = sinf(angle) * magnitude;
                 #else
-                angle = normalize_angle(angle);
+                const float angle = normalize_angle(2 * (float)M_PI * (elapsedTime / float(period) + phaseNormalized));
                 force = _sinf(angle) * magnitude;
                 #endif
                 force += offset;
@@ -54,9 +54,9 @@ namespace SunFFB
 
             case ET_TRIANGLE:
             {
-                float slope = 4.f * magnitude / float(period);
+                const float slope = 4.f * magnitude / float(period);
                 const uint32_t phaseOffset = period >> 2;
-                uint32_t offsetRemaind = (timeRemaind + phaseOffset) % period;
+                const uint32_t offsetRemaind = (timeRemaind + phaseOffset) % period;
 
                 if(offsetRemaind >= (period >> 1))
                     force = slope * (period - offsetRemaind);
@@ -71,7 +71,7 @@ namespace SunFFB
             case ET_SAWTOOTH_DOWN:
             case ET_SAWTOOTH_UP:
             {
-                float slope = (float)magnitude / float(period);
+                const float slope = (float)magnitude / float(period);
                 if(ET_SAWTOOTH_DOWN == effectType)
                     force = slope * (period - timeRemaind);
                 else
@@ -90,12 +90,12 @@ namespace SunFFB
 
     float FFBForceCalculator::apply_condition(const SetConditionReportData& conditionData, float metric) const
     {
-        int16_t cpOffset = conditionData.cpOffset;
-        int16_t postiveCoeff = conditionData.positiveCoefficient;
-        int16_t negativeCoeff = conditionData.negativeCoefficient;
-        int16_t postiveSaturation = conditionData.positiveSaturation;
-        int16_t negativeSaturation = -conditionData.negativeSaturation;
-        uint8_t deadBand = conditionData.deadBand;
+        const int16_t cpOffset = conditionData.cpOffset;
+        const int16_t postiveCoeff = conditionData.positiveCoefficient;
+        const int16_t negativeCoeff = conditionData.negativeCoefficient;
+        const int16_t postiveSaturation = conditionData.positiveSaturation;
+        const int16_t negativeSaturation = -conditionData.negativeSaturation;
+        const uint8_t deadBand = conditionData.deadBand;
 
         float force = 0.f;
 
@@ -116,8 +116,8 @@ namespace SunFFB
 
     void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const int32_t metrics[NUM_AXIS], const int32_t maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
     {
-        uint8_t axisEnable = effectBlock.effectData.axisEnable;
-        uint8_t conditionBlockFlags = effectBlock.conditionBlockFlags;
+        const uint8_t axisEnable = effectBlock.effectData.axisEnable;
+        const uint8_t conditionBlockFlags = effectBlock.conditionBlockFlags;
 
         if(axisEnable & DIRECTION_ENABLE)
         {
@@ -140,7 +140,7 @@ namespace SunFFB
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
                     metric += metrics[i] * directionUnitVector[i];
                 
-                float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]));
+                const float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]));
 
                 #pragma unroll
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -176,7 +176,7 @@ namespace SunFFB
         const EffectBlock* effectBlocks = ffbReportHandler.get_all_effect_blocks();
 
         float forcesSum[NUM_AXIS] = {0};
-        uint32_t currentTime = millis();
+        const uint32_t currentTime = millis();
 
         for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
         {
@@ -184,10 +184,10 @@ namespace SunFFB
 
             if(is_effect_playing(effectBlock, ffbDeviceInput.inputData.buttons, currentTime))
             {
-                uint8_t effectType = effectBlock.effectData.effectType;
-                uint16_t duration = effectBlock.effectData.duration;
-                uint32_t elapsedTime = currentTime - effectBlock.startTime;
-                uint8_t effectGain = effectBlock.effectData.gain;
+                const uint8_t effectType = effectBlock.effectData.effectType;
+                const uint16_t duration = effectBlock.effectData.duration;
+                const uint32_t elapsedTime = currentTime - effectBlock.startTime;
+                const uint8_t effectGain = effectBlock.effectData.gain;
 
                 float force = 0;
                 float forcesCondition[NUM_AXIS] = {0};
@@ -284,17 +284,17 @@ namespace SunFFB
 
     float FFBForceCalculator::get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration) const
     {
-        uint8_t attackLevel = envelopeData.attackLevel;
-        uint8_t fadeLevel = envelopeData.fadeLevel;
-        uint16_t attackTime = envelopeData.attackTime;
-        uint16_t fadeTime = envelopeData.fadeTime;
+        const uint8_t attackLevel = envelopeData.attackLevel;
+        const uint8_t fadeLevel = envelopeData.fadeLevel;
+        const uint16_t attackTime = envelopeData.attackTime;
+        const uint16_t fadeTime = envelopeData.fadeTime;
 
         float envelope = USB_MAX_MAGNITUDE;
 
         if(elapsedTime < attackTime)
         {
-            float height = USB_MAX_MAGNITUDE - attackLevel;
-            float slope = height / (float)attackTime;
+            const float height = USB_MAX_MAGNITUDE - attackLevel;
+            const float slope = height / (float)attackTime;
             envelope = slope * elapsedTime + attackLevel;
 
             return envelope / float(USB_MAX_MAGNITUDE);
@@ -304,8 +304,8 @@ namespace SunFFB
 
         if(elapsedTime > (duration - fadeTime))
         {
-            float height = USB_MAX_MAGNITUDE - fadeLevel;
-            float slope = height / (float)fadeTime;
+            const float height = USB_MAX_MAGNITUDE - fadeLevel;
+            const float slope = height / (float)fadeTime;
             envelope = slope * (duration - elapsedTime) + fadeLevel;
 
             return envelope / float(USB_MAX_MAGNITUDE);
@@ -316,9 +316,9 @@ namespace SunFFB
 
     bool FFBForceCalculator::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const
     {
-        uint32_t elapsedTime = currentTime - effectBlock.startTime;
-        uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
-        bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
+        const uint32_t elapsedTime = currentTime - effectBlock.startTime;
+        const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
+        const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
 
         if(!buttonPressed)
         {
@@ -363,7 +363,7 @@ namespace SunFFB
         if(currentTime < effectBlock.startTime)
             return false;
         
-        uint32_t elapsedTime = currentTime - effectBlock.startTime;
+        const uint32_t elapsedTime = currentTime - effectBlock.startTime;
         if((USB_DURATION_INFINITE != effectBlock.effectData.duration) && (elapsedTime >= effectBlock.effectData.duration))
             return false;
         

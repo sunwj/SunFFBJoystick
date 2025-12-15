@@ -23,17 +23,17 @@ namespace SunFFB
         void free_effect(uint8_t idx);
         const EffectBlock* get_all_effect_blocks() const {return (const EffectBlock*)effectBlocks;};
 
-        void set_effect(SetEffectReportData* data);
-        void set_envelop(SetEnvelopeReportData* data);
-        void set_condition(SetConditionReportData* data);
-        void set_periodic(SetPeriodicReportData* data);
-        void set_constant_force(SetConstantForceReportData* data);
-        void set_ramp_force(SetRampForceReportData* data);
-        void set_effect_operation(EffectOperationReportData* data);
-        void set_effect_block_free(BlockFreeReportData* data);
+        void set_effect(const SetEffectReportData* data);
+        void set_envelop(const SetEnvelopeReportData* data);
+        void set_condition(const SetConditionReportData* data);
+        void set_periodic(const SetPeriodicReportData* data);
+        void set_constant_force(const SetConstantForceReportData* data);
+        void set_ramp_force(const SetRampForceReportData* data);
+        void set_effect_operation(const EffectOperationReportData* data);
+        void set_effect_block_free(const BlockFreeReportData* data);
 
-        void set_device_gain(DeviceGainReportData* data);
-        void set_device_control(DeviceControlReportData* data);
+        void set_device_gain(const DeviceGainReportData* data);
+        void set_device_control(const DeviceControlReportData* data);
 
         volatile bool devicePaused;
         volatile uint8_t deviceState;

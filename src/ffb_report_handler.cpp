@@ -114,7 +114,7 @@ namespace SunFFB
         return (const PoolReportData*)&poolData;
     }
 
-    void FFBReportHandler::set_effect(SetEffectReportData* data)
+    void FFBReportHandler::set_effect(const SetEffectReportData* data)
     {
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
@@ -122,7 +122,7 @@ namespace SunFFB
         volatile SetEffectReportData* effectData = &effectBlock->effectData;
         memcpy((void*)effectData, data, sizeof(SetEffectReportData));
 
-        uint8_t enableAxis = data->axisEnable;
+        const uint8_t enableAxis = data->axisEnable;
         if(enableAxis & DIRECTION_ENABLE)
         {
             #if NUM_AXIS == 1
@@ -130,7 +130,7 @@ namespace SunFFB
             #endif
 
             #if NUM_AXIS == 2
-            float theta = data->directions[0] * USB_NORMALIZATION_RAD;
+            const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
             #ifndef USE_FAST_MATH
             effectBlock->directionUnitVector[0] = cosf(theta);
             effectBlock->directionUnitVector[1] = sinf(theta);
@@ -186,7 +186,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_envelop(SetEnvelopeReportData* data)
+    void FFBReportHandler::set_envelop(const SetEnvelopeReportData* data)
     {
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
@@ -200,9 +200,9 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_condition(SetConditionReportData* data)
+    void FFBReportHandler::set_condition(const SetConditionReportData* data)
     {
-        uint8_t parameterBlockOffset = data->parameterBlockOffset & 0x0F;
+        const uint8_t parameterBlockOffset = data->parameterBlockOffset & 0x0F;
         if(parameterBlockOffset > (NUM_AXIS - 1)) return;
 
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
@@ -219,7 +219,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_periodic(SetPeriodicReportData* data)
+    void FFBReportHandler::set_periodic(const SetPeriodicReportData* data)
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
@@ -232,7 +232,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_constant_force(SetConstantForceReportData* data)
+    void FFBReportHandler::set_constant_force(const SetConstantForceReportData* data)
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
@@ -245,7 +245,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_ramp_force(SetRampForceReportData* data)
+    void FFBReportHandler::set_ramp_force(const SetRampForceReportData* data)
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
@@ -258,7 +258,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_device_gain(DeviceGainReportData* data)
+    void FFBReportHandler::set_device_gain(const DeviceGainReportData* data)
     {
         deviceGain = data->gain;
 
@@ -267,7 +267,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_device_control(DeviceControlReportData* data)
+    void FFBReportHandler::set_device_control(const DeviceControlReportData* data)
     {
         switch(data->state)
         {
@@ -298,7 +298,7 @@ namespace SunFFB
                 devicePaused = false;
                 pidStates.status &= ~(0x01);
 
-                uint32_t pauseLength = millis() - pauseTime;
+                const uint32_t pauseLength = millis() - pauseTime;
                 for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
                 {
                     if(effectBlocks[i].state & EFFECT_STATE_PLAYING)
@@ -316,7 +316,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_effect_operation(EffectOperationReportData* data)
+    void FFBReportHandler::set_effect_operation(const EffectOperationReportData* data)
     {
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         switch (data->effectOperation)
@@ -351,7 +351,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_effect_block_free(BlockFreeReportData* data)
+    void FFBReportHandler::set_effect_block_free(const BlockFreeReportData* data)
     {
         if(0xFF == data->effectBlockIndex)
             free_all_effects();
