@@ -132,11 +132,11 @@ namespace SunFFB
             #if NUM_AXIS == 2
             const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
             #ifndef USE_FAST_MATH
-            effectBlock->directionUnitVector[0] = cosf(theta);
-            effectBlock->directionUnitVector[1] = sinf(theta);
+            effectBlock->directionUnitVector[0] = sinf(theta);
+            effectBlock->directionUnitVector[1] = cosf(theta);
             #else
-            effectBlock->directionUnitVector[0] = _cosf(theta);
-            effectBlock->directionUnitVector[1] = _sinf(theta);
+            effectBlock->directionUnitVector[0] = _sinf(theta);
+            effectBlock->directionUnitVector[1] = _cosf(theta);
             #endif
             #endif
 
@@ -145,14 +145,14 @@ namespace SunFFB
             float phi = data->directions[1] * USB_NORMALIZATION_RAD;
             #ifndef USE_FAST_MATH
             float sinPhi = sinf(phi);
-            effectBlock->directionUnitVector[0] = sinPhi * cosf(theta);
-            effectBlock->directionUnitVector[1] = sinPhi * sinf(theta);
-            effectBlock->directionUnitVector[2] = cosf(phi);
+            effectBlock->directionUnitVector[0] = cosf(phi);
+            effectBlock->directionUnitVector[1] = -sinPhi * cosf(theta);
+            effectBlock->directionUnitVector[2] = sinPhi * sinf(theta);
             #else
             float sinPhi = _sinf(phi);
-            effectBlock->directionUnitVector[0] = sinPhi * _cosf(theta);
-            effectBlock->directionUnitVector[1] = sinPhi * _sinf(theta);
-            effectBlock->directionUnitVector[2] = _cosf(phi);
+            effectBlock->directionUnitVector[0] = _cosf(phi);
+            effectBlock->directionUnitVector[1] = -sinPhi * _cosf(theta);
+            effectBlock->directionUnitVector[2] = sinPhi * _sinf(theta);
             #endif
             #endif
         }

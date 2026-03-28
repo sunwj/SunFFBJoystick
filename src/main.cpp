@@ -14,6 +14,11 @@
 
 // #define SERIAL_PRINT
 
+#define TFT_X 0
+#define TFT_Y 0
+#define TFT_W 160
+#define TFT_H 80
+
 #define SW_PIN 16
 #define TDX_PIN 4
 #define RDX_PIN 5
@@ -22,6 +27,8 @@
 constexpr uint8_t joystickPins[NUM_AXIS] = {18};
 #elif NUM_AXIS == 2
 constexpr uint8_t joystickPins[NUM_AXIS] = {18, 17};
+#elif NUM_AXIS == 3
+constexpr uint8_t joystickPins[NUM_AXIS] = {18, 17, 19};
 #endif
 
 uint16_t coordOffsets[NUM_AXIS] = {0};
@@ -182,6 +189,7 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
 void lcd_task(void* params)
 {
+    uint32_t cnt = 0;
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
     {
@@ -268,7 +276,7 @@ void lcd_task(void* params)
         }
 
         sprite.pushSprite(0, 0);
-        vTaskDelayUntil( & wakeupTime, pdMS_TO_TICKS(40));
+        vTaskDelayUntil( & wakeupTime, pdMS_TO_TICKS(60));
     }
 }
 
@@ -402,7 +410,9 @@ void setup()
 
     lcd.init();
     lcd.setRotation(1);
+    lcd.setTextWrap(true, true);
     sprite.createSprite(160, 80);
+    sprite.setTextWrap(true, true);
     sprite.fillSprite(TFT_BLACK);
     sprite.setCursor(0, 0);
     sprite.setTextColor(TFT_WHITE);
@@ -445,8 +455,8 @@ void setup()
     xSemaphoreGive(semaphoreFFBReportHandler);
 
     xTaskCreatePinnedToCore(lcd_task, "LCD", 4096, nullptr, 1, nullptr, appCore);
-    xTaskCreatePinnedToCore(joystick_task, "Joystick", 2048, nullptr, 1, nullptr, appCore);
-    xTaskCreatePinnedToCore(force_calculation_task, "Force", 4096, nullptr, 1, nullptr, appCore);
+    xTaskCreatePinnedToCore(joystick_task, "Joystick", 2048, nullptr, 2, nullptr, appCore);
+    xTaskCreatePinnedToCore(force_calculation_task, "Force", 4096, nullptr, 2, nullptr, appCore);
 
     xTaskCreatePinnedToCore(send_force_task, "SendForce", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
     xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
