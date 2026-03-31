@@ -95,7 +95,7 @@ namespace SunFFB
         const int16_t negativeCoeff = conditionData.negativeCoefficient;
         const int16_t postiveSaturation = conditionData.positiveSaturation;
         const int16_t negativeSaturation = -conditionData.negativeSaturation;
-        const uint8_t deadBand = conditionData.deadBand;
+        const uint16_t deadBand = conditionData.deadBand;
 
         float force = 0.f;
 
@@ -284,8 +284,8 @@ namespace SunFFB
 
     float FFBForceCalculator::get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration) const
     {
-        const uint8_t attackLevel = envelopeData.attackLevel;
-        const uint8_t fadeLevel = envelopeData.fadeLevel;
+        const uint16_t attackLevel = envelopeData.attackLevel;
+        const uint16_t fadeLevel = envelopeData.fadeLevel;
         const uint16_t attackTime = envelopeData.attackTime;
         const uint16_t fadeTime = envelopeData.fadeTime;
 
@@ -360,6 +360,7 @@ namespace SunFFB
         if(USB_NO_TRIGGER_BUTTON != effectBlock.effectData.triggerButton)
             return is_trigger_playing(const_cast<EffectBlock&>(effectBlock), triggerButtonState, currentTime);
         
+        // TODO: is_effect_playing() returns false when time is up, but it does not clear the playing bit. Result: stale state, wrong UI/status, and possibly wrong host-visible behavior.
         if(currentTime < effectBlock.startTime)
             return false;
         

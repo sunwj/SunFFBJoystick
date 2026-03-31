@@ -174,7 +174,7 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
         break;
 
         case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
-            ffbHandler.create_new_effect();
+            ffbHandler.create_new_effect((SunFFB::CreateNewEffectReportData*)buffer);
         break;
 
         default:

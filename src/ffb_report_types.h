@@ -133,6 +133,7 @@ namespace SunFFB
         bool envelopParameter;
         bool triggerButtonLatch;
         uint8_t conditionBlockFlags = 0x00;
+        // TODO: preserve original effect duration
     
         SetEffectReportData effectData;
         TypeSpecificParameterBlock typeSpecificData[NUM_AXIS];
@@ -140,6 +141,7 @@ namespace SunFFB
     
     struct __attribute__((packed)) Metrics
     {
+        // TODO: speed and acceleration may be defined as float
         int32_t position[NUM_AXIS];
         int32_t speed[NUM_AXIS];
         int32_t acceleration[NUM_AXIS];

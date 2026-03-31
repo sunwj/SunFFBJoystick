@@ -17,7 +17,7 @@ namespace SunFFB
         free_all_effects();
     }
 
-    void FFBReportHandler::create_new_effect()
+    void FFBReportHandler::create_new_effect(const CreateNewEffectReportData* data)
     {
         blockLoadData.effectBlockIndex = get_next_free_effect_block_index();
 
@@ -31,6 +31,7 @@ namespace SunFFB
 
             memset((void*)effectBlock, 0, sizeof(EffectBlock));
             effectBlock->state = EFFECT_STATE_ALLOCATED;
+            effectBlock->effectData.effectType = data->effectType;
 
             blockLoadData.ramPoolAvailable -= sizeof(EffectBlock);
         }
@@ -93,6 +94,7 @@ namespace SunFFB
     void FFBReportHandler::start_effect(volatile EffectBlock* effectBlock)
     {
         effectBlock->state |= EFFECT_STATE_PLAYING;
+        // TODO: Triggered effects appear to bypass startDelay. If PID spec expects delay after trigger, this is wrong.
         if(effectBlock->effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
             effectBlock->startTime = 0;
         else
@@ -164,14 +166,21 @@ namespace SunFFB
             #endif
 
             #if NUM_AXIS == 2
-            effectBlock->directionUnitVector[0] = int16_t(data->directions[0]) / USB_MAX_DIRECTION_CARTESIAN;
-            effectBlock->directionUnitVector[1] = int16_t(data->directions[1]) / USB_MAX_DIRECTION_CARTESIAN;
+            const float x = float(data->directions[1]);
+            const float y = float(data->directions[0]);
+            float invLen = 1.f / sqrtf(x * x + y * y + 1e-6f);
+            effectBlock->directionUnitVector[0] = x * invLen;
+            effectBlock->directionUnitVector[1] = y * invLen;
             #endif
 
             #if NUM_AXIS == 3
-            effectBlock->directionUnitVector[0] = int16_t(data->directions[0]) / USB_MAX_DIRECTION_CARTESIAN;
-            effectBlock->directionUnitVector[1] = int16_t(data->directions[1]) / USB_MAX_DIRECTION_CARTESIAN;
-            effectBlock->directionUnitVector[2] = int16_t(data->directions[2]) / USB_MAX_DIRECTION_CARTESIAN;
+            const float x = float(data->directions[2]);
+            const float y = float(data->directions[1]);
+            const float z = float(data->directions[0]);
+            float invLen = 1.f / sqrtf(x * x + y * y + z * z + 1e-6f);
+            effectBlock->directionUnitVector[0] = x * invLen;
+            effectBlock->directionUnitVector[1] = y * invLen;
+            effectBlock->directionUnitVector[2] = z * invLen;
             #endif
         }
 
@@ -269,6 +278,7 @@ namespace SunFFB
 
     void FFBReportHandler::set_device_control(const DeviceControlReportData* data)
     {
+        // TODO: set_device_control() updates PID status bit 1 for enable/disable actuators, but force_calculator() only checks devicePaused
         switch(data->state)
         {
             case 1:                 // enable actuators
@@ -319,6 +329,8 @@ namespace SunFFB
     void FFBReportHandler::set_effect_operation(const EffectOperationReportData* data)
     {
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        if (nullptr == effectBlock) return;
+
         switch (data->effectOperation)
         {
             case 1:                 // start
@@ -326,6 +338,7 @@ namespace SunFFB
                 if(0xFF == data->loopCount)
                     effectBlock->effectData.duration = USB_DURATION_INFINITE;
                 else if(data->loopCount > 0)
+                // TODO: If the same effect is started again later, duration is already multiplied. Repeated starts keep stretching it. keep the original duration unchanged and track remaining loops separately.
                     effectBlock->effectData.duration *= data->loopCount;
 
                 start_effect(effectBlock);

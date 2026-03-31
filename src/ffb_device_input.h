@@ -55,7 +55,7 @@ namespace SunFFB
         {
             // inputData.axis[i] = axis[i];
             inputData.axis[i] += (axis[i] - inputData.axis[i]) * alphaPos;
-            if(inputData.axis[i] > -metrics.positionDeadBand[0] && inputData.axis[i] < metrics.positionDeadBand[i]) inputData.axis[i] = 0;
+            if(inputData.axis[i] > -metrics.positionDeadBand[i] && inputData.axis[i] < metrics.positionDeadBand[i]) inputData.axis[i] = 0;
 
             float newSpeed = (inputData.axis[i] - metrics.position[i]) / (dt * 1e3f);
             newSpeed = metrics.speed[i] + alphaSpeed * (newSpeed - metrics.speed[i]);
@@ -85,7 +85,7 @@ namespace SunFFB
             metrics.maxSpeed[i] = USB_AXIS_MAX_ABSOLUTE * 0.0025f;
             metrics.maxAcceleration[i] = USB_AXIS_MAX_ABSOLUTE;
         }
-        tPrev = millis();
+        tPrev = micros();
     }
 }
 

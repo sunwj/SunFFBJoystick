@@ -18,7 +18,7 @@ namespace SunFFB
         const BlockLoadReportData* get_block_load_report_data() const {return (const BlockLoadReportData*)&blockLoadData;};
         const PoolReportData* get_pool_report_data();
 
-        void create_new_effect();
+        void create_new_effect(const CreateNewEffectReportData* data);
         uint8_t get_next_free_effect_block_index();
         void free_effect(uint8_t idx);
         const EffectBlock* get_all_effect_blocks() const {return (const EffectBlock*)effectBlocks;};
