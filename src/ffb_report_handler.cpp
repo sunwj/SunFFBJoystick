@@ -132,27 +132,27 @@ namespace SunFFB
             #if NUM_AXIS == 2
             const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
             #ifndef USE_FAST_MATH
-            effectBlock->directionUnitVector[0] = sinf(theta);
+            effectBlock->directionUnitVector[0] = -sinf(theta);
             effectBlock->directionUnitVector[1] = cosf(theta);
             #else
-            effectBlock->directionUnitVector[0] = _sinf(theta);
+            effectBlock->directionUnitVector[0] = -_sinf(theta);
             effectBlock->directionUnitVector[1] = _cosf(theta);
             #endif
             #endif
 
             #if NUM_AXIS == 3
-            float theta = data->directions[0] * USB_NORMALIZATION_RAD;
-            float phi = data->directions[1] * USB_NORMALIZATION_RAD;
+            const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
+            const float phi = data->directions[1] * USB_NORMALIZATION_RAD;
             #ifndef USE_FAST_MATH
-            float sinPhi = sinf(phi);
-            effectBlock->directionUnitVector[0] = cosf(phi);
-            effectBlock->directionUnitVector[1] = -sinPhi * cosf(theta);
-            effectBlock->directionUnitVector[2] = sinPhi * sinf(theta);
+            const float cosPhi = cosf(phi);
+            effectBlock->directionUnitVector[0] = -sinf(phi);
+            effectBlock->directionUnitVector[1] = -cosPhi * sinf(theta);
+            effectBlock->directionUnitVector[2] = -cosPhi * cosf(theta);
             #else
-            float sinPhi = _sinf(phi);
-            effectBlock->directionUnitVector[0] = _cosf(phi);
-            effectBlock->directionUnitVector[1] = -sinPhi * _cosf(theta);
-            effectBlock->directionUnitVector[2] = sinPhi * _sinf(theta);
+            const float cosPhi = _cosf(phi);
+            effectBlock->directionUnitVector[0] = -_sinf(phi);
+            effectBlock->directionUnitVector[1] = -cosPhi * _sinf(theta);
+            effectBlock->directionUnitVector[2] = -cosPhi * _cosf(theta);
             #endif
             #endif
         }
