@@ -159,7 +159,7 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
             ffbHandler.set_constant_force((SunFFB::SetConstantForceReportData*)buffer);
         break;
 
-        case REPORT_ID_SET_RAMP_FROCE_REPORT:
+        case REPORT_ID_SET_RAMP_FORCE_REPORT:
             ffbHandler.set_ramp_force((SunFFB::SetRampForceReportData*)buffer);
         break;
 

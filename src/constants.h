@@ -67,7 +67,7 @@
 #define REPORT_ID_SET_CONDITION_REPORT                  5
 #define REPORT_ID_SET_PERIODIC_REPORT                   6
 #define REPORT_ID_SET_CONSTANT_FORCE_REPORT             7
-#define REPORT_ID_SET_RAMP_FROCE_REPORT                 8
+#define REPORT_ID_SET_RAMP_FORCE_REPORT                 8
 #define REPORT_ID_CUSTOM_FORCE_DATA_REPORT              9
 #define REPORT_ID_DOWNLOAD_FORCE_SAMPLE                 10
 #define REPORT_ID_EFFECT_OPERATION_REPORT               11
