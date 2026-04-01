@@ -114,7 +114,7 @@ namespace SunFFB
         return -force;
     }
 
-    void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const int32_t metrics[NUM_AXIS], const int32_t maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
+    void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const int32_t maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
     {
         const uint8_t axisEnable = effectBlock.effectData.axisEnable;
         const uint8_t conditionBlockFlags = effectBlock.conditionBlockFlags;
@@ -165,7 +165,7 @@ namespace SunFFB
 
     void FFBForceCalculator::force_calculator(const FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const
     {
-        if(ffbReportHandler.devicePaused)
+        if(ffbReportHandler.devicePaused || !(ffbReportHandler.get_pid_state_report_data()->status & 0x02))
         {
             #pragma unroll
             for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -291,7 +291,7 @@ namespace SunFFB
 
         float envelope = USB_MAX_MAGNITUDE;
 
-        if(elapsedTime < attackTime)
+        if(attackTime > 0 && elapsedTime < attackTime)
         {
             const float height = USB_MAX_MAGNITUDE - attackLevel;
             const float slope = height / (float)attackTime;
@@ -302,7 +302,7 @@ namespace SunFFB
 
         if(USB_DURATION_INFINITE == duration) return 1.f;
 
-        if(elapsedTime > (duration - fadeTime))
+        if(fadeTime > 0 && elapsedTime > (duration - fadeTime))
         {
             const float height = USB_MAX_MAGNITUDE - fadeLevel;
             const float slope = height / (float)fadeTime;
@@ -329,7 +329,8 @@ namespace SunFFB
         {
             if(!effectBlock.triggerButtonLatch)
             {
-                effectBlock.startTime = currentTime;
+                // TODO: need check
+                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
                 effectBlock.triggerButtonLatch = true;
                 return true;
             }
@@ -360,7 +361,6 @@ namespace SunFFB
         if(USB_NO_TRIGGER_BUTTON != effectBlock.effectData.triggerButton)
             return is_trigger_playing(const_cast<EffectBlock&>(effectBlock), triggerButtonState, currentTime);
         
-        // TODO: is_effect_playing() returns false when time is up, but it does not clear the playing bit. Result: stale state, wrong UI/status, and possibly wrong host-visible behavior.
         if(currentTime < effectBlock.startTime)
             return false;
         

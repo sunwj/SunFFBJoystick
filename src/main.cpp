@@ -128,6 +128,12 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
 
 void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, const uint8_t* buffer, uint16_t bufSize)
 {
+    // TODO: send PID status when it changes
+    // usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
+    // after set_device_control()
+	// after set_effect_operation()
+	// after create_new_effect()
+	// after block free/reset
     uint32_t startTime = micros();
 
     xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);

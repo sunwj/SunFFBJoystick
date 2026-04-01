@@ -15,9 +15,9 @@ namespace SunFFB
         void update_speed_deadband(const int32_t speedDeadBand[NUM_AXIS]) { memcpy((void*)metrics.speedDeadBand, speedDeadBand, sizeof(metrics.speedDeadBand)); };
         void update_acceleration_deadband(const int32_t accelerationDeadBand[NUM_AXIS]) { memcpy((void*)metrics.accelerationDeadBand, accelerationDeadBand, sizeof(metrics.accelerationDeadBand)); };
 
-        const int32_t* get_position() const { return (const int32_t*)metrics.position; };
-        const int32_t* get_speed() const { return (const int32_t*)metrics.speed; };
-        const int32_t* get_acceleration() const { return (const int32_t*)metrics.acceleration; };
+        const float* get_position() const { return (const float*)metrics.position; };
+        const float* get_speed() const { return (const float*)metrics.speed; };
+        const float* get_acceleration() const { return (const float*)metrics.acceleration; };
 
         const int32_t* get_max_position() const { return (const int32_t*)metrics.maxPosition; };
         const int32_t* get_max_speed() const { return (const int32_t*)metrics.maxSpeed; };
@@ -46,6 +46,11 @@ namespace SunFFB
     {
         const uint32_t currentTime = micros();
         const float dt = (currentTime - tPrev) * 1e-6f;
+        if (dt <= 0.f)
+        {
+            tPrev = currentTime;
+            return;
+        }
 
         const float alphaPos = dt / (tFPos + dt);
         const float alphaSpeed = dt / (tFSpeed + dt);

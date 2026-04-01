@@ -71,8 +71,11 @@ namespace SunFFB
         volatile EffectBlock* effectBlock = get_effect_block(idx);
         if(nullptr == effectBlock) return;
 
-        effectBlock->state = EFFECT_STATE_FREE;
-        blockLoadData.ramPoolAvailable += sizeof(EffectBlock);
+        if (effectBlock->state != EFFECT_STATE_FREE)
+        {
+            effectBlock->state = EFFECT_STATE_FREE;
+            blockLoadData.ramPoolAvailable += sizeof(EffectBlock);
+        }
         nextEffectIdx = idx - 1;
     }
 
@@ -94,11 +97,13 @@ namespace SunFFB
     void FFBReportHandler::start_effect(volatile EffectBlock* effectBlock)
     {
         effectBlock->state |= EFFECT_STATE_PLAYING;
-        // TODO: Triggered effects appear to bypass startDelay. If PID spec expects delay after trigger, this is wrong.
+        effectBlock->startTime = millis() + effectBlock->effectData.startDelay;
         if(effectBlock->effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
+        {
+            // TODO: need check
             effectBlock->startTime = 0;
-        else
-            effectBlock->startTime = millis() + effectBlock->effectData.startDelay;
+            effectBlock->triggerButtonLatch = false;
+        }
     }
 
     void FFBReportHandler::stop_all_effects()
@@ -123,6 +128,8 @@ namespace SunFFB
 
         volatile SetEffectReportData* effectData = &effectBlock->effectData;
         memcpy((void*)effectData, data, sizeof(SetEffectReportData));
+
+        effectBlock->originalDuration = effectData->duration;
 
         const uint8_t enableAxis = data->axisEnable;
         if(enableAxis & DIRECTION_ENABLE)
@@ -338,8 +345,7 @@ namespace SunFFB
                 if(0xFF == data->loopCount)
                     effectBlock->effectData.duration = USB_DURATION_INFINITE;
                 else if(data->loopCount > 0)
-                // TODO: If the same effect is started again later, duration is already multiplied. Repeated starts keep stretching it. keep the original duration unchanged and track remaining loops separately.
-                    effectBlock->effectData.duration *= data->loopCount;
+                    effectBlock->effectData.duration = data->loopCount * effectBlock->originalDuration;
 
                 start_effect(effectBlock);
             }
