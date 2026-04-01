@@ -11,7 +11,8 @@ namespace SunFFB
     float FFBForceCalculator::ramp_force_calculator(const EffectBlock& effectBlock, float elapsedTime) const
     {
         const SetRampForceReportData& rampData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].rampData;
-        return rampData.rampStart + (rampData.rampEnd - rampData.rampStart) * elapsedTime / float(effectBlock.effectData.duration);
+        const uint16_t duration = effectBlock.effectData.duration > 0 ? effectBlock.effectData.duration : 1;
+        return rampData.rampStart + (rampData.rampEnd - rampData.rampStart) * elapsedTime / float(duration);
     }
 
     float FFBForceCalculator::periodic_force_calculator(uint8_t effectType, const EffectBlock& effectBlock, uint32_t elapsedTime) const
@@ -71,11 +72,11 @@ namespace SunFFB
             case ET_SAWTOOTH_DOWN:
             case ET_SAWTOOTH_UP:
             {
-                const float slope = (float)magnitude / float(period);
+                const float slope = 2.f * magnitude / float(period);
                 if(ET_SAWTOOTH_DOWN == effectType)
-                    force = slope * (period - timeRemaind);
+                    force = magnitude - slope * timeRemaind;
                 else
-                    force = slope * timeRemaind;
+                    force = -magnitude + slope * timeRemaind;
                 
                 force += offset;
             }
@@ -316,7 +317,6 @@ namespace SunFFB
 
     bool FFBForceCalculator::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const
     {
-        const uint32_t elapsedTime = currentTime - effectBlock.startTime;
         const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
         const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
 
@@ -329,13 +329,15 @@ namespace SunFFB
         {
             if(!effectBlock.triggerButtonLatch)
             {
-                // TODO: need check
                 effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
                 effectBlock.triggerButtonLatch = true;
+                if (currentTime < effectBlock.startTime) return false;
                 return true;
             }
             else
             {
+                const uint32_t elapsedTime = currentTime - effectBlock.startTime;
+
                 if(elapsedTime < effectBlock.effectData.duration)
                     return true;
                 
@@ -345,7 +347,7 @@ namespace SunFFB
                 if(elapsedTime < (effectBlock.effectData.duration + effectBlock.effectData.triggerRepeatInterval))
                     return false;
                 
-                effectBlock.startTime = currentTime;
+                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
                 return true;
             }
         }

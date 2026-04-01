@@ -136,6 +136,8 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 	// after block free/reset
     uint32_t startTime = micros();
 
+    if (!buffer || bufSize == 0) return;
+    
     xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
     switch (reportId)
     {

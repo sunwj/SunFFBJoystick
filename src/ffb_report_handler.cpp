@@ -302,6 +302,11 @@ namespace SunFFB
 
             case 4:                 // reset
                 free_all_effects();
+                devicePaused = false;
+                pauseTime = 0;
+                deviceGain = USB_MAX_DEVICE_GAIN;
+                pidStates.status = 0x1E;
+                pidStates.effectBlockIndex = 0;
             break;
 
             case 5:                 // pause
@@ -342,6 +347,7 @@ namespace SunFFB
         {
             case 1:                 // start
             {
+                effectBlock->effectData.duration = effectBlock->originalDuration;
                 if(0xFF == data->loopCount)
                     effectBlock->effectData.duration = USB_DURATION_INFINITE;
                 else if(data->loopCount > 0)
@@ -354,6 +360,13 @@ namespace SunFFB
             case 2:                 // start solo
             {
                 stop_all_effects();
+
+                effectBlock->effectData.duration = effectBlock->originalDuration;
+                if(0xFF == data->loopCount)
+                    effectBlock->effectData.duration = USB_DURATION_INFINITE;
+                else if(data->loopCount > 0)
+                    effectBlock->effectData.duration = data->loopCount * effectBlock->originalDuration;
+
                 start_effect(effectBlock);
             }
             break;
