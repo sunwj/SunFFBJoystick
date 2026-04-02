@@ -175,6 +175,7 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
         case REPORT_ID_DEVICE_CONTROL_REPORT:
             ffbHandler.set_device_control((SunFFB::DeviceControlReportData*)buffer);
+            usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
         break;
 
         case REPORT_ID_DEVICE_GAIN_REPORT:
@@ -431,7 +432,7 @@ void setup()
     ffbHandler.init();
 
     // Manual begin() is required on core without built-in support e.g. mbed rp2040
-    // TinyUSBDevice.setID(0xFFFF, 0x2010);
+    TinyUSBDevice.setID(0xFFFF, 0x2010);
     TinyUSBDevice.setManufacturerDescriptor("SunFFB");
     TinyUSBDevice.setProductDescriptor("Force feedback joystick");
     if (!TinyUSBDevice.isInitialized())
