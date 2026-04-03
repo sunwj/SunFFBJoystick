@@ -176,8 +176,8 @@ namespace SunFFB
             const float x = float(data->directions[1]);
             const float y = float(data->directions[0]);
             float invLen = 1.f / sqrtf(x * x + y * y + 1e-6f);
-            effectBlock->directionUnitVector[0] = x * invLen;
-            effectBlock->directionUnitVector[1] = y * invLen;
+            effectBlock->directionUnitVector[0] = -x * invLen;
+            effectBlock->directionUnitVector[1] = -y * invLen;
             #endif
 
             #if NUM_AXIS == 3
@@ -185,9 +185,9 @@ namespace SunFFB
             const float y = float(data->directions[1]);
             const float z = float(data->directions[0]);
             float invLen = 1.f / sqrtf(x * x + y * y + z * z + 1e-6f);
-            effectBlock->directionUnitVector[0] = x * invLen;
-            effectBlock->directionUnitVector[1] = y * invLen;
-            effectBlock->directionUnitVector[2] = z * invLen;
+            effectBlock->directionUnitVector[0] = -x * invLen;
+            effectBlock->directionUnitVector[1] = -y * invLen;
+            effectBlock->directionUnitVector[2] = -z * invLen;
             #endif
         }
 

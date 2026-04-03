@@ -314,7 +314,7 @@ class SunFFBDevice:
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()
 
-    def _require(self) -> hid.device:
+    def _require(self) -> hid.Device:
         if self.dev is None:
             raise RuntimeError("Device not open")
         return self.dev

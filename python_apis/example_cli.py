@@ -97,7 +97,7 @@ def cmd_constant(args):
             duration_ms=args.duration,
             gain=args.gain,
             axis_enable=DIRECTION_ENABLE,
-            directions=(0, 0),
+            directions=(9000, 0),
             loop_count=args.loop_count,
             start=True,
         )
