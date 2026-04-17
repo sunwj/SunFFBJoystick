@@ -2,7 +2,6 @@
 #define _FFB_REPORT_HANDLER_H_
 
 #include <Arduino.h>
-#include <Adafruit_TinyUSB.h>
 #include "ffb_report_descriptor.h"
 #include "ffb_report_types.h"
 
@@ -24,7 +23,7 @@ namespace SunFFB
         const EffectBlock* get_all_effect_blocks() const {return (const EffectBlock*)effectBlocks;};
 
         void set_effect(const SetEffectReportData* data);
-        void set_envelop(const SetEnvelopeReportData* data);
+        void set_envelope(const SetEnvelopeReportData* data);
         void set_condition(const SetConditionReportData* data);
         void set_periodic(const SetPeriodicReportData* data);
         void set_constant_force(const SetConstantForceReportData* data);

@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <FreeRTOS.h>
-#include <Adafruit_TinyUSB.h>
 #include <memory.h>
 #include <algorithm>
 #include <TFT_eSPI.h>
+#include "tusb.h"
 #include "constants.h"
 #include "ffb_report_types.h"
 #include "ffb_report_descriptor.h"
@@ -44,7 +44,6 @@ HardwareSerial comSerial(1);
 TFT_eSPI lcd = TFT_eSPI();
 TFT_eSprite sprite = TFT_eSprite( & lcd);
 
-Adafruit_USBD_HID usb_hid;
 SunFFB::FFBDeviceInput ffbDeviceInput;
 SunFFB::FFBReportHandler ffbHandler;
 SunFFB::FFBForceCalculator ffbForceCalculator;
@@ -53,141 +52,143 @@ TaskHandle_t forceCalculationTaskHandle;
 SemaphoreHandle_t semaphoreFFBDeviceInput;
 SemaphoreHandle_t semaphoreFFBReportHandler;
 
-static
-const uint8_t ffbReportDescriptor[] PROGMEM = {
-    // Windows expects all of the I/O/F reports to be wrapped in an application collection;
-    // otherwise, the device won't be registered as capable of force-feedback.
-    // Linux is fine either way.
-    HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP),
-    HID_USAGE(HID_USAGE_DESKTOP_JOYSTICK),
-    HID_COLLECTION(HID_COLLECTION_APPLICATION),
-
-    // Input Reports
-    FFB_REPORT_DESC_INPUT_JOYSTICK,
-    FFB_REPORT_DESC_INPUT_PID_STATE,
-    // Output Reports
-    FFB_REPORT_DESC_OUTPUT_SET_EFFECT,
-    FFB_REPORT_DESC_OUTPUT_SET_ENVELOPE,
-    FFB_REPORT_DESC_OUTPUT_SET_CONDITION,
-    FFB_REPORT_DESC_OUTPUT_SET_PERIODIC,
-    FFB_REPORT_DESC_OUTPUT_SET_CONSTANT,
-    FFB_REPORT_DESC_OUTPUT_SET_RAMP,
-    FFB_REPORT_DESC_OUTPUT_EFFECT_OPERATION,
-    FFB_REPORT_DESC_OUTPUT_BLOCK_FREE,
-    FFB_REPORT_DESC_OUTPUT_DEVICE_CONTROL,
-    FFB_REPORT_DESC_OUTPUT_DEVICE_GAIN,
-    // Feature Reports
-    FFB_REPORT_DESC_FEATURE_CREATE_NEW_EFFECT,
-    FFB_REPORT_DESC_FEATURE_BLOCK_LOAD,
-    FFB_REPORT_DESC_FEATURE_POOL_REPORT,
-
-    HID_COLLECTION_END
-};
-
-uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen)
+void send_pid_state_report()
 {
-    switch (report_type)
-    {
-        case HID_REPORT_TYPE_FEATURE:
-            switch (report_id)
-            {
-                // Block Load Request
-                case REPORT_ID_BLOCK_LOAD_REPORT:
-                {
-                    const SunFFB::BlockLoadReportData* data = ffbHandler.get_block_load_report_data();
-                    memcpy(buffer, data, sizeof(SunFFB::BlockLoadReportData));
+    if (!tud_hid_ready()) return;
 
-                    #ifdef SERIAL_PRINT
-                    Serial.printf("Block load. idx: %d, status: %d \n", data -> effectBlockIndex, data -> blockLoadStatus);
-                    #endif
-                    return 4;
-                }
-
-                // Pool size, max simultaneous effects, etc.
-                case REPORT_ID_POOL_REPORT:
-                {
-                    const SunFFB::PoolReportData* data = ffbHandler.get_pool_report_data();
-                    memcpy(buffer, data, sizeof(SunFFB::PoolReportData));
-
-                    #ifdef SERIAL_PRINT
-                    Serial.printf("Pool report. \n");
-                    #endif
-                    return 4;
-                }
-
-                default:
-                    break;
-            }
-        break;
-
-        default:
-        break;
-    }
-    return 0;
+    tud_hid_report(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
 }
 
-void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, const uint8_t* buffer, uint16_t bufSize)
+void send_joystick_report()
 {
-    // TODO: send PID status when it changes
-    // usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
-    // after set_device_control()
-	// after set_effect_operation()
-	// after create_new_effect()
-	// after block free/reset
-    uint32_t startTime = micros();
+    if (!tud_hid_ready()) return;
 
-    if (!buffer || bufSize == 0) return;
-    
-    xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
-    switch (reportId)
+    tud_hid_report(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+}
+
+uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen)
+{
+    (void) instance;
+    (void) reqlen;
+
+    switch (report_id)
     {
-        case REPORT_ID_SET_EFFECT_REPORT:
-            ffbHandler.set_effect((SunFFB::SetEffectReportData*)buffer);
-        break;
+        case REPORT_ID_BLOCK_LOAD_REPORT:
+        {
+            if (report_type != HID_REPORT_TYPE_FEATURE) return 0;
+            if (reqlen < sizeof(SunFFB::BlockLoadReportData)) return 0;
 
-        case REPORT_ID_SET_ENVELOPE_REPORT:
-            ffbHandler.set_envelop((SunFFB::SetEnvelopeReportData*)buffer);
-        break;
+            memcpy(buffer, (const void*)ffbHandler.get_block_load_report_data(), sizeof(SunFFB::BlockLoadReportData));
+            return sizeof(SunFFB::BlockLoadReportData);
+        }
 
-        case REPORT_ID_SET_CONDITION_REPORT:
-            ffbHandler.set_condition((SunFFB::SetConditionReportData*)buffer);
-        break;
+        case REPORT_ID_POOL_REPORT:
+        {
+            if (report_type != HID_REPORT_TYPE_FEATURE) return 0;
+            if (reqlen < sizeof(SunFFB::PoolReportData)) return 0;
 
-        case REPORT_ID_SET_PERIODIC_REPORT:
-            ffbHandler.set_periodic((SunFFB::SetPeriodicReportData*)buffer);
-        break;
-
-        case REPORT_ID_SET_CONSTANT_FORCE_REPORT:
-            ffbHandler.set_constant_force((SunFFB::SetConstantForceReportData*)buffer);
-        break;
-
-        case REPORT_ID_SET_RAMP_FORCE_REPORT:
-            ffbHandler.set_ramp_force((SunFFB::SetRampForceReportData*)buffer);
-        break;
-
-        case REPORT_ID_EFFECT_OPERATION_REPORT:
-            ffbHandler.set_effect_operation((SunFFB::EffectOperationReportData*)buffer);
-        break;
-
-        case REPORT_ID_BLOCK_FREE_REPORT:
-            ffbHandler.set_effect_block_free((SunFFB::BlockFreeReportData*)buffer);
-        break;
-
-        case REPORT_ID_DEVICE_CONTROL_REPORT:
-            ffbHandler.set_device_control((SunFFB::DeviceControlReportData*)buffer);
-            usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
-        break;
-
-        case REPORT_ID_DEVICE_GAIN_REPORT:
-            ffbHandler.set_device_gain((SunFFB::DeviceGainReportData*)buffer);
-        break;
-
-        case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
-            ffbHandler.create_new_effect((SunFFB::CreateNewEffectReportData*)buffer);
-        break;
+            memcpy(buffer, (const void*)ffbHandler.get_pool_report_data(), sizeof(SunFFB::PoolReportData));
+            return sizeof(SunFFB::PoolReportData);
+        }
 
         default:
-        break;
+            return 0; // STALL unsupported GET_REPORT
+    }
+}
+
+void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+{
+    (void) instance;
+
+    uint32_t startTime = micros();
+
+    if (buffer == nullptr || bufsize == 0) return;
+
+    switch (report_id)
+    {
+        case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
+            if (report_type == HID_REPORT_TYPE_FEATURE && bufsize >= sizeof(SunFFB::CreateNewEffectReportData))
+            {
+                ffbHandler.create_new_effect((const SunFFB::CreateNewEffectReportData*)buffer);
+            }
+            break;
+
+        case REPORT_ID_SET_EFFECT_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::SetEffectReportData))
+            {
+                ffbHandler.set_effect((const SunFFB::SetEffectReportData*)buffer);
+            }
+            break;
+
+        case REPORT_ID_SET_ENVELOPE_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::SetEnvelopeReportData))
+            {
+                ffbHandler.set_envelope((const SunFFB::SetEnvelopeReportData*)buffer);
+            }
+            break;
+
+        case REPORT_ID_SET_CONDITION_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::SetConditionReportData))
+            {
+                ffbHandler.set_condition((const SunFFB::SetConditionReportData*)buffer);
+            }
+            break;
+
+        case REPORT_ID_SET_PERIODIC_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::SetPeriodicReportData))
+            {
+                ffbHandler.set_periodic((const SunFFB::SetPeriodicReportData*)buffer);
+            }
+            break;
+
+        case REPORT_ID_SET_CONSTANT_FORCE_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::SetConstantForceReportData))
+            {
+                ffbHandler.set_constant_force((const SunFFB::SetConstantForceReportData*)buffer);
+            }
+            break;
+
+        case REPORT_ID_SET_RAMP_FORCE_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::SetRampForceReportData))
+            {
+                ffbHandler.set_ramp_force((const SunFFB::SetRampForceReportData*)buffer);
+            }
+            break;
+
+        case REPORT_ID_EFFECT_OPERATION_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::EffectOperationReportData))
+            {
+                ffbHandler.set_effect_operation((const SunFFB::EffectOperationReportData*)buffer);
+                // send_pid_state_report();
+            }
+            break;
+
+        case REPORT_ID_BLOCK_FREE_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT &&
+                bufsize >= sizeof(SunFFB::BlockFreeReportData))
+            {
+                ffbHandler.free_effect(((const SunFFB::BlockFreeReportData*)buffer)->effectBlockIndex);
+                // send_pid_state_report();
+            }
+            break;
+
+        case REPORT_ID_DEVICE_CONTROL_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::DeviceControlReportData))
+            {
+                ffbHandler.set_device_control((const SunFFB::DeviceControlReportData*)buffer);
+                send_pid_state_report();
+            }
+            break;
+
+        case REPORT_ID_DEVICE_GAIN_REPORT:
+            if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::DeviceGainReportData))
+            {
+                ffbHandler.set_device_gain((const SunFFB::DeviceGainReportData*)buffer);
+            }
+            break;
+
+        default:
+            break;
     }
     xSemaphoreGive(semaphoreFFBReportHandler);
 
@@ -309,7 +310,7 @@ void joystick_task(void* params)
       ffbDeviceInput.update_axis(coords);
       xSemaphoreGive(semaphoreFFBDeviceInput);
 
-      usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+      send_joystick_report();
 
       vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     }
@@ -431,28 +432,9 @@ void setup()
 
     ffbHandler.init();
 
-    // Manual begin() is required on core without built-in support e.g. mbed rp2040
-    TinyUSBDevice.setID(0xFFFF, 0x2010);
-    TinyUSBDevice.setManufacturerDescriptor("SunFFB");
-    TinyUSBDevice.setProductDescriptor("Force feedback joystick");
-    if (!TinyUSBDevice.isInitialized())
-        TinyUSBDevice.begin(0);
-
-    // Setup HID
-    usb_hid.setBootProtocol(HID_ITF_PROTOCOL_NONE);
-    usb_hid.setPollInterval(2);
-    usb_hid.setReportDescriptor(ffbReportDescriptor, sizeof(ffbReportDescriptor));
-    usb_hid.setReportCallback(hid_get_report_callback, hid_set_report_callback);
-
-    usb_hid.begin();
-
-    // If already enumerated, additional class driverr begin() e.g msc, hid, midi won't take effect until re-enumeration
-    if (TinyUSBDevice.mounted())
-    {
-        TinyUSBDevice.detach();
-        delay(10);
-        TinyUSBDevice.attach();
-    }
+    // tusb_rhport_init_t dev_init = {.role = TUSB_ROLE_DEVICE, .speed = TUSB_SPEED_AUTO};
+    // tusb_init(0, &dev_init);
+    tusb_init();
 
     gPositions = xQueueCreate(1, sizeof(int16_t) * NUM_AXIS);
     gForces = xQueueCreate(1, sizeof(int32_t) * NUM_AXIS);

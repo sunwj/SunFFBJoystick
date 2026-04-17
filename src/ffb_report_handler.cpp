@@ -202,7 +202,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_envelop(const SetEnvelopeReportData* data)
+    void FFBReportHandler::set_envelope(const SetEnvelopeReportData* data)
     {
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
