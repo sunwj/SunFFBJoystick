@@ -438,6 +438,7 @@ void setup()
     xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
 }
 
+int count = 0;
 void loop()
 {
     vTaskDelete(nullptr);
