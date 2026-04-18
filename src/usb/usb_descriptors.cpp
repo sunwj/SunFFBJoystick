@@ -34,9 +34,9 @@ enum
 // #endif
 
 #define EPNUM_HID_IN        0x81
-#define EPNUM_CDC_NOTIF     0x82
+#define EPNUM_CDC_NOTIF     0x85
 #define EPNUM_CDC_OUT       0x03
-#define EPNUM_CDC_IN        0x83
+#define EPNUM_CDC_IN        0x84
 
 #define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_HID_DESC_LEN)
 
@@ -112,7 +112,7 @@ static uint8_t const desc_configuration[] =
     TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN, 0x00, 250),
 
     // cdc descriptor
-    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 4, EPNUM_CDC_NOTIF, 8, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64),
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 4, EPNUM_CDC_NOTIF, 64, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64),
 
     // interface number, string index, protocol, report descriptor length,
     // endpoint IN address, endpoint size, polling interval

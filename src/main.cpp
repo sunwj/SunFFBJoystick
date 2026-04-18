@@ -153,7 +153,7 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
             if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::DeviceControlReportData))
             {
                 ffbHandler.set_device_control((const SunFFB::DeviceControlReportData*)buffer);
-                tud_hid_report(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
+                // tud_hid_report(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
             }
             break;
 
@@ -295,6 +295,7 @@ void joystick_task(void* params)
       xSemaphoreGive(semaphoreFFBDeviceInput);
 
       tud_hid_report(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+    //   tud_hid_n_report(0, REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
 
       vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     }
@@ -438,7 +439,6 @@ void setup()
     xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
 }
 
-int count = 0;
 void loop()
 {
     vTaskDelete(nullptr);
