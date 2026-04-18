@@ -107,13 +107,6 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
     // xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
     switch (report_id)
     {
-        case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
-            // if (report_type == HID_REPORT_TYPE_FEATURE && bufsize >= sizeof(SunFFB::CreateNewEffectReportData))
-            {
-                ffbHandler.create_new_effect((const SunFFB::CreateNewEffectReportData*)buffer);
-            }
-            break;
-
         case REPORT_ID_SET_EFFECT_REPORT:
             // if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::SetEffectReportData))
             {
@@ -167,7 +160,7 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
         case REPORT_ID_BLOCK_FREE_REPORT:
             // if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::BlockFreeReportData))
             {
-                ffbHandler.free_effect(((const SunFFB::BlockFreeReportData*)buffer)->effectBlockIndex);
+                ffbHandler.set_effect_block_free((SunFFB::BlockFreeReportData*)buffer);
                 // send_pid_state_report();
             }
             break;
@@ -184,6 +177,13 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
             // if (report_type == HID_REPORT_TYPE_OUTPUT && bufsize >= sizeof(SunFFB::DeviceGainReportData))
             {
                 ffbHandler.set_device_gain((const SunFFB::DeviceGainReportData*)buffer);
+            }
+            break;
+        
+        case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
+            // if (report_type == HID_REPORT_TYPE_FEATURE && bufsize >= sizeof(SunFFB::CreateNewEffectReportData))
+            {
+                ffbHandler.create_new_effect((const SunFFB::CreateNewEffectReportData*)buffer);
             }
             break;
 
@@ -312,7 +312,7 @@ void joystick_task(void* params)
 
       send_joystick_report();
 
-      vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+      vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(20));
     }
 
     // ffbDeviceInput.reset();
