@@ -106,7 +106,7 @@ static uint8_t const desc_configuration[] =
 
     // interface number, string index, protocol, report descriptor length,
     // endpoint IN address, endpoint size, polling interval
-    TUD_HID_DESCRIPTOR(ITF_NUM_HID, 0, HID_ITF_PROTOCOL_NONE, sizeof(desc_hid_report), EPNUM_HID_IN, CFG_TUD_HID_EP_BUFSIZE, 1)
+    TUD_HID_DESCRIPTOR(ITF_NUM_HID, 0, HID_ITF_PROTOCOL_NONE, sizeof(desc_hid_report), EPNUM_HID_IN, CFG_TUD_HID_EP_BUFSIZE, 2)
 };
 
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
