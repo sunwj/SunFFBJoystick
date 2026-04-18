@@ -2,7 +2,7 @@
 #define _FFB_REPORT_HANDLER_H_
 
 #include <Arduino.h>
-#include "ffb_report_descriptor.h"
+#include "usb/ffb_report_descriptor.h"
 #include "ffb_report_types.h"
 
 namespace SunFFB
