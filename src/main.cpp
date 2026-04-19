@@ -175,7 +175,8 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
         case REPORT_ID_DEVICE_CONTROL_REPORT:
             ffbHandler.set_device_control((SunFFB::DeviceControlReportData*)buffer);
-            usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
+            if (usb_hid.ready())
+                usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
         break;
 
         case REPORT_ID_DEVICE_GAIN_REPORT:
@@ -296,22 +297,23 @@ void joystick_task(void* params)
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
     {
-      int16_t coords[NUM_AXIS];
-      #pragma unroll
-      for(uint8_t i = 0; i < NUM_AXIS; ++i)
-      {
-        coords[i] = analogRead(joystickPins[i]) - coordOffsets[i];
-        coords[i] = std::clamp(coords[i], int16_t(-2048), int16_t(2048));
-        coords[i] = coords[i] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
-      }
+        int16_t coords[NUM_AXIS];
+        #pragma unroll
+        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+        {
+            coords[i] = analogRead(joystickPins[i]) - coordOffsets[i];
+            coords[i] = std::clamp(coords[i], int16_t(-2048), int16_t(2048));
+            coords[i] = coords[i] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+        }
 
-      xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-      ffbDeviceInput.update_axis(coords);
-      xSemaphoreGive(semaphoreFFBDeviceInput);
+        xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+        ffbDeviceInput.update_axis(coords);
+        xSemaphoreGive(semaphoreFFBDeviceInput);
 
-      usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+        if (usb_hid.ready())
+            usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
 
-      vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     }
 
     // ffbDeviceInput.reset();
