@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <TFT_eSPI.h>
 #include "tusb.h"
+#include "esp32-hal-tinyusb.h"
 #include "constants.h"
 #include "ffb_report_types.h"
 #include "usb/ffb_report_descriptor.h"
@@ -52,7 +53,12 @@ TaskHandle_t forceCalculationTaskHandle;
 SemaphoreHandle_t semaphoreFFBDeviceInput;
 SemaphoreHandle_t semaphoreFFBReportHandler;
 
-uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen)
+static SemaphoreHandle_t tinyusb_hid_device_input_sem = NULL;
+static SemaphoreHandle_t tinyusb_hid_device_input_mutex = NULL;
+
+static uint16_t timeout_ms = 100;
+
+extern "C" uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen)
 {
     (void) instance;
     (void) reqlen;
@@ -82,7 +88,7 @@ uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_t
     }
 }
 
-void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+extern "C"  void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
 {
     (void) instance;
 
@@ -181,6 +187,12 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
         reportProcessTime = (endTime - startTime);
 }
 
+extern "C" void tud_hid_report_complete_cb(uint8_t instance, uint8_t const *report, uint16_t len)
+{
+    if (tinyusb_hid_device_input_sem)
+        xSemaphoreGive(tinyusb_hid_device_input_sem);
+}
+
 void lcd_task(void* params)
 {
     uint32_t cnt = 0;
@@ -274,6 +286,8 @@ void lcd_task(void* params)
     }
 }
 
+uint32_t count = 0;
+
 void joystick_task(void* params)
 {
     ffbDeviceInput.reset();
@@ -281,23 +295,31 @@ void joystick_task(void* params)
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
     {
-      int16_t coords[NUM_AXIS];
-      #pragma unroll
-      for(uint8_t i = 0; i < NUM_AXIS; ++i)
-      {
-        coords[i] = analogRead(joystickPins[i]) - coordOffsets[i];
-        coords[i] = std::clamp(coords[i], int16_t(-2048), int16_t(2048));
-        coords[i] = coords[i] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
-      }
+        int16_t coords[NUM_AXIS];
+        #pragma unroll
+        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+        {
+            coords[i] = analogRead(joystickPins[i]) - coordOffsets[i];
+            coords[i] = std::clamp(coords[i], int16_t(-2048), int16_t(2048));
+            coords[i] = coords[i] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+        }
 
-      xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-      ffbDeviceInput.update_axis(coords);
-      xSemaphoreGive(semaphoreFFBDeviceInput);
+        xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+        ffbDeviceInput.update_axis(coords);
+        xSemaphoreGive(semaphoreFFBDeviceInput);
 
-      tud_hid_report(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
-    //   tud_hid_n_report(0, REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+        xSemaphoreTake(tinyusb_hid_device_input_mutex, pdMS_TO_TICKS(timeout_ms));
+        if (tud_hid_ready())
+        {
+            xSemaphoreTake(tinyusb_hid_device_input_sem, 0);
+            if (tud_hid_n_report(0, REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData)))
+            {
+                xSemaphoreTake(tinyusb_hid_device_input_sem, pdMS_TO_TICKS(timeout_ms));
+            }
+        }
+        xSemaphoreGive(tinyusb_hid_device_input_mutex);
 
-      vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     }
 
     // ffbDeviceInput.reset();
@@ -419,14 +441,25 @@ void setup()
 
     // tusb_rhport_init_t dev_init = {.role = TUSB_ROLE_DEVICE, .speed = TUSB_SPEED_AUTO};
     // tusb_init(0, &dev_init);
-    tusb_init();
-    delay(250);
+    // tusb_init();
+    while (!tud_mounted()) delay(10);
+
+    // if (tud_mounted())
+    // {
+    //     tud_disconnect();
+    //     delay(100);
+    //     tud_connect();
+    // }
+    // delay(250);
 
     gPositions = xQueueCreate(1, sizeof(int16_t) * NUM_AXIS);
     gForces = xQueueCreate(1, sizeof(int32_t) * NUM_AXIS);
 
     semaphoreFFBDeviceInput = xSemaphoreCreateBinary();
     semaphoreFFBReportHandler = xSemaphoreCreateBinary();
+
+    tinyusb_hid_device_input_sem = xSemaphoreCreateBinary();
+    tinyusb_hid_device_input_mutex = xSemaphoreCreateMutex();
 
     xSemaphoreGive(semaphoreFFBDeviceInput);
     xSemaphoreGive(semaphoreFFBReportHandler);

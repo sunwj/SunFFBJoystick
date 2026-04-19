@@ -5,6 +5,8 @@
 #include "ffb_report_descriptor.h"
 #include "constants.h"
 
+extern "C" {
+
 // -----------------------------------------------------------------------------
 // Replace these with your real values
 // -----------------------------------------------------------------------------
@@ -169,4 +171,5 @@ uint16_t const * tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 
     _desc_str[0] = (TUSB_DESC_STRING << 8) | (2 * chr_count + 2);
     return _desc_str;
+}
 }

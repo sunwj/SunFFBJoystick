@@ -1,0 +1,182 @@
+#include <Arduino.h>
+#include <FreeRTOS.h>
+#include <memory.h>
+#include <algorithm>
+#include <TFT_eSPI.h>
+#include "tusb.h"
+#include "esp32-hal-tinyusb.h"
+#include "constants.h"
+#include "ffb_device_input.h"
+
+// #define SERIAL_PRINT
+
+#define TFT_X 0
+#define TFT_Y 0
+#define TFT_W 160
+#define TFT_H 80
+
+#define SW_PIN 16
+#define TDX_PIN 4
+#define RDX_PIN 5
+
+#if NUM_AXIS == 1
+constexpr uint8_t joystickPins[NUM_AXIS] = {18};
+#elif NUM_AXIS == 2
+constexpr uint8_t joystickPins[NUM_AXIS] = {18, 17};
+#elif NUM_AXIS == 3
+constexpr uint8_t joystickPins[NUM_AXIS] = {18, 17, 19};
+#endif
+
+uint16_t coordOffsets[NUM_AXIS] = {0};
+
+TFT_eSPI lcd = TFT_eSPI();
+TFT_eSprite sprite = TFT_eSprite( & lcd);
+
+SunFFB::FFBDeviceInput ffbDeviceInput;
+SemaphoreHandle_t semaphoreFFBDeviceInput;
+
+extern "C" uint16_t tud_hid_get_report_cb(uint8_t instance,
+                                          uint8_t report_id,
+                                          hid_report_type_t report_type,
+                                          uint8_t* buffer,
+                                          uint16_t reqlen)
+{
+  (void)instance; (void)report_id; (void)report_type; (void)buffer; (void)reqlen;
+  return 0; // acceptable as a stub, but host GET_REPORT will stall
+}
+
+extern "C" void tud_hid_set_report_cb(uint8_t instance,
+                                      uint8_t report_id,
+                                      hid_report_type_t report_type,
+                                      uint8_t const* buffer,
+                                      uint16_t bufsize)
+{
+  (void)instance; (void)report_id; (void)report_type; (void)buffer; (void)bufsize;
+}
+
+void lcd_task(void* params)
+{
+    uint32_t cnt = 0;
+    TickType_t wakeupTime = xTaskGetTickCount();
+    while (true)
+    {
+        sprite.fillSprite(TFT_BLACK);
+        sprite.drawRect(0, 0, 40, 40, TFT_RED);
+        uint8_t coords[NUM_AXIS];
+        #pragma unroll
+        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+        {
+            uint8_t c = ffbDeviceInput.inputData.axis[i] / float(USB_AXIS_MAX_ABSOLUTE) * 20 + 20;
+            c = c < 2 ? 2 : c;
+            c = c > 38 ? 38 : c;
+            coords[i] = c;
+        }
+        #if NUM_AXIS == 1
+        sprite.fillSmoothCircle(coords[0], 20, 2, TFT_GREEN, TFT_BLACK);
+        #elif NUM_AXIS == 2
+        sprite.fillSmoothCircle(coords[0], coords[1], 2, TFT_GREEN, TFT_BLACK);
+        #endif
+
+        #if NUM_AXIS == 1
+        sprite.setCursor(40, 23);
+        sprite.printf("AX: %d", ffbDeviceInput.inputData.axis[0]);
+        #elif NUM_AXIS == 2
+        sprite.setCursor(40, 23);
+        sprite.printf("AX: %d", ffbDeviceInput.inputData.axis[0]);
+        sprite.setCursor(100, 23);
+        sprite.printf("AY: %d", ffbDeviceInput.inputData.axis[1]);
+        #endif
+
+        uint32_t currentTime = millis() * 1e-3;
+        sprite.setCursor(124, 70);
+        sprite.printf("%d", currentTime);
+
+        sprite.pushSprite(0, 0);
+        vTaskDelayUntil( & wakeupTime, pdMS_TO_TICKS(60));
+    }
+}
+
+void joystick_task(void* params)
+{
+    ffbDeviceInput.reset();
+    ffbDeviceInput.set_tf_speed(0.1f);
+    TickType_t wakeupTime = xTaskGetTickCount();
+    while (true)
+    {
+      int16_t coords[NUM_AXIS];
+      #pragma unroll
+      for(uint8_t i = 0; i < NUM_AXIS; ++i)
+      {
+        coords[i] = analogRead(joystickPins[i]) - coordOffsets[i];
+        coords[i] = std::clamp(coords[i], int16_t(-2048), int16_t(2048));
+        coords[i] = coords[i] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+      }
+
+      xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+      ffbDeviceInput.update_axis(coords);
+      xSemaphoreGive(semaphoreFFBDeviceInput);
+
+      if (tud_mounted() && !tud_suspended() && tud_hid_ready())
+      {
+        if (!tud_hid_report(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData)))
+            Serial.println(0);
+      }
+    // if (!tud_hid_n_report(0, REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData)))
+    //   Serial.println(0);
+
+      vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(10));
+    }
+}
+
+void setup()
+{
+    uint8_t appCore = xTaskGetAffinity(nullptr);
+    uint8_t protoCore = 0;
+
+    Serial.begin(115200);
+
+    // init joystick and calibrate
+    pinMode(SW_PIN, INPUT);
+    #pragma unroll
+    for(uint8_t i = 0; i < NUM_AXIS; ++i)
+    {
+        pinMode(joystickPins[i], INPUT);
+        uint32_t o = 0;
+        for (auto j = 0; j < 1000; ++j)
+        {
+            o += analogRead(joystickPins[i]);
+            delay(1);
+        }
+        coordOffsets[i] = o / 1000;
+    }
+
+    lcd.init();
+    lcd.setRotation(1);
+    lcd.setTextWrap(true, true);
+    sprite.createSprite(160, 80);
+    sprite.setTextWrap(true, true);
+    sprite.fillSprite(TFT_BLACK);
+    sprite.setCursor(0, 0);
+    sprite.setTextColor(TFT_WHITE);
+    sprite.setTextFont(1);
+    sprite.printf("SunFFB Joystick");
+    sprite.pushSprite(0, 0);
+
+    // tusb_rhport_init_t dev_init = {.role = TUSB_ROLE_DEVICE, .speed = TUSB_SPEED_AUTO};
+    // tusb_init(0, &dev_init);
+    tusb_init();
+
+    while (!tud_mounted()) delay(10);
+
+    semaphoreFFBDeviceInput = xSemaphoreCreateBinary();
+
+    xSemaphoreGive(semaphoreFFBDeviceInput);
+
+    xTaskCreatePinnedToCore(lcd_task, "LCD", 4096, nullptr, 1, nullptr, appCore);
+    xTaskCreatePinnedToCore(joystick_task, "Joystick", 2048, nullptr, 2, nullptr, appCore);
+}
+
+void loop()
+{
+    vTaskDelete(nullptr);
+}
