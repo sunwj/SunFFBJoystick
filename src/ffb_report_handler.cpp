@@ -165,7 +165,6 @@ namespace SunFFB
             #endif
             #endif
         }
-        // TODO: test the cartesian direction format
         else
         {
             #if NUM_AXIS == 1

@@ -11,6 +11,7 @@
 #include "ffb_device_input.h"
 #include "ffb_force_calculator.h"
 #include "simple_serial_communication.h"
+#include "esp_freertos_hooks.h"
 
 // #define SERIAL_PRINT
 
@@ -22,6 +23,8 @@
 #define SW_PIN 16
 #define TDX_PIN 4
 #define RDX_PIN 5
+
+#define POLLING_RATE 2
 
 #if NUM_AXIS == 1
 constexpr uint8_t joystickPins[NUM_AXIS] = {18};
@@ -38,6 +41,8 @@ volatile uint32_t effectProcessTime = 0;
 
 QueueHandle_t gPositions;
 QueueHandle_t gForces;
+QueueHandle_t gJoystickReportData;
+QueueHandle_t gPIDStateReportData;
 
 HardwareSerial comSerial(1);
 
@@ -53,8 +58,7 @@ TaskHandle_t forceCalculationTaskHandle;
 SemaphoreHandle_t semaphoreFFBDeviceInput;
 SemaphoreHandle_t semaphoreFFBReportHandler;
 
-static
-const uint8_t ffbReportDescriptor[] PROGMEM = {
+static const uint8_t ffbReportDescriptor[] PROGMEM = {
     // Windows expects all of the I/O/F reports to be wrapped in an application collection;
     // otherwise, the device won't be registered as capable of force-feedback.
     // Linux is fine either way.
@@ -128,17 +132,11 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
 
 void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, const uint8_t* buffer, uint16_t bufSize)
 {
-    // TODO: send PID status when it changes
-    // usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
-    // after set_device_control()
-	// after set_effect_operation()
-	// after create_new_effect()
-	// after block free/reset
     uint32_t startTime = micros();
 
     if (!buffer || bufSize == 0) return;
     
-    xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
+    xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
     switch (reportId)
     {
         case REPORT_ID_SET_EFFECT_REPORT:
@@ -175,8 +173,7 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
         case REPORT_ID_DEVICE_CONTROL_REPORT:
             ffbHandler.set_device_control((SunFFB::DeviceControlReportData*)buffer);
-            if (usb_hid.ready())
-                usb_hid.sendReport(REPORT_ID_PID_STATE, (void*)ffbHandler.get_pid_state_report_data(), sizeof(SunFFB::PIDStateReportData));
+            xQueueOverwrite(gPIDStateReportData, (void*)ffbHandler.get_pid_state_report_data());
         break;
 
         case REPORT_ID_DEVICE_GAIN_REPORT:
@@ -309,32 +306,10 @@ void joystick_task(void* params)
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
         ffbDeviceInput.update_axis(coords);
         xSemaphoreGive(semaphoreFFBDeviceInput);
-
-        if (usb_hid.ready())
-            usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
+        xQueueOverwrite(gJoystickReportData, (void*)&ffbDeviceInput.inputData);
 
         vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
     }
-
-    // ffbDeviceInput.reset();
-    // // int32_t speedDeadBand[NUM_AXIS] = {30, 30};
-    // // ffbDeviceInput.update_speed_deadband(speedDeadBand);
-    // ffbDeviceInput.set_tf_speed(0.025f);
-    
-    // TickType_t wakeupTime = xTaskGetTickCount();
-    // while (true)
-    // {
-    //     int16_t coords[NUM_AXIS] = {0};
-    //     xQueuePeek(gPositions, coords, portMAX_DELAY);
-
-    //     xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-    //     ffbDeviceInput.update_axis(coords);
-    //     xSemaphoreGive(semaphoreFFBDeviceInput);
-
-    //     usb_hid.sendReport(REPORT_ID_JOYSTICK, (void*)&ffbDeviceInput.inputData, sizeof(SunFFB::JoystickInputReportData));
-
-    //     vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
-    // }
 }
 
 void force_calculation_task(void* params)
@@ -351,19 +326,48 @@ void force_calculation_task(void* params)
         xSemaphoreGive(semaphoreFFBReportHandler);
         xSemaphoreGive(semaphoreFFBDeviceInput);
 
-        // const int32_t* pos = ffbDeviceInput.get_position();
-        // forces[0] = pos[0] >= 32766 ? -10000 : forces[0];
-        // forces[1] = pos[1] >= 32766 ? -10000 : forces[1];
-        // forces[0] = pos[0] <= -32766 ? 10000 : forces[0];
-        // forces[1] = pos[1] <= -32766 ? 10000 : forces[1];
-
         xQueueOverwrite(gForces, forces);
 
         uint32_t endTime = micros();
         if (startTime < endTime)
             effectProcessTime = (endTime - startTime);
 
-        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(1));
+    }
+}
+
+void send_report_task(void* params)
+{
+    TickType_t lastJoystick = xTaskGetTickCount();
+    SunFFB::JoystickInputReportData joystickData;
+    SunFFB::PIDStateReportData pidData;
+
+    while (true)
+    {
+        if (!usb_hid.ready())
+        {
+            vTaskDelay(pdMS_TO_TICKS(1));
+            continue;
+        }
+
+        
+        if (xQueueReceive(gPIDStateReportData, &pidData, 0) == pdTRUE)
+        {
+            usb_hid.sendReport(REPORT_ID_PID_STATE, &pidData, sizeof(SunFFB::PIDStateReportData));
+            continue;
+        }
+
+        TickType_t now = xTaskGetTickCount();
+        if ((now - lastJoystick) >= pdMS_TO_TICKS(POLLING_RATE))
+        {
+            if (xQueuePeek(gJoystickReportData, &joystickData, 0) == pdTRUE)
+            {
+                usb_hid.sendReport(REPORT_ID_JOYSTICK, &joystickData, sizeof(SunFFB::JoystickInputReportData));
+                lastJoystick = now;
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
@@ -442,7 +446,7 @@ void setup()
 
     // Setup HID
     usb_hid.setBootProtocol(HID_ITF_PROTOCOL_NONE);
-    usb_hid.setPollInterval(2);
+    usb_hid.setPollInterval(POLLING_RATE);
     usb_hid.setReportDescriptor(ffbReportDescriptor, sizeof(ffbReportDescriptor));
     usb_hid.setReportCallback(hid_get_report_callback, hid_set_report_callback);
 
@@ -456,8 +460,12 @@ void setup()
         TinyUSBDevice.attach();
     }
 
+    while (!usb_hid.ready()) delay(50);
+
     gPositions = xQueueCreate(1, sizeof(int16_t) * NUM_AXIS);
     gForces = xQueueCreate(1, sizeof(int32_t) * NUM_AXIS);
+    gJoystickReportData = xQueueCreate(1, sizeof(SunFFB::JoystickInputReportData));
+    gPIDStateReportData = xQueueCreate(1, sizeof(SunFFB::PIDStateReportData));
 
     semaphoreFFBDeviceInput = xSemaphoreCreateBinary();
     semaphoreFFBReportHandler = xSemaphoreCreateBinary();
@@ -467,8 +475,9 @@ void setup()
 
     xTaskCreatePinnedToCore(lcd_task, "LCD", 4096, nullptr, 1, nullptr, appCore);
     xTaskCreatePinnedToCore(joystick_task, "Joystick", 2048, nullptr, 2, nullptr, appCore);
-    xTaskCreatePinnedToCore(force_calculation_task, "Force", 4096, nullptr, 2, nullptr, appCore);
+    xTaskCreatePinnedToCore(force_calculation_task, "Force", 2048, nullptr, 2, nullptr, appCore);
 
+    xTaskCreatePinnedToCore(send_report_task, "Report", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
     xTaskCreatePinnedToCore(send_force_task, "SendForce", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
     xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
 }

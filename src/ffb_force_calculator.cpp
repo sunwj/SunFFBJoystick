@@ -249,7 +249,6 @@ namespace SunFFB
                         #pragma unroll
                         for(uint8_t i = 0; i < NUM_AXIS; ++i)
                         {
-                            // TODO: test
                             if((effectBlock.effectData.axisEnable & DIRECTION_ENABLE) || ((effectBlock.effectData.axisEnable >> i) & 0x01))
                                 forcesSum[i] += force * effectBlock.directionUnitVector[i];
                         }
