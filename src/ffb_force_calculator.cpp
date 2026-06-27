@@ -166,7 +166,7 @@ namespace SunFFB
 
     void FFBForceCalculator::force_calculator(const FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const
     {
-        if(ffbReportHandler.devicePaused || !(ffbReportHandler.get_pid_state_report_data()->status & 0x02))
+        if(ffbReportHandler.deviceState != FFBReportHandler::DEVICE_STATE_ACTIVE)
         {
             #pragma unroll
             for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -316,6 +316,7 @@ namespace SunFFB
 
     bool FFBForceCalculator::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const
     {
+        if (effectBlock.effectData.triggerButton == 0) return false;
         const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
         const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
 

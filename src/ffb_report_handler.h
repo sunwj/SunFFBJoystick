@@ -11,6 +11,13 @@ namespace SunFFB
     class FFBReportHandler
     {
         public:
+        enum DeviceState : uint8_t {
+            DEVICE_STATE_INIT = 0,
+            DEVICE_STATE_ACTIVE = 1,
+            DEVICE_STATE_PAUSED = 2,
+            DEVICE_STATE_DISABLED = 3,
+        };
+
         FFBReportHandler();
         ~FFBReportHandler() {free_all_effects();};
         void init();
@@ -24,7 +31,7 @@ namespace SunFFB
         const EffectBlock* get_all_effect_blocks() const {return (const EffectBlock*)effectBlocks;};
 
         void set_effect(const SetEffectReportData* data);
-        void set_envelop(const SetEnvelopeReportData* data);
+        void set_envelope(const SetEnvelopeReportData* data);
         void set_condition(const SetConditionReportData* data);
         void set_periodic(const SetPeriodicReportData* data);
         void set_constant_force(const SetConstantForceReportData* data);
@@ -36,7 +43,7 @@ namespace SunFFB
         void set_device_control(const DeviceControlReportData* data);
 
         volatile bool devicePaused;
-        volatile uint8_t deviceState;
+        volatile DeviceState deviceState = DEVICE_STATE_INIT;
         volatile uint8_t deviceGain = USB_MAX_DEVICE_GAIN;
 
         private:

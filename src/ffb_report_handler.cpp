@@ -201,7 +201,7 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::set_envelop(const SetEnvelopeReportData* data)
+    void FFBReportHandler::set_envelope(const SetEnvelopeReportData* data)
     {
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
@@ -289,10 +289,12 @@ namespace SunFFB
         {
             case 1:                 // enable actuators
                 pidStates.status |= 0x02;
+                deviceState = DEVICE_STATE_ACTIVE;
             break;
 
             case 2:                 // disable actuators
                 pidStates.status &= ~(0x02);
+                deviceState = DEVICE_STATE_DISABLED;
             break;
 
             case 3:                 // stop all effects
@@ -306,18 +308,21 @@ namespace SunFFB
                 deviceGain = USB_MAX_DEVICE_GAIN;
                 pidStates.status = 0x1E;
                 pidStates.effectBlockIndex = 0;
+                deviceState = DEVICE_STATE_INIT;
             break;
 
             case 5:                 // pause
                 devicePaused = true;
                 pidStates.status |= 1;
                 pauseTime = millis();
+                deviceState = DEVICE_STATE_PAUSED;
             break;
 
             case 6:                 // continue
             {
                 devicePaused = false;
                 pidStates.status &= ~(0x01);
+                deviceState = DEVICE_STATE_ACTIVE;
 
                 const uint32_t pauseLength = millis() - pauseTime;
                 for(uint8_t i = 0; i < MAX_EFFECTS; ++i)

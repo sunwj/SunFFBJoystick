@@ -144,7 +144,7 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
         break;
 
         case REPORT_ID_SET_ENVELOPE_REPORT:
-            ffbHandler.set_envelop((SunFFB::SetEnvelopeReportData*)buffer);
+            ffbHandler.set_envelope((SunFFB::SetEnvelopeReportData*)buffer);
         break;
 
         case REPORT_ID_SET_CONDITION_REPORT:
