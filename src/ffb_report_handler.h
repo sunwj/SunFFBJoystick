@@ -28,7 +28,7 @@ namespace SunFFB
         void create_new_effect(const CreateNewEffectReportData* data);
         uint8_t get_next_free_effect_block_index();
         void free_effect(uint8_t idx);
-        EffectBlock* get_all_effect_blocks() {return (EffectBlock*)effectBlocks;};
+        EffectBlock* get_all_effect_blocks() const {return (EffectBlock*)effectBlocks;};
 
         void set_effect(const SetEffectReportData* data);
         void set_envelope(const SetEnvelopeReportData* data);
@@ -47,7 +47,7 @@ namespace SunFFB
         volatile uint8_t deviceGain = USB_MAX_DEVICE_GAIN;
 
         private:
-        EffectBlock* get_effect_block(uint8_t idx);
+        EffectBlock* get_effect_block(uint8_t idx) const;
         void free_all_effects();
         void start_effect(volatile EffectBlock* effectBlock);
         // TODO: stop_effect() clears the PLAYING state bit but does not update

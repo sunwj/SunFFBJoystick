@@ -85,7 +85,7 @@ namespace SunFFB
         blockLoadData.ramPoolAvailable = sizeof(effectBlocks);
     }
 
-    EffectBlock* FFBReportHandler::get_effect_block(uint8_t idx)
+    EffectBlock* FFBReportHandler::get_effect_block(uint8_t idx) const
     {
         if(idx > 0 && idx <= MAX_EFFECTS)
             return (EffectBlock*)&effectBlocks[idx - 1];
