@@ -87,7 +87,7 @@ namespace SunFFB
         for (uint8_t i = 0; i < NUM_AXIS; ++i)
         {
             metrics.maxPosition[i] = USB_AXIS_MAX_ABSOLUTE;
-            metrics.maxSpeed[i] = USB_AXIS_MAX_ABSOLUTE * 0.0025f;
+            metrics.maxSpeed[i] = USB_AXIS_MAX_ABSOLUTE * DEFAULT_MAX_SPEED_SCALE;
             metrics.maxAcceleration[i] = USB_AXIS_MAX_ABSOLUTE;
         }
         tPrev = micros();

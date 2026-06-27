@@ -13,25 +13,12 @@
 #include "simple_serial_communication.h"
 #include "esp_freertos_hooks.h"
 
-// #define SERIAL_PRINT
-
-#define TFT_X 0
-#define TFT_Y 0
-#define TFT_W 160
-#define TFT_H 80
-
-#define SW_PIN 16
-#define TDX_PIN 4
-#define RDX_PIN 5
-
-#define POLLING_RATE 2
-
 #if NUM_AXIS == 1
-constexpr uint8_t joystickPins[NUM_AXIS] = {18};
+constexpr uint8_t joystickPins[NUM_AXIS] = {AXIS0_ADC_PIN};
 #elif NUM_AXIS == 2
-constexpr uint8_t joystickPins[NUM_AXIS] = {18, 17};
+constexpr uint8_t joystickPins[NUM_AXIS] = {AXIS0_ADC_PIN, AXIS1_ADC_PIN};
 #elif NUM_AXIS == 3
-constexpr uint8_t joystickPins[NUM_AXIS] = {18, 17, 19};
+constexpr uint8_t joystickPins[NUM_AXIS] = {AXIS0_ADC_PIN, AXIS1_ADC_PIN, AXIS2_ADC_PIN};
 #endif
 
 uint16_t coordOffsets[NUM_AXIS] = {0};
@@ -282,15 +269,15 @@ void lcd_task(void* params)
             sprite.fillSmoothCircle(44 + i % 14 * 8, 48 + 8 * int(i / 14), 4, color, TFT_BLACK);
         }
 
-        sprite.pushSprite(0, 0);
-        vTaskDelayUntil( & wakeupTime, pdMS_TO_TICKS(60));
+    sprite.pushSprite(TFT_X, TFT_Y);
+        vTaskDelayUntil( & wakeupTime, pdMS_TO_TICKS(LCD_TASK_PERIOD_MS));
     }
 }
 
 void joystick_task(void* params)
 {
     ffbDeviceInput.reset();
-    ffbDeviceInput.set_tf_speed(0.1f);
+    ffbDeviceInput.set_tf_speed(DEFAULT_SPEED_TC);
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
     {
@@ -299,8 +286,8 @@ void joystick_task(void* params)
         for(uint8_t i = 0; i < NUM_AXIS; ++i)
         {
             coords[i] = analogRead(joystickPins[i]) - coordOffsets[i];
-            coords[i] = std::clamp(coords[i], int16_t(-2048), int16_t(2048));
-            coords[i] = coords[i] / 2048.f * USB_AXIS_MAX_ABSOLUTE;
+            coords[i] = std::clamp(coords[i], int16_t(-ADC_CLAMP), int16_t(ADC_CLAMP));
+            coords[i] = coords[i] / ADC_SCALE * USB_AXIS_MAX_ABSOLUTE;
         }
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
@@ -308,7 +295,7 @@ void joystick_task(void* params)
         xSemaphoreGive(semaphoreFFBDeviceInput);
         xQueueOverwrite(gJoystickReportData, (void*)&ffbDeviceInput.inputData);
 
-        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(JOYSTICK_TASK_PERIOD_MS));
     }
 }
 
@@ -332,7 +319,7 @@ void force_calculation_task(void* params)
         if (startTime < endTime)
             effectProcessTime = (endTime - startTime);
 
-        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(1));
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(FORCE_TASK_PERIOD_MS));
     }
 }
 
@@ -380,7 +367,7 @@ void send_force_task(void* params)
         xQueuePeek(gForces, forces, portMAX_DELAY);
         send_packet_buffer(comSerial, (uint8_t*)forces, sizeof(forces));
 
-        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(SEND_FORCE_TASK_PERIOD_MS));
     }
 }
 
@@ -396,7 +383,7 @@ void receive_position_task(void* params)
             continue;
         }
 
-        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(2));
+        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(RECV_POSITION_TASK_PERIOD_MS));
     }
 }
 
@@ -405,8 +392,8 @@ void setup()
     uint8_t appCore = xTaskGetAffinity(nullptr);
     uint8_t protoCore = 0;
 
-    Serial.begin(115200);
-    comSerial.begin(115200, SERIAL_8N1, RDX_PIN, TDX_PIN);
+    Serial.begin(SERIAL_BAUD);
+    comSerial.begin(UART1_BAUD, SERIAL_8N1, RDX_PIN, TDX_PIN);
 
     // init joystick and calibrate
     pinMode(SW_PIN, INPUT);
@@ -415,32 +402,32 @@ void setup()
     {
         pinMode(joystickPins[i], INPUT);
         uint32_t o = 0;
-        for (auto j = 0; j < 1000; ++j)
+        for (auto j = 0; j < ADC_CALIBRATION_SAMPLES; ++j)
         {
             o += analogRead(joystickPins[i]);
             delay(1);
         }
-        coordOffsets[i] = o / 1000;
+        coordOffsets[i] = o / ADC_CALIBRATION_SAMPLES;
     }
 
     lcd.init();
     lcd.setRotation(1);
     lcd.setTextWrap(true, true);
-    sprite.createSprite(160, 80);
+    sprite.createSprite(TFT_W, TFT_H);
     sprite.setTextWrap(true, true);
     sprite.fillSprite(TFT_BLACK);
     sprite.setCursor(0, 0);
     sprite.setTextColor(TFT_WHITE);
     sprite.setTextFont(1);
     sprite.printf("SunFFB Joystick");
-    sprite.pushSprite(0, 0);
+    sprite.pushSprite(TFT_X, TFT_Y);
 
     ffbHandler.init();
 
     // Manual begin() is required on core without built-in support e.g. mbed rp2040
-    TinyUSBDevice.setID(0xFFFF, 0x2010);
-    TinyUSBDevice.setManufacturerDescriptor("SunFFB");
-    TinyUSBDevice.setProductDescriptor("Force feedback joystick");
+    TinyUSBDevice.setID(USB_VID, USB_PID);
+    TinyUSBDevice.setManufacturerDescriptor(USB_MANUFACTURER);
+    TinyUSBDevice.setProductDescriptor(USB_PRODUCT);
     if (!TinyUSBDevice.isInitialized())
         TinyUSBDevice.begin(0);
 
@@ -473,13 +460,13 @@ void setup()
     xSemaphoreGive(semaphoreFFBDeviceInput);
     xSemaphoreGive(semaphoreFFBReportHandler);
 
-    xTaskCreatePinnedToCore(lcd_task, "LCD", 4096, nullptr, 1, nullptr, appCore);
-    xTaskCreatePinnedToCore(joystick_task, "Joystick", 2048, nullptr, 2, nullptr, appCore);
-    xTaskCreatePinnedToCore(force_calculation_task, "Force", 2048, nullptr, 2, nullptr, appCore);
+    xTaskCreatePinnedToCore(lcd_task, "LCD", LCD_TASK_STACK_SIZE, nullptr, 1, nullptr, appCore);
+    xTaskCreatePinnedToCore(joystick_task, "Joystick", TASK_STACK_SIZE, nullptr, 2, nullptr, appCore);
+    xTaskCreatePinnedToCore(force_calculation_task, "Force", TASK_STACK_SIZE, nullptr, 2, nullptr, appCore);
 
-    xTaskCreatePinnedToCore(send_report_task, "Report", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
-    xTaskCreatePinnedToCore(send_force_task, "SendForce", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
-    xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", 2048, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
+    xTaskCreatePinnedToCore(send_report_task, "Report", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
+    xTaskCreatePinnedToCore(send_force_task, "SendForce", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
+    xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
 }
 
 void loop()

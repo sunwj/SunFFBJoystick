@@ -1,7 +1,6 @@
 #include "ffb_report_handler.h"
 #include "math_utils.h"
 
-// #define SERIAL_PRINT
 
 namespace SunFFB
 {
