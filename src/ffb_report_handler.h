@@ -28,7 +28,7 @@ namespace SunFFB
         void create_new_effect(const CreateNewEffectReportData* data);
         uint8_t get_next_free_effect_block_index();
         void free_effect(uint8_t idx);
-        const EffectBlock* get_all_effect_blocks() const {return (const EffectBlock*)effectBlocks;};
+        EffectBlock* get_all_effect_blocks() {return (EffectBlock*)effectBlocks;};
 
         void set_effect(const SetEffectReportData* data);
         void set_envelope(const SetEnvelopeReportData* data);
@@ -50,6 +50,9 @@ namespace SunFFB
         EffectBlock* get_effect_block(uint8_t idx);
         void free_all_effects();
         void start_effect(volatile EffectBlock* effectBlock);
+        // TODO: stop_effect() clears the PLAYING state bit but does not update
+        // pidStates.effectBlockIndex. Add logic to clear the playing flag in pidStates
+        // when no effects remain playing.
         void stop_effect(volatile EffectBlock* effectBlock) {effectBlock->state &= ~EFFECT_STATE_PLAYING;};
         void stop_all_effects();
 

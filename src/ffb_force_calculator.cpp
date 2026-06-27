@@ -164,7 +164,7 @@ namespace SunFFB
         }
     }
 
-    void FFBForceCalculator::force_calculator(const FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const
+    void FFBForceCalculator::force_calculator(FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const
     {
         if(ffbReportHandler.deviceState != FFBReportHandler::DEVICE_STATE_ACTIVE)
         {
@@ -174,14 +174,14 @@ namespace SunFFB
             return;
         }
 
-        const EffectBlock* effectBlocks = ffbReportHandler.get_all_effect_blocks();
+        EffectBlock* effectBlocks = ffbReportHandler.get_all_effect_blocks();
 
         float forcesSum[NUM_AXIS] = {0};
         const uint32_t currentTime = millis();
 
         for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
         {
-            const EffectBlock& effectBlock = effectBlocks[i];
+            EffectBlock& effectBlock = effectBlocks[i];
 
             if(is_effect_playing(effectBlock, ffbDeviceInput.inputData.buttons, currentTime))
             {
@@ -355,13 +355,13 @@ namespace SunFFB
         return true;
     }
 
-    bool FFBForceCalculator::is_effect_playing(const EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const
+    bool FFBForceCalculator::is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const
     {
         if(!(effectBlock.state & EFFECT_STATE_PLAYING))
             return false;
 
         if(USB_NO_TRIGGER_BUTTON != effectBlock.effectData.triggerButton)
-            return is_trigger_playing(const_cast<EffectBlock&>(effectBlock), triggerButtonState, currentTime);
+            return is_trigger_playing(effectBlock, triggerButtonState, currentTime);
         
         if(currentTime < effectBlock.startTime)
             return false;

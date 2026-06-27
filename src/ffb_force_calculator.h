@@ -10,7 +10,7 @@ namespace SunFFB
     class FFBForceCalculator
     {
         public:
-        void force_calculator(const FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const;
+        void force_calculator(FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const;
 
         private:
         float constant_force_calculator(const EffectBlock& effectBlock) const;
@@ -21,7 +21,7 @@ namespace SunFFB
         float get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration) const;
         float apply_condition(const SetConditionReportData& conditionData, float metric) const;
         bool is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const;
-        bool is_effect_playing(const EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const;
+        bool is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const;
     };
 
     inline float normalize_range(float x, float maxVal) { return x / maxVal; }

@@ -85,8 +85,10 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                 // Block Load Request
                 case REPORT_ID_BLOCK_LOAD_REPORT:
                 {
+                    xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
                     const SunFFB::BlockLoadReportData* data = ffbHandler.get_block_load_report_data();
                     memcpy(buffer, data, sizeof(SunFFB::BlockLoadReportData));
+                    xSemaphoreGive(semaphoreFFBReportHandler);
 
                     #ifdef SERIAL_PRINT
                     Serial.printf("Block load. idx: %d, status: %d \n", data -> effectBlockIndex, data -> blockLoadStatus);
@@ -152,10 +154,18 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
         case REPORT_ID_EFFECT_OPERATION_REPORT:
             ffbHandler.set_effect_operation((SunFFB::EffectOperationReportData*)buffer);
+            // TODO: set_effect_operation() can start/stop effects, which changes
+            // pidStates.effectBlockIndex (playing bit, effect ID). Queue the updated
+            // state so the host sees it:
+            //   xQueueOverwrite(gPIDStateReportData, (void*)ffbHandler.get_pid_state_report_data());
+            // Also update pidStates.effectBlockIndex in start_effect() / stop_effect().
         break;
 
         case REPORT_ID_BLOCK_FREE_REPORT:
             ffbHandler.set_effect_block_free((SunFFB::BlockFreeReportData*)buffer);
+            // TODO: free_effect() changes effect pool state. If the freed effect was
+            // playing, pidStates.effectBlockIndex should be cleared. Also ramPoolAvailable
+            // changes should be visible to the host. Queue the updated pool/state if needed.
         break;
 
         case REPORT_ID_DEVICE_CONTROL_REPORT:
@@ -169,6 +179,11 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
         case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
             ffbHandler.create_new_effect((SunFFB::CreateNewEffectReportData*)buffer);
+            // TODO: create_new_effect() changes blockLoadData and ramPoolAvailable.
+            // The host typically follows up with a BLOCK_LOAD feature report to read
+            // the result, so this may be OK. However, if the host polls POOL_REPORT
+            // to see available RAM, the stale pool data might not reflect the latest
+            // allocation until the host sends another POOL feature report.
         break;
 
         default:
@@ -192,11 +207,18 @@ void lcd_task(void* params)
 
         sprite.fillSprite(TFT_BLACK);
         sprite.drawRect(0, 0, 40, 40, TFT_RED);
+
+        // snapshot axis data under semaphore for consistent reads
+        int16_t axisSnapshot[NUM_AXIS];
+        xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
+        memcpy(axisSnapshot, (const int16_t*)ffbDeviceInput.inputData.axis, sizeof(axisSnapshot));
+        xSemaphoreGive(semaphoreFFBDeviceInput);
+
         uint8_t coords[NUM_AXIS];
         #pragma unroll
         for(uint8_t i = 0; i < NUM_AXIS; ++i)
         {
-            uint8_t c = ffbDeviceInput.inputData.axis[i] / float(USB_AXIS_MAX_ABSOLUTE) * 20 + 20;
+            uint8_t c = axisSnapshot[i] / float(USB_AXIS_MAX_ABSOLUTE) * 20 + 20;
             c = c < 2 ? 2 : c;
             c = c > 38 ? 38 : c;
             coords[i] = c;
@@ -213,12 +235,12 @@ void lcd_task(void* params)
         sprite.printf("Effect time: %d us", effectProcessTime);
         #if NUM_AXIS == 1
         sprite.setCursor(40, 23);
-        sprite.printf("AX: %d", ffbDeviceInput.inputData.axis[0]);
+        sprite.printf("AX: %d", axisSnapshot[0]);
         #elif NUM_AXIS == 2
         sprite.setCursor(40, 23);
-        sprite.printf("AX: %d", ffbDeviceInput.inputData.axis[0]);
+        sprite.printf("AX: %d", axisSnapshot[0]);
         sprite.setCursor(100, 23);
-        sprite.printf("AY: %d", ffbDeviceInput.inputData.axis[1]);
+        sprite.printf("AY: %d", axisSnapshot[1]);
         #endif
 
         constexpr uint8_t yOffsets[2] = {20, 60};
@@ -254,16 +276,22 @@ void lcd_task(void* params)
         sprite.setCursor(124, 70);
         sprite.printf("%d", currentTime);
 
-        const SunFFB::EffectBlock * blocks = ffbHandler.get_all_effect_blocks();
+        // snapshot effect states under semaphore for consistent reads
+        uint8_t effectStates[MAX_EFFECTS];
+        xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
+        for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
+            effectStates[i] = ffbHandler.get_all_effect_blocks()[i].state;
+        xSemaphoreGive(semaphoreFFBReportHandler);
+
         for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
         {
             uint16_t color = TFT_BLACK;
-            if (EFFECT_STATE_FREE == blocks[i].state)
+            if (EFFECT_STATE_FREE == effectStates[i])
                 color = TFT_GREEN;
-            else if (blocks[i].state & EFFECT_STATE_ALLOCATED)
+            else if (effectStates[i] & EFFECT_STATE_ALLOCATED)
             {
                 color = TFT_BLUE;
-                if (blocks[i].state & EFFECT_STATE_PLAYING)
+                if (effectStates[i] & EFFECT_STATE_PLAYING)
                     color = TFT_RED;
             }
             sprite.fillSmoothCircle(44 + i % 14 * 8, 48 + 8 * int(i / 14), 4, color, TFT_BLACK);
@@ -292,8 +320,8 @@ void joystick_task(void* params)
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
         ffbDeviceInput.update_axis(coords);
-        xSemaphoreGive(semaphoreFFBDeviceInput);
         xQueueOverwrite(gJoystickReportData, (void*)&ffbDeviceInput.inputData);
+        xSemaphoreGive(semaphoreFFBDeviceInput);
 
         vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(JOYSTICK_TASK_PERIOD_MS));
     }

@@ -97,6 +97,9 @@ namespace SunFFB
     {
         effectBlock->state |= EFFECT_STATE_PLAYING;
         effectBlock->startTime = millis() + effectBlock->effectData.startDelay;
+        // TODO: update pidStates.effectBlockIndex to reflect the newly started effect:
+        //   pidStates.effectBlockIndex = (effectBlock->effectData.effectBlockIndex << 1) | 0x01;
+        // Then queue the updated state so the USB host sees it.
         if(effectBlock->effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
         {
             // TODO: need check
@@ -107,6 +110,8 @@ namespace SunFFB
 
     void FFBReportHandler::stop_all_effects()
     {
+        // TODO: after stopping all effects, clear pidStates.effectBlockIndex to 0
+        // and queue the updated state so the host sees no effects are playing.
         for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
             stop_effect(&effectBlocks[i]);
     }
@@ -341,6 +346,10 @@ namespace SunFFB
         #endif
     }
 
+    // TODO: set_effect_operation() changes which effects are playing, which should
+    // update pidStates.effectBlockIndex (playing bit + effect ID). Callers should
+    // queue the updated state via xQueueOverwrite(gPIDStateReportData, ...) so the
+    // USB host's PID state report stays in sync.
     void FFBReportHandler::set_effect_operation(const EffectOperationReportData* data)
     {
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
