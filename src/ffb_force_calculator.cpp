@@ -89,7 +89,7 @@ namespace SunFFB
         return force;
     }
 
-    float FFBForceCalculator::apply_condition(const SetConditionReportData& conditionData, float metric) const
+    float FFBForceCalculator::apply_condition(const SetConditionReportData& conditionData, float metric, float maxMetric) const
     {
         const int16_t cpOffset = conditionData.cpOffset;
         const int16_t postiveCoeff = conditionData.positiveCoefficient;
@@ -100,7 +100,7 @@ namespace SunFFB
 
         float force = 0.f;
 
-        constexpr float invRange =  1.f / USB_AXIS_MAX_ABSOLUTE;
+        const float invRange = 1.f / maxMetric;
         if(metric < (cpOffset - deadBand) * invRange)
         {
             force = (metric - (cpOffset - deadBand) * invRange) * negativeCoeff;
@@ -128,7 +128,7 @@ namespace SunFFB
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
                 {
                     const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
-                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]));
+                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]), maxMetrics[i]);
                 }
             }
             else
@@ -141,7 +141,7 @@ namespace SunFFB
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
                     metric += metrics[i] * directionUnitVector[i];
                 
-                const float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]));
+                const float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]), maxMetrics[0]);
 
                 #pragma unroll
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -158,7 +158,7 @@ namespace SunFFB
                 if((axisEnable >> i) & 0x01)
                 {
                     const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
-                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i])) * directionUnitVector[i];
+                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]), maxMetrics[i]) * directionUnitVector[i];
                 }
             }
         }
@@ -241,16 +241,27 @@ namespace SunFFB
                         if(effectBlock.envelopParameter)
                         {
                             const SetEnvelopeReportData& envelopeData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData;
-                            force *= get_envelope(envelopeData, elapsedTime, duration);
+                            float baseMag;
+                            if(ET_CONSTANT == effectType)
+                                baseMag = fabsf(effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData.magnitude);
+                            else if(ET_RAMP == effectType)
+                            {
+                                const SetRampForceReportData& ramp = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].rampData;
+                                baseMag = fmaxf(fabsf(ramp.rampStart), fabsf(ramp.rampEnd));
+                            }
+                            else
+                                baseMag = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData.magnitude;
+                            if(baseMag < 1.f) baseMag = USB_MAX_MAGNITUDE;
+                            force *= get_envelope(envelopeData, elapsedTime, duration, baseMag);
                         }
 
                         force *= effectGain / float(USB_MAX_EFFECT_GAIN);
 
                         #pragma unroll
-                        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+                        for(uint8_t axis = 0; axis < NUM_AXIS; ++axis)
                         {
-                            if((effectBlock.effectData.axisEnable & DIRECTION_ENABLE) || ((effectBlock.effectData.axisEnable >> i) & 0x01))
-                                forcesSum[i] += force * effectBlock.directionUnitVector[i];
+                            if((effectBlock.effectData.axisEnable & DIRECTION_ENABLE) || ((effectBlock.effectData.axisEnable >> axis) & 0x01))
+                                forcesSum[axis] += force * effectBlock.directionUnitVector[axis];
                         }
                     }
                     break;
@@ -260,10 +271,10 @@ namespace SunFFB
                     case ET_DAMPER:
                     case ET_INERTIA:
                         #pragma unroll
-                        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+                        for(uint8_t axis = 0; axis < NUM_AXIS; ++axis)
                         {
-                            forcesCondition[i] *= effectGain / float(USB_MAX_EFFECT_GAIN);
-                            forcesSum[i] += forcesCondition[i];
+                            forcesCondition[axis] *= effectGain / float(USB_MAX_EFFECT_GAIN);
+                            forcesSum[axis] += forcesCondition[axis];
                         }
                     break;
 
@@ -282,33 +293,23 @@ namespace SunFFB
         }
     }
 
-    float FFBForceCalculator::get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration) const
+    float FFBForceCalculator::get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration, float baseMagnitude) const
     {
         const uint16_t attackLevel = envelopeData.attackLevel;
         const uint16_t fadeLevel = envelopeData.fadeLevel;
         const uint16_t attackTime = envelopeData.attackTime;
         const uint16_t fadeTime = envelopeData.fadeTime;
 
-        float envelope = USB_MAX_MAGNITUDE;
-
         if(attackTime > 0 && elapsedTime < attackTime)
         {
-            const float height = USB_MAX_MAGNITUDE - attackLevel;
-            const float slope = height / (float)attackTime;
-            envelope = slope * elapsedTime + attackLevel;
-
-            return envelope / float(USB_MAX_MAGNITUDE);
+            const float t = (float)elapsedTime / attackTime;
+            return (attackLevel + (baseMagnitude - attackLevel) * t) / baseMagnitude;
         }
 
-        if(USB_DURATION_INFINITE == duration) return 1.f;
-
-        if(fadeTime > 0 && elapsedTime > (duration - fadeTime))
+        if(USB_DURATION_INFINITE != duration && fadeTime > 0 && elapsedTime > (duration - fadeTime))
         {
-            const float height = USB_MAX_MAGNITUDE - fadeLevel;
-            const float slope = height / (float)fadeTime;
-            envelope = slope * (duration - elapsedTime) + fadeLevel;
-
-            return envelope / float(USB_MAX_MAGNITUDE);
+            const float t = (float)(elapsedTime - (duration - fadeTime)) / fadeTime;
+            return (baseMagnitude + (fadeLevel - baseMagnitude) * t) / baseMagnitude;
         }
 
         return 1.f;
@@ -368,7 +369,10 @@ namespace SunFFB
         
         const uint32_t elapsedTime = currentTime - effectBlock.startTime;
         if((USB_DURATION_INFINITE != effectBlock.effectData.duration) && (elapsedTime >= effectBlock.effectData.duration))
+        {
+            effectBlock.state &= ~EFFECT_STATE_PLAYING;
             return false;
+        }
         
         return true; 
     }
