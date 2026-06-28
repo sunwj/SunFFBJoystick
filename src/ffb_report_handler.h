@@ -42,19 +42,22 @@ namespace SunFFB
         void set_device_gain(const DeviceGainReportData* data);
         void set_device_control(const DeviceControlReportData* data);
 
+        // Play-state check (1-based effectBlockIndex). May auto-stop expired effects.
+        bool is_effect_playing(uint8_t effectBlockIndex, uint8_t triggerButtonState, uint32_t currentTime);
+
         volatile bool devicePaused;
         volatile DeviceState deviceState = DEVICE_STATE_INIT;
         volatile uint8_t deviceGain = USB_MAX_DEVICE_GAIN;
+        volatile bool pidStateDirty = false;
 
         private:
         EffectBlock* get_effect_block(uint8_t idx) const;
         void free_all_effects();
         void start_effect(volatile EffectBlock* effectBlock);
-        // TODO: stop_effect() clears the PLAYING state bit but does not update
-        // pidStates.effectBlockIndex. Add logic to clear the playing flag in pidStates
-        // when no effects remain playing.
-        void stop_effect(volatile EffectBlock* effectBlock) {effectBlock->state &= ~EFFECT_STATE_PLAYING;};
+        void stop_effect(volatile EffectBlock* effectBlock);
         void stop_all_effects();
+        bool is_trigger_playing(volatile EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime);
+        void update_pid_effect_index();
 
         uint8_t nextEffectIdx = 0;
         volatile uint32_t pauseTime;

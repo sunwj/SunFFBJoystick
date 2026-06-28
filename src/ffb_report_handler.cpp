@@ -35,6 +35,8 @@ namespace SunFFB
             blockLoadData.ramPoolAvailable -= sizeof(EffectBlock);
         }
 
+        pidStateDirty = true;
+
         #ifdef SERIAL_PRINT
         Serial.printf("Create new effect: %d\n", blockLoadData.blockLoadStatus);
         #endif
@@ -74,8 +76,10 @@ namespace SunFFB
         {
             effectBlock->state = EFFECT_STATE_FREE;
             blockLoadData.ramPoolAvailable += sizeof(EffectBlock);
+            update_pid_effect_index();
         }
         nextEffectIdx = idx - 1;
+        pidStateDirty = true;
     }
 
     void FFBReportHandler::free_all_effects()
@@ -83,6 +87,8 @@ namespace SunFFB
         nextEffectIdx = 0;
         memset((void*)&effectBlocks, 0, sizeof(effectBlocks));
         blockLoadData.ramPoolAvailable = sizeof(effectBlocks);
+        pidStates.effectBlockIndex = 0;
+        pidStateDirty = true;
     }
 
     EffectBlock* FFBReportHandler::get_effect_block(uint8_t idx) const
@@ -97,23 +103,28 @@ namespace SunFFB
     {
         effectBlock->state |= EFFECT_STATE_PLAYING;
         effectBlock->startTime = millis() + effectBlock->effectData.startDelay;
-        // TODO: update pidStates.effectBlockIndex to reflect the newly started effect:
-        //   pidStates.effectBlockIndex = (effectBlock->effectData.effectBlockIndex << 1) | 0x01;
-        // Then queue the updated state so the USB host sees it.
+        update_pid_effect_index();
+        pidStateDirty = true;
         if(effectBlock->effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
         {
-            // TODO: need check
             effectBlock->startTime = 0;
             effectBlock->triggerButtonLatch = false;
         }
     }
 
+    void FFBReportHandler::stop_effect(volatile EffectBlock* effectBlock)
+    {
+        effectBlock->state &= ~EFFECT_STATE_PLAYING;
+        update_pid_effect_index();
+        pidStateDirty = true;
+    }
+
     void FFBReportHandler::stop_all_effects()
     {
-        // TODO: after stopping all effects, clear pidStates.effectBlockIndex to 0
-        // and queue the updated state so the host sees no effects are playing.
         for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
-            stop_effect(&effectBlocks[i]);
+            effectBlocks[i].state &= ~EFFECT_STATE_PLAYING;
+        pidStates.effectBlockIndex = 0;
+        pidStateDirty = true;
     }
 
     const PoolReportData* FFBReportHandler::get_pool_report_data()
@@ -280,6 +291,7 @@ namespace SunFFB
     void FFBReportHandler::set_device_gain(const DeviceGainReportData* data)
     {
         deviceGain = data->gain;
+        pidStateDirty = true;
 
         #ifdef SERIAL_PRINT
         Serial.printf("device gain. %d \n", deviceGain);
@@ -288,7 +300,7 @@ namespace SunFFB
 
     void FFBReportHandler::set_device_control(const DeviceControlReportData* data)
     {
-        // TODO: set_device_control() updates PID status bit 1 for enable/disable actuators, but force_calculator() only checks devicePaused
+        pidStateDirty = true;
         switch(data->state)
         {
             case 1:                 // enable actuators
@@ -346,12 +358,9 @@ namespace SunFFB
         #endif
     }
 
-    // TODO: set_effect_operation() changes which effects are playing, which should
-    // update pidStates.effectBlockIndex (playing bit + effect ID). Callers should
-    // queue the updated state via xQueueOverwrite(gPIDStateReportData, ...) so the
-    // USB host's PID state report stays in sync.
     void FFBReportHandler::set_effect_operation(const EffectOperationReportData* data)
     {
+        pidStateDirty = true;
         volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock) return;
 
@@ -402,8 +411,94 @@ namespace SunFFB
         else
             free_effect(data->effectBlockIndex);
 
+        pidStateDirty = true;
+
         #ifdef SERIAL_PRINT
         Serial.printf("Block free. %d \n", data->effectBlockIndex);
         #endif
+    }
+
+    void FFBReportHandler::update_pid_effect_index()
+    {
+        uint8_t idx = 0;
+        for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
+        {
+            if(effectBlocks[i].state & EFFECT_STATE_PLAYING)
+            {
+                idx = i + 1;
+                break;
+            }
+        }
+        if(idx)
+            pidStates.effectBlockIndex = (idx << 1) | 0x01;
+        else
+            pidStates.effectBlockIndex = 0;
+    }
+
+    bool FFBReportHandler::is_trigger_playing(volatile EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
+    {
+        if (effectBlock.effectData.triggerButton == 0) return false;
+        const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
+        const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
+
+        if(!buttonPressed)
+        {
+            effectBlock.triggerButtonLatch = false;
+            return false;
+        }
+        else
+        {
+            if(!effectBlock.triggerButtonLatch)
+            {
+                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
+                effectBlock.triggerButtonLatch = true;
+                if (currentTime < effectBlock.startTime) return false;
+                return true;
+            }
+            else
+            {
+                const uint32_t elapsedTime = currentTime - effectBlock.startTime;
+
+                if(elapsedTime < effectBlock.effectData.duration)
+                    return true;
+
+                if(USB_DURATION_INFINITE == effectBlock.effectData.triggerRepeatInterval)
+                    return false;
+
+                if(elapsedTime < (effectBlock.effectData.duration + effectBlock.effectData.triggerRepeatInterval))
+                    return false;
+
+                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    bool FFBReportHandler::is_effect_playing(uint8_t effectBlockIndex, uint8_t triggerButtonState, uint32_t currentTime)
+    {
+        volatile EffectBlock* effectBlock = get_effect_block(effectBlockIndex);
+        if(nullptr == effectBlock) return false;
+
+        if(!(effectBlock->state & EFFECT_STATE_PLAYING))
+            return false;
+
+        if(USB_NO_TRIGGER_BUTTON != effectBlock->effectData.triggerButton)
+            return is_trigger_playing(*effectBlock, triggerButtonState, currentTime);
+
+        if(currentTime < effectBlock->startTime)
+            return false;
+
+        const uint32_t elapsedTime = currentTime - effectBlock->startTime;
+        if((USB_DURATION_INFINITE != effectBlock->effectData.duration) && (elapsedTime >= effectBlock->effectData.duration))
+        {
+            effectBlock->state &= ~EFFECT_STATE_PLAYING;
+            update_pid_effect_index();
+            pidStateDirty = true;
+            return false;
+        }
+
+        return true;
     }
 } // namespace SunFFB

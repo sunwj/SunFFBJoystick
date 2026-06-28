@@ -183,7 +183,7 @@ namespace SunFFB
         {
             EffectBlock& effectBlock = effectBlocks[i];
 
-            if(is_effect_playing(effectBlock, ffbDeviceInput.inputData.buttons, currentTime))
+            if(ffbReportHandler.is_effect_playing(i + 1, ffbDeviceInput.inputData.buttons, currentTime))
             {
                 const uint8_t effectType = effectBlock.effectData.effectType;
                 const uint16_t duration = effectBlock.effectData.duration;
@@ -322,65 +322,4 @@ namespace SunFFB
         return 1.f;
     }
 
-    bool FFBForceCalculator::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const
-    {
-        if (effectBlock.effectData.triggerButton == 0) return false;
-        const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
-        const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
-
-        if(!buttonPressed)
-        {
-            effectBlock.triggerButtonLatch = false;
-            return false;
-        }
-        else
-        {
-            if(!effectBlock.triggerButtonLatch)
-            {
-                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
-                effectBlock.triggerButtonLatch = true;
-                if (currentTime < effectBlock.startTime) return false;
-                return true;
-            }
-            else
-            {
-                const uint32_t elapsedTime = currentTime - effectBlock.startTime;
-
-                if(elapsedTime < effectBlock.effectData.duration)
-                    return true;
-                
-                if(USB_DURATION_INFINITE == effectBlock.effectData.triggerRepeatInterval)
-                    return false;
-                
-                if(elapsedTime < (effectBlock.effectData.duration + effectBlock.effectData.triggerRepeatInterval))
-                    return false;
-                
-                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
-                return true;
-            }
-        }
-
-        return true;
-    }
-
-    bool FFBForceCalculator::is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const
-    {
-        if(!(effectBlock.state & EFFECT_STATE_PLAYING))
-            return false;
-
-        if(USB_NO_TRIGGER_BUTTON != effectBlock.effectData.triggerButton)
-            return is_trigger_playing(effectBlock, triggerButtonState, currentTime);
-        
-        if(currentTime < effectBlock.startTime)
-            return false;
-        
-        const uint32_t elapsedTime = currentTime - effectBlock.startTime;
-        if((USB_DURATION_INFINITE != effectBlock.effectData.duration) && (elapsedTime >= effectBlock.effectData.duration))
-        {
-            effectBlock.state &= ~EFFECT_STATE_PLAYING;
-            return false;
-        }
-        
-        return true; 
-    }
 }

@@ -29,7 +29,6 @@ volatile uint32_t effectProcessTime = 0;
 QueueHandle_t gPositions;
 QueueHandle_t gForces;
 QueueHandle_t gJoystickReportData;
-QueueHandle_t gPIDStateReportData;
 
 HardwareSerial comSerial(1);
 
@@ -128,23 +127,14 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
         case REPORT_ID_EFFECT_OPERATION_REPORT:
             ffbHandler.set_effect_operation((SunFFB::EffectOperationReportData*)buffer);
-            // TODO: set_effect_operation() can start/stop effects, which changes
-            // pidStates.effectBlockIndex (playing bit, effect ID). Queue the updated
-            // state so the host sees it:
-            //   xQueueOverwrite(gPIDStateReportData, (void*)ffbHandler.get_pid_state_report_data());
-            // Also update pidStates.effectBlockIndex in start_effect() / stop_effect().
         break;
 
         case REPORT_ID_BLOCK_FREE_REPORT:
             ffbHandler.set_effect_block_free((SunFFB::BlockFreeReportData*)buffer);
-            // TODO: free_effect() changes effect pool state. If the freed effect was
-            // playing, pidStates.effectBlockIndex should be cleared. Also ramPoolAvailable
-            // changes should be visible to the host. Queue the updated pool/state if needed.
         break;
 
         case REPORT_ID_DEVICE_CONTROL_REPORT:
             ffbHandler.set_device_control((SunFFB::DeviceControlReportData*)buffer);
-            xQueueOverwrite(gPIDStateReportData, (void*)ffbHandler.get_pid_state_report_data());
         break;
 
         case REPORT_ID_DEVICE_GAIN_REPORT:
@@ -329,7 +319,6 @@ void send_report_task(void* params)
 {
     TickType_t lastJoystick = xTaskGetTickCount();
     SunFFB::JoystickInputReportData joystickData;
-    SunFFB::PIDStateReportData pidData;
 
     while (true)
     {
@@ -339,11 +328,14 @@ void send_report_task(void* params)
             continue;
         }
 
-        
-        if (xQueueReceive(gPIDStateReportData, &pidData, 0) == pdTRUE)
+        if (ffbHandler.pidStateDirty)
         {
+            SunFFB::PIDStateReportData pidData;
+            xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
+            pidData = *ffbHandler.get_pid_state_report_data();
+            ffbHandler.pidStateDirty = false;
+            xSemaphoreGive(semaphoreFFBReportHandler);
             usb_hid.sendReport(REPORT_ID_PID_STATE, &pidData, sizeof(SunFFB::PIDStateReportData));
-            continue;
         }
 
         TickType_t now = xTaskGetTickCount();
@@ -454,7 +446,6 @@ void setup()
     gPositions = xQueueCreate(1, sizeof(int16_t) * NUM_AXIS);
     gForces = xQueueCreate(1, sizeof(int32_t) * NUM_AXIS);
     gJoystickReportData = xQueueCreate(1, sizeof(SunFFB::JoystickInputReportData));
-    gPIDStateReportData = xQueueCreate(1, sizeof(SunFFB::PIDStateReportData));
 
     semaphoreFFBDeviceInput = xSemaphoreCreateBinary();
     semaphoreFFBReportHandler = xSemaphoreCreateBinary();
