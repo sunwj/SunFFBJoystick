@@ -241,16 +241,7 @@ namespace SunFFB
                         if(effectBlock.envelopParameter)
                         {
                             const SetEnvelopeReportData& envelopeData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData;
-                            float baseMag;
-                            if(ET_CONSTANT == effectType)
-                                baseMag = fabsf(effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData.magnitude);
-                            else if(ET_RAMP == effectType)
-                            {
-                                const SetRampForceReportData& ramp = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].rampData;
-                                baseMag = fmaxf(fabsf(ramp.rampStart), fabsf(ramp.rampEnd));
-                            }
-                            else
-                                baseMag = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData.magnitude;
+                            float baseMag = get_base_magnitude(effectBlock, effectType);
                             if(baseMag < 1.f) baseMag = USB_MAX_MAGNITUDE;
                             force *= get_envelope(envelopeData, elapsedTime, duration, baseMag);
                         }
@@ -290,6 +281,22 @@ namespace SunFFB
         {
             forcesSum[i] *= ffbReportHandler.deviceGain / float(USB_MAX_DEVICE_GAIN);
             forces[i] = clamp(forcesSum[i], float(-USB_MAX_MAGNITUDE), float(USB_MAX_MAGNITUDE));
+        }
+    }
+
+    float FFBForceCalculator::get_base_magnitude(const EffectBlock& effectBlock, uint8_t effectType) const
+    {
+        switch (effectType)
+        {
+            case ET_CONSTANT:
+                return fabsf(effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData.magnitude);
+            case ET_RAMP:
+            {
+                const SetRampForceReportData& ramp = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].rampData;
+                return fmaxf(fabsf(ramp.rampStart), fabsf(ramp.rampEnd));
+            }
+            default:
+                return effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData.magnitude;
         }
     }
 

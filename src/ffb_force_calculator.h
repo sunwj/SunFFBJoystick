@@ -19,6 +19,7 @@ namespace SunFFB
         void condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const float maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const;
 
         float get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration, float baseMagnitude) const;
+        float get_base_magnitude(const EffectBlock& effectBlock, uint8_t effectType) const;
         float apply_condition(const SetConditionReportData& conditionData, float metric, float maxMetric) const;
         bool is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const;
         bool is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime) const;
