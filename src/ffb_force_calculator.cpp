@@ -115,7 +115,7 @@ namespace SunFFB
         return -force;
     }
 
-    void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const int32_t maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
+    void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const float maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
     {
         const uint8_t axisEnable = effectBlock.effectData.axisEnable;
         const uint8_t conditionBlockFlags = effectBlock.conditionBlockFlags;

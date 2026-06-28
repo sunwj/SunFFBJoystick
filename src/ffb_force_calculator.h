@@ -16,7 +16,7 @@ namespace SunFFB
         float constant_force_calculator(const EffectBlock& effectBlock) const;
         float ramp_force_calculator(const EffectBlock& effectBlock, float elapsedTime) const;
         float periodic_force_calculator(uint8_t effectType, const EffectBlock& effectBlock, uint32_t elapsedTime) const;
-        void condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const int32_t maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const;
+        void condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const float maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const;
 
         float get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration) const;
         float apply_condition(const SetConditionReportData& conditionData, float metric) const;

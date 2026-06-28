@@ -19,21 +19,35 @@ public:
         this->tF = (tF > 0.f) ? tF : 0.f;
     }
 
-    inline float operator()(float x, float dt = -1)
+    inline float get_time_constant() const
     {
-        // if sample interval is not provided, calculate it on the fly
-        if (dt < 0.f)
+        return tF;
+    }
+
+    inline float filter_alpha(float x, float alpha)
+    {
+        output += alpha * (x - output);
+        return output;
+    }
+
+    inline float operator()(float x, float dt)
+    {
+        const float alpha = dt / (tF + dt);
+        output += alpha * (x - output);
+        return output;
+    }
+
+    inline float operator()(float x)
+    {
+        uint32_t now = micros();
+        float dt = (now - tPrev) * 1e-6f;
+        if (dt > 0.3f)
         {
-            uint32_t now = micros();
-            dt = (now - tPrev) * 1e-6f;
-            if (dt > 0.3f)
-            {
-                output = x;
-                tPrev = now;
-                return output;
-            }
+            output = x;
             tPrev = now;
+            return output;
         }
+        tPrev = now;
 
         const float alpha = dt / (tF + dt);
         output += alpha * (x - output);

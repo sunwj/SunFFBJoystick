@@ -149,9 +149,9 @@ namespace SunFFB
         int32_t speedDeadBand[NUM_AXIS] = {0};
         int32_t accelerationDeadBand[NUM_AXIS] = {0};
 
-        int32_t maxPosition[NUM_AXIS] = {USB_AXIS_MAX_ABSOLUTE};
-        int32_t maxSpeed[NUM_AXIS] = {USB_AXIS_MAX_ABSOLUTE};
-        int32_t maxAcceleration[NUM_AXIS] = {USB_AXIS_MAX_ABSOLUTE};
+        float maxPosition[NUM_AXIS] = {(float)USB_AXIS_MAX_ABSOLUTE};
+        float maxSpeed[NUM_AXIS] = {(float)USB_AXIS_MAX_ABSOLUTE};
+        float maxAcceleration[NUM_AXIS] = {(float)USB_AXIS_MAX_ABSOLUTE};
     };
 } // namespace SunFFB
 
