@@ -1,5 +1,6 @@
 #include "ffb_force_calculator.h"
 #include "math_utils.h"
+#include "ffb_hal.h"
 
 namespace SunFFB
 {
@@ -178,7 +179,7 @@ namespace SunFFB
         EffectBlock* effectBlocks = ffbReportHandler.get_all_effect_blocks();
 
         float forcesSum[NUM_AXIS] = {0};
-        const uint32_t currentTime = millis();
+        const uint32_t currentTime = _millis();
 
         for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
         {

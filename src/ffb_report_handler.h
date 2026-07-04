@@ -1,9 +1,7 @@
 #ifndef _FFB_REPORT_HANDLER_H_
 #define _FFB_REPORT_HANDLER_H_
 
-#include <Arduino.h>
-#include <Adafruit_TinyUSB.h>
-#include "ffb_report_descriptor.h"
+#include <stdint.h>
 #include "ffb_report_types.h"
 
 namespace SunFFB

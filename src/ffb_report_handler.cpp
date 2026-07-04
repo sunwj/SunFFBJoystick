@@ -1,5 +1,7 @@
 #include "ffb_report_handler.h"
+#include <cstring>
 #include "math_utils.h"
+#include "ffb_hal.h"
 
 
 namespace SunFFB
@@ -38,7 +40,7 @@ namespace SunFFB
         pidStateDirty = true;
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Create new effect: %d\n", blockLoadData.blockLoadStatus);
+        _debug_printf("Create new effect: %d\n", blockLoadData.blockLoadStatus);
         #endif
     }
 
@@ -102,7 +104,7 @@ namespace SunFFB
     void FFBReportHandler::start_effect(volatile EffectBlock* effectBlock)
     {
         effectBlock->state |= EFFECT_STATE_PLAYING;
-        effectBlock->startTime = millis() + effectBlock->effectData.startDelay;
+        effectBlock->startTime = _millis() + effectBlock->effectData.startDelay;
         update_pid_effect_index();
         pidStateDirty = true;
         if(effectBlock->effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
@@ -207,10 +209,10 @@ namespace SunFFB
 
         #ifdef SERIAL_PRINT
         #if NUM_AXIS == 1
-        Serial.printf("Set effect: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
+        _debug_printf("Set effect: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
             effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain, effectData->triggerButton, effectData->axisEnable, effectData->directions[0], effectData->startDelay);
         #elif NUM_AXIS == 2
-        Serial.printf("Set effect: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
+        _debug_printf("Set effect: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d \n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
             effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain, effectData->triggerButton, effectData->axisEnable, effectData->directions[0], effectData->directions[1], effectData->startDelay);
         #endif
         #endif
@@ -226,7 +228,7 @@ namespace SunFFB
         effectBlock->envelopParameter = true;
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Set envelope. %d, %d, %d, %d, %d \n", envelopData->effectBlockIndex, envelopData->attackLevel, envelopData->fadeLevel, envelopData->attackTime, envelopData->fadeTime);
+        _debug_printf("Set envelope. %d, %d, %d, %d, %d \n", envelopData->effectBlockIndex, envelopData->attackLevel, envelopData->fadeLevel, envelopData->attackTime, envelopData->fadeTime);
         #endif
     }
 
@@ -244,7 +246,7 @@ namespace SunFFB
         effectBlock->conditionBlockFlags |= (0x01 << parameterBlockOffset);
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Set condition. %d, %d, %d, %d, %d, %d, %d, %d \n", conditionData->effectBlockIndex, conditionData->parameterBlockOffset, conditionData->cpOffset, \
+        _debug_printf("Set condition. %d, %d, %d, %d, %d, %d, %d, %d \n", conditionData->effectBlockIndex, conditionData->parameterBlockOffset, conditionData->cpOffset, \
             conditionData->positiveCoefficient, conditionData->negativeCoefficient, conditionData->positiveSaturation, conditionData->negativeSaturation, conditionData->deadBand);
         #endif
     }
@@ -258,7 +260,7 @@ namespace SunFFB
         memcpy((void*)periodicData, data, sizeof(SetPeriodicReportData));
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Set periodic. %d, %d, %d, %d, %d \n", periodicData->effectBlockIndex, periodicData->magnitude, periodicData->offset, periodicData->phase, periodicData->period);
+        _debug_printf("Set periodic. %d, %d, %d, %d, %d \n", periodicData->effectBlockIndex, periodicData->magnitude, periodicData->offset, periodicData->phase, periodicData->period);
         #endif
     }
 
@@ -271,7 +273,7 @@ namespace SunFFB
         memcpy(constantData, data, sizeof(SetConstantForceReportData));
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Set constant. %d, %d \n", constantData->effectBlockIndex, constantData->magnitude);
+        _debug_printf("Set constant. %d, %d \n", constantData->effectBlockIndex, constantData->magnitude);
         #endif
     }
 
@@ -284,7 +286,7 @@ namespace SunFFB
         memcpy(rampData, data, sizeof(SetRampForceReportData));
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Set ramp. %d, %d, %d \n", rampData->effectBlockIndex, rampData->rampStart, rampData->rampEnd);
+        _debug_printf("Set ramp. %d, %d, %d \n", rampData->effectBlockIndex, rampData->rampStart, rampData->rampEnd);
         #endif
     }
 
@@ -294,7 +296,7 @@ namespace SunFFB
         pidStateDirty = true;
 
         #ifdef SERIAL_PRINT
-        Serial.printf("device gain. %d \n", deviceGain);
+        _debug_printf("device gain. %d \n", deviceGain);
         #endif
     }
 
@@ -330,7 +332,7 @@ namespace SunFFB
             case 5:                 // pause
                 devicePaused = true;
                 pidStates.status |= 1;
-                pauseTime = millis();
+                pauseTime = _millis();
                 deviceState = DEVICE_STATE_PAUSED;
             break;
 
@@ -340,7 +342,7 @@ namespace SunFFB
                 pidStates.status &= ~(0x01);
                 deviceState = DEVICE_STATE_ACTIVE;
 
-                const uint32_t pauseLength = millis() - pauseTime;
+                const uint32_t pauseLength = _millis() - pauseTime;
                 for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
                 {
                     if(effectBlocks[i].state & EFFECT_STATE_PLAYING)
@@ -354,7 +356,7 @@ namespace SunFFB
         }
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Device control. %d \n", data->state);
+        _debug_printf("Device control. %d \n", data->state);
         #endif
     }
 
@@ -400,7 +402,7 @@ namespace SunFFB
         }
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Effect operation. %d, %d, %d \n", data->effectBlockIndex, data->effectOperation, data->loopCount);
+        _debug_printf("Effect operation. %d, %d, %d \n", data->effectBlockIndex, data->effectOperation, data->loopCount);
         #endif
     }
 
@@ -414,7 +416,7 @@ namespace SunFFB
         pidStateDirty = true;
 
         #ifdef SERIAL_PRINT
-        Serial.printf("Block free. %d \n", data->effectBlockIndex);
+        _debug_printf("Block free. %d \n", data->effectBlockIndex);
         #endif
     }
 

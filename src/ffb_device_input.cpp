@@ -1,10 +1,11 @@
 #include "ffb_device_input.h"
+#include "ffb_hal.h"
 
 namespace SunFFB
 {
     void FFBDeviceInput::update_axis(const int16_t axis[NUM_AXIS])
     {
-        const uint32_t currentTime = micros();
+        const uint32_t currentTime = _micros();
         const float dt = (currentTime - tPrev) * 1e-6f;
         if (dt <= 0.f)
         {
@@ -12,23 +13,23 @@ namespace SunFFB
             return;
         }
 
-        const float alphaPos = dt / (lpfPosition[0].get_time_constant() + dt);
-        const float alphaSpeed = dt / (lpfSpeed[0].get_time_constant() + dt);
+        const float alphaPos = dt / (tF_position + dt);
+        const float alphaSpeed = dt / (tF_speed + dt);
 
         #pragma unroll
         for(uint8_t i = 0; i < NUM_AXIS; ++i)
         {
-            const float position = lpfPosition[i].filter_alpha(axis[i], alphaPos);
+            const float position = lpfPosition[i] += alphaPos * (axis[i] - lpfPosition[i]);
 
             float newSpeed = (position - metrics.position[i]) / dt;
-            newSpeed = lpfSpeed[i].filter_alpha(newSpeed, alphaSpeed);
+            newSpeed = lpfSpeed[i] += alphaSpeed * (newSpeed - lpfSpeed[i]);
             if(newSpeed > metrics.maxSpeed[i])
                 newSpeed = metrics.maxSpeed[i];
             else if(newSpeed < -metrics.maxSpeed[i])
                 newSpeed = -metrics.maxSpeed[i];
 
             float newAccel = (newSpeed - metrics.speed[i]) / dt;
-            newAccel = lpfAccel[i].filter_alpha(newAccel, alphaSpeed);
+            newAccel = lpfAccel[i] += alphaSpeed * (newAccel - lpfAccel[i]);
             if(newAccel > metrics.maxAcceleration[i])
                 newAccel = metrics.maxAcceleration[i];
             else if(newAccel < -metrics.maxAcceleration[i])
@@ -63,10 +64,10 @@ namespace SunFFB
             metrics.maxPosition[i] = (float)USB_AXIS_MAX_ABSOLUTE;
             metrics.maxSpeed[i] = (float)USB_AXIS_MAX_ABSOLUTE * DEFAULT_MAX_SPEED_SCALE;
             metrics.maxAcceleration[i] = (float)USB_AXIS_MAX_ABSOLUTE * DEFAULT_MAX_ACCEL_SCALE;
-            lpfPosition[i].reset();
-            lpfSpeed[i].reset();
-            lpfAccel[i].reset();
+            lpfPosition[i] = 0;
+            lpfSpeed[i] = 0;
+            lpfAccel[i] = 0;
         }
-        tPrev = micros();
+        tPrev = _micros();
     }
 }

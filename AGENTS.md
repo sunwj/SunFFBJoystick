@@ -34,7 +34,7 @@ src/                          — All firmware source (SunFFB namespace)
   ffb_report_handler.*        — Effect block management, PID state
   ffb_force_calculator.*      — Real-time force computation
   ffb_device_input.h          — Axis filtering, speed/acceleration derivation
-  low_pass_filter.h           — First-order low-pass filter
+  (axis filtering inlined in ffb_device_input)
   math_utils.h                — clamp, fast math stubs
   hid_pid.h                   — HID PID usage constants
 

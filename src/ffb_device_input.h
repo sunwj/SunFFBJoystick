@@ -1,9 +1,9 @@
 #ifndef _FFB_DEVICE_INPUT_H_
 #define _FFB_DEVICE_INPUT_H_
 
-#include <Arduino.h>
+#include <cstring>
+#include <math.h>
 #include "ffb_report_types.h"
-#include "low_pass_filter.h"
 
 namespace SunFFB
 {
@@ -31,38 +31,24 @@ namespace SunFFB
         const float* get_max_speed() const { return (const float*)metrics.maxSpeed; };
         const float* get_max_acceleration() const { return (const float*)metrics.maxAcceleration; };
 
-        // Set low-pass time constant for position LPF.
-        void set_tf_position(float tf)
-        {
-            for(uint8_t i = 0; i < NUM_AXIS; ++i)
-                lpfPosition[i].set_time_constant(tf);
-        }
+        // Set low-pass time constant for position LPF (shared by all axes).
+        void set_tf_position(float tf) { tF_position = tf; }
 
-        // Set low-pass time constant for speed and acceleration LPFs.
-        void set_tf_speed(float tf)
-        {
-            for(uint8_t i = 0; i < NUM_AXIS; ++i)
-            {
-                lpfSpeed[i].set_time_constant(tf);
-                lpfAccel[i].set_time_constant(tf);
-            }
-        }
+        // Set low-pass time constant for speed and acceleration LPFs (shared).
+        void set_tf_speed(float tf) { tF_speed = tf; }
 
         // Set position LPF cutoff in Hz (converts to time constant).
         void set_cutoff_frequency_position(float cutOffFreq)
         {
-            for(uint8_t i = 0; i < NUM_AXIS; ++i)
-                lpfPosition[i].set_cutoff_frequency(cutOffFreq);
+            if (cutOffFreq > 0.f)
+                tF_position = 1.f / (2.f * float(M_PI) * cutOffFreq);
         }
 
         // Set speed/accel LPF cutoff in Hz (converts to time constant).
         void set_cutoff_frequency_speed(float cutOffFreq)
         {
-            for(uint8_t i = 0; i < NUM_AXIS; ++i)
-            {
-                lpfSpeed[i].set_cutoff_frequency(cutOffFreq);
-                lpfAccel[i].set_cutoff_frequency(cutOffFreq);
-            }
+            if (cutOffFreq > 0.f)
+                tF_speed = 1.f / (2.f * float(M_PI) * cutOffFreq);
         }
 
         // Reset all filters and metrics to initial state.
@@ -74,10 +60,12 @@ namespace SunFFB
         private:
         Metrics metrics;                                // derived position/speed/acceleration (owned by joystick_task)
         uint32_t tPrev = 0;                             // last update timestamp (micros)
+        float tF_position = DEFAULT_SPEED_TC;           // shared position LPF time constant
+        float tF_speed = DEFAULT_SPEED_TC;              // shared speed/accel LPF time constant
 
-        LowPassFilter lpfPosition[NUM_AXIS];            // per-axis position LPF
-        LowPassFilter lpfSpeed[NUM_AXIS];               // per-axis speed LPF
-        LowPassFilter lpfAccel[NUM_AXIS];               // per-axis acceleration LPF
+        float lpfPosition[NUM_AXIS] = {0};              // per-axis position LPF state
+        float lpfSpeed[NUM_AXIS] = {0};                 // per-axis speed LPF state
+        float lpfAccel[NUM_AXIS] = {0};                 // per-axis acceleration LPF state
     };
 } // namespace SunFFB
 
