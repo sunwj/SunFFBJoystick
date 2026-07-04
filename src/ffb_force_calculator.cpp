@@ -166,14 +166,14 @@ namespace SunFFB
 
     void FFBForceCalculator::force_calculator(FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const
     {
-        // TODO: initial state may be incorrect
-        // if(ffbReportHandler.deviceState != FFBReportHandler::DEVICE_STATE_ACTIVE)
-        // {
-        //     #pragma unroll
-        //     for(uint8_t i = 0; i < NUM_AXIS; ++i)
-        //         forces[i] = 0;
-        //     return;
-        // }
+        if(ffbReportHandler.deviceState == FFBReportHandler::DEVICE_STATE_PAUSED ||
+           ffbReportHandler.deviceState == FFBReportHandler::DEVICE_STATE_DISABLED)
+        {
+            #pragma unroll
+            for(uint8_t i = 0; i < NUM_AXIS; ++i)
+                forces[i] = 0;
+            return;
+        }
 
         EffectBlock* effectBlocks = ffbReportHandler.get_all_effect_blocks();
 
@@ -184,7 +184,7 @@ namespace SunFFB
         {
             EffectBlock& effectBlock = effectBlocks[i];
 
-            if(ffbReportHandler.is_effect_playing(i + 1, ffbDeviceInput.inputData.buttons, currentTime))
+            if(ffbReportHandler.is_effect_playing(effectBlock, ffbDeviceInput.inputData.buttons, currentTime))
             {
                 const uint8_t effectType = effectBlock.effectData.effectType;
                 const uint16_t duration = effectBlock.effectData.duration;

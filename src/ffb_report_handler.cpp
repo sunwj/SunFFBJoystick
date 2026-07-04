@@ -478,22 +478,28 @@ namespace SunFFB
 
     bool FFBReportHandler::is_effect_playing(uint8_t effectBlockIndex, uint8_t triggerButtonState, uint32_t currentTime)
     {
-        volatile EffectBlock* effectBlock = get_effect_block(effectBlockIndex);
+        EffectBlock* effectBlock = get_effect_block(effectBlockIndex);
         if(nullptr == effectBlock) return false;
+        return is_effect_playing(*effectBlock, triggerButtonState, currentTime);
+    }
 
-        if(!(effectBlock->state & EFFECT_STATE_PLAYING))
+    bool FFBReportHandler::is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
+    {
+        volatile EffectBlock& eb = effectBlock;
+
+        if(!(eb.state & EFFECT_STATE_PLAYING))
             return false;
 
-        if(USB_NO_TRIGGER_BUTTON != effectBlock->effectData.triggerButton)
-            return is_trigger_playing(*effectBlock, triggerButtonState, currentTime);
+        if(USB_NO_TRIGGER_BUTTON != eb.effectData.triggerButton)
+            return is_trigger_playing(eb, triggerButtonState, currentTime);
 
-        if(currentTime < effectBlock->startTime)
+        if(currentTime < eb.startTime)
             return false;
 
-        const uint32_t elapsedTime = currentTime - effectBlock->startTime;
-        if((USB_DURATION_INFINITE != effectBlock->effectData.duration) && (elapsedTime >= effectBlock->effectData.duration))
+        const uint32_t elapsedTime = currentTime - eb.startTime;
+        if((USB_DURATION_INFINITE != eb.effectData.duration) && (elapsedTime >= eb.effectData.duration))
         {
-            effectBlock->state &= ~EFFECT_STATE_PLAYING;
+            eb.state &= ~EFFECT_STATE_PLAYING;
             update_pid_effect_index();
             pidStateDirty = true;
             return false;
