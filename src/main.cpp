@@ -262,13 +262,15 @@ void lcd_task(void* params)
         }
 
     sprite.pushSprite(TFT_X, TFT_Y);
-        vTaskDelayUntil( & wakeupTime, pdMS_TO_TICKS(LCD_TASK_PERIOD_MS));
+    
+    vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(LCD_TASK_PERIOD_MS));
     }
 }
 
 void joystick_task(void* params)
 {
     ffbDeviceInput.reset();
+    ffbDeviceInput.set_tf_position(DEFAULT_SPEED_TC);
     ffbDeviceInput.set_tf_speed(DEFAULT_SPEED_TC);
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
@@ -458,8 +460,8 @@ void setup()
     xTaskCreatePinnedToCore(force_calculation_task, "Force", TASK_STACK_SIZE, nullptr, 2, nullptr, appCore);
 
     xTaskCreatePinnedToCore(send_report_task, "Report", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
-    xTaskCreatePinnedToCore(send_force_task, "SendForce", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
-    xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
+    // xTaskCreatePinnedToCore(send_force_task, "SendForce", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
+    // xTaskCreatePinnedToCore(receive_position_task, "ReceivePos", TASK_STACK_SIZE, nullptr, configMAX_PRIORITIES - 1, nullptr, protoCore);
 }
 
 void loop()

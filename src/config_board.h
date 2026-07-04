@@ -46,8 +46,8 @@
 #define ADC_SCALE 2048.f
 
 // ===== Default Runtime Values =====
-#define DEFAULT_SPEED_TC 0.1f
-#define DEFAULT_MAX_SPEED_SCALE 2.5f
-#define DEFAULT_MAX_ACCEL_SCALE 1000000.0f
+#define DEFAULT_SPEED_TC 0.01f
+#define DEFAULT_MAX_SPEED_SCALE 100.0f
+#define DEFAULT_MAX_ACCEL_SCALE 100.0f
 
 #endif

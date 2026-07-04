@@ -166,13 +166,14 @@ namespace SunFFB
 
     void FFBForceCalculator::force_calculator(FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const
     {
-        if(ffbReportHandler.deviceState != FFBReportHandler::DEVICE_STATE_ACTIVE)
-        {
-            #pragma unroll
-            for(uint8_t i = 0; i < NUM_AXIS; ++i)
-                forces[i] = 0;
-            return;
-        }
+        // TODO: initial state may be incorrect
+        // if(ffbReportHandler.deviceState != FFBReportHandler::DEVICE_STATE_ACTIVE)
+        // {
+        //     #pragma unroll
+        //     for(uint8_t i = 0; i < NUM_AXIS; ++i)
+        //         forces[i] = 0;
+        //     return;
+        // }
 
         EffectBlock* effectBlocks = ffbReportHandler.get_all_effect_blocks();
 

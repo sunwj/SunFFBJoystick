@@ -34,6 +34,7 @@ namespace SunFFB
             else if(newAccel < -metrics.maxAcceleration[i])
                 newAccel = -metrics.maxAcceleration[i];
 
+            inputData.axis[i] = position;
             if(position > -metrics.positionDeadBand[i] && position < metrics.positionDeadBand[i])
                 inputData.axis[i] = 0;
 

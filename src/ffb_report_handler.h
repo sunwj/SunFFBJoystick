@@ -51,6 +51,7 @@ namespace SunFFB
         void set_device_gain(const DeviceGainReportData* data);          // Report 14
         void set_device_control(const DeviceControlReportData* data);    // Report 13
 
+        // TODO: change is_effect_playing first parameter to accept reference of EffectBlock not index
         // Play-state check (1-based effectBlockIndex). May auto-stop expired effects.
         bool is_effect_playing(uint8_t effectBlockIndex, uint8_t triggerButtonState, uint32_t currentTime);
 
