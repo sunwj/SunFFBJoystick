@@ -1,7 +1,6 @@
 #ifndef _FFB_DESCRIPTOR_H_
 #define _FFB_DESCRIPTOR_H_
 
-#include <Adafruit_TinyUSB.h>
 #include "hid_pid.h"
 #include "constants.h"
 
