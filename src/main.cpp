@@ -10,7 +10,8 @@
 #include "ffb_report_handler.h"
 #include "ffb_device_input.h"
 #include "ffb_force_calculator.h"
-#include "simple_serial_communication.h"
+#include "communication/serial_hal_arduino.h"
+#include "communication/serial_link.h"
 #include "esp_freertos_hooks.h"
 
 #if NUM_AXIS == 1
@@ -31,6 +32,8 @@ QueueHandle_t gForces;
 QueueHandle_t gJoystickReportData;
 
 HardwareSerial comSerial(1);
+SunFFB::ArduinoSerialHal serialHal(comSerial);
+SunFFB::FFBSerialLink<SunFFB::ArduinoSerialHal> serialLink(serialHal);
 
 TFT_eSPI lcd = TFT_eSPI();
 TFT_eSprite sprite = TFT_eSprite( & lcd);
@@ -358,7 +361,7 @@ void send_force_task(void* params)
     {
         int32_t forces[NUM_AXIS];
         xQueuePeek(gForces, forces, portMAX_DELAY);
-        send_packet_buffer(comSerial, (uint8_t*)forces, sizeof(forces));
+        serialLink.sendForce(forces);
 
         vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(SEND_FORCE_TASK_PERIOD_MS));
     }
@@ -366,13 +369,12 @@ void send_force_task(void* params)
 
 void receive_position_task(void* params)
 {
+    SunFFB::PositionPayload payload;
     TickType_t wakeupTime = xTaskGetTickCount();
     while (true)
     {
-        uint16_t pos[NUM_AXIS];
-        if(receive_packet_buffer(comSerial, (uint8_t*)pos, sizeof(pos)))
-        {
-            xQueueOverwrite(gPositions, pos);
+        if (serialLink.receivePosition(payload)) {
+            xQueueOverwrite(gPositions, payload.position);
             continue;
         }
 
