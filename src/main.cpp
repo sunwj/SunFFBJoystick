@@ -72,8 +72,10 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                 // Pool size, max simultaneous effects, etc.
                 case REPORT_ID_POOL_REPORT:
                 {
+                    xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
                     const SunFFB::PoolReportData* data = ffbHandler.get_pool_report_data();
                     memcpy(buffer, data, sizeof(SunFFB::PoolReportData));
+                    xSemaphoreGive(semaphoreFFBReportHandler);
 
                     #ifdef SERIAL_PRINT
                     Serial.printf("Pool report. \n");
@@ -143,11 +145,6 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 
         case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
             ffbHandler.create_new_effect((SunFFB::CreateNewEffectReportData*)buffer);
-            // TODO: create_new_effect() changes blockLoadData and ramPoolAvailable.
-            // The host typically follows up with a BLOCK_LOAD feature report to read
-            // the result, so this may be OK. However, if the host polls POOL_REPORT
-            // to see available RAM, the stale pool data might not reflect the latest
-            // allocation until the host sends another POOL feature report.
         break;
 
         default:
