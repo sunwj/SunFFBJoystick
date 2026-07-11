@@ -107,51 +107,73 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
     switch (reportId)
     {
         case REPORT_ID_SET_EFFECT_REPORT:
+        {
             ffbHandler.set_effect((SunFFB::SetEffectReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_SET_ENVELOPE_REPORT:
+        {
             ffbHandler.set_envelope((SunFFB::SetEnvelopeReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_SET_CONDITION_REPORT:
+        {
             ffbHandler.set_condition((SunFFB::SetConditionReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_SET_PERIODIC_REPORT:
+        {
             ffbHandler.set_periodic((SunFFB::SetPeriodicReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_SET_CONSTANT_FORCE_REPORT:
+        {
             ffbHandler.set_constant_force((SunFFB::SetConstantForceReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_SET_RAMP_FORCE_REPORT:
+        {
             ffbHandler.set_ramp_force((SunFFB::SetRampForceReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_EFFECT_OPERATION_REPORT:
+        {
             ffbHandler.set_effect_operation((SunFFB::EffectOperationReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_BLOCK_FREE_REPORT:
+        {
             ffbHandler.set_effect_block_free((SunFFB::BlockFreeReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_DEVICE_CONTROL_REPORT:
+        {
             ffbHandler.set_device_control((SunFFB::DeviceControlReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_DEVICE_GAIN_REPORT:
+        {
             ffbHandler.set_device_gain((SunFFB::DeviceGainReportData*)buffer);
-        break;
+            break;
+        }
 
         case REPORT_ID_CREATE_NEW_EFFECT_REPORT:
+        {
             ffbHandler.create_new_effect((SunFFB::CreateNewEffectReportData*)buffer);
-        break;
+            break;
+        }
 
         default:
-        break;
+            break;
     }
     xSemaphoreGive(semaphoreFFBReportHandler);
 
@@ -283,6 +305,9 @@ void joystick_task(void* params)
             coords[i] = std::clamp(coords[i], int16_t(-ADC_CLAMP), int16_t(ADC_CLAMP));
             coords[i] = coords[i] / ADC_SCALE * USB_AXIS_MAX_ABSOLUTE;
         }
+
+        uint8_t btnState = digitalRead(SW_PIN) ? 0 : 1;
+        ffbDeviceInput.update_buttons(btnState);
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
         ffbDeviceInput.update_axis(coords);
