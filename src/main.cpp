@@ -196,9 +196,11 @@ void lcd_task(void* params)
 
         // snapshot axis data under semaphore for consistent reads
         int16_t axisSnapshot[NUM_AXIS];
-        xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
-        memcpy(axisSnapshot, (const int16_t*)ffbDeviceInput.inputData.axis, sizeof(axisSnapshot));
-        xSemaphoreGive(semaphoreFFBDeviceInput);
+        if (xSemaphoreTake(semaphoreFFBDeviceInput, pdMS_TO_TICKS(10)) == pdTRUE)
+        {
+            memcpy(axisSnapshot, (const int16_t*)ffbDeviceInput.inputData.axis, sizeof(axisSnapshot));
+            xSemaphoreGive(semaphoreFFBDeviceInput);
+        }
 
         uint8_t coords[NUM_AXIS];
         #pragma unroll
@@ -264,10 +266,12 @@ void lcd_task(void* params)
 
         // snapshot effect states under semaphore for consistent reads
         uint8_t effectStates[MAX_EFFECTS];
-        xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
-        for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
-            effectStates[i] = ffbHandler.get_all_effect_blocks()[i].state;
-        xSemaphoreGive(semaphoreFFBReportHandler);
+        if (xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(10)) == pdTRUE)
+        {
+            for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
+                effectStates[i] = ffbHandler.get_all_effect_blocks()[i].state;
+            xSemaphoreGive(semaphoreFFBReportHandler);
+        }
 
         for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
         {

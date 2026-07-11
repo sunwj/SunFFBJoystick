@@ -158,6 +158,26 @@ namespace SunFFB
         TypeSpecificParameterBlock typeSpecificData[NUM_AXIS];          // per-axis type-specific data + envelope
     };
     
+    // ===== Build-time validation =====
+    static_assert(sizeof(JoystickInputReportData) == 1 + NUM_AXIS * 2,
+        "JoystickInputReportData size mismatch with HID descriptor");
+    static_assert(sizeof(PIDStateReportData) == 2,
+        "PIDStateReportData size mismatch");
+    static_assert(MAX_EFFECTS <= 255,
+        "MAX_EFFECTS exceeds uint8_t effectBlockIndex range");
+    static_assert(NUM_AXIS >= 1 && NUM_AXIS <= 3,
+        "NUM_AXIS must be 1, 2, or 3");
+    static_assert(sizeof(SetConstantForceReportData) == 3,
+        "SetConstantForceReportData size mismatch");
+    static_assert(sizeof(DeviceControlReportData) == 1,
+        "DeviceControlReportData size mismatch");
+    static_assert(sizeof(DeviceGainReportData) == 1,
+        "DeviceGainReportData size mismatch");
+    static_assert(sizeof(TypeSpecificParameterBlock) == sizeof(SetConditionReportData),
+        "TypeSpecificParameterBlock union not sized by largest member");
+    static_assert(sizeof(PoolReportData) == 4,
+        "PoolReportData size mismatch");
+
     // Derived motion metrics for one frame update (not packed — internal use only)
     struct __attribute__((packed)) Metrics
     {
