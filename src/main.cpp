@@ -306,8 +306,10 @@ void joystick_task(void* params)
             coords[i] = coords[i] / ADC_SCALE * USB_AXIS_MAX_ABSOLUTE;
         }
 
+#ifdef USE_BUTTON
         uint8_t btnState = digitalRead(SW_PIN) ? 0 : 1;
         ffbDeviceInput.update_buttons(btnState);
+#endif
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
         ffbDeviceInput.update_axis(coords);
@@ -416,7 +418,9 @@ void setup()
     comSerial.begin(UART1_BAUD, SERIAL_8N1, RDX_PIN, TDX_PIN);
 
     // init joystick and calibrate
+#ifdef USE_BUTTON
     pinMode(SW_PIN, INPUT);
+#endif
     #pragma unroll
     for(uint8_t i = 0; i < NUM_AXIS; ++i)
     {

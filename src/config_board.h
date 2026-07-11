@@ -10,6 +10,7 @@
 #define TFT_H 80
 
 // ===== GPIO Pins =====
+// #define USE_BUTTON
 #define SW_PIN 16
 #define TDX_PIN 4
 #define RDX_PIN 5
