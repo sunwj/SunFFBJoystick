@@ -37,9 +37,6 @@
 #define SEND_FORCE_TASK_PERIOD_MS 2
 #define RECV_POSITION_TASK_PERIOD_MS 2
 
-// ===== Performance =====
-#define FORCE_TASK_MAX_TIME_US 800
-
 // ===== Task Stack Sizes =====
 #define LCD_TASK_STACK_SIZE 4096
 #define TASK_STACK_SIZE 2048
@@ -48,6 +45,9 @@
 #define ADC_CALIBRATION_SAMPLES 1000
 #define ADC_CLAMP 2048
 #define ADC_SCALE 2048.f
+
+// ===== Performance =====
+#define FORCE_TASK_MAX_TIME_US 800
 
 // ===== Default Runtime Values =====
 #define DEFAULT_SPEED_TC 0.01f
