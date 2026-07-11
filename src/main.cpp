@@ -220,7 +220,17 @@ void lcd_task(void* params)
         sprite.setCursor(40, 0);
         sprite.printf("Report time: %d us", reportProcessTime);
         sprite.setCursor(40, 11);
-        sprite.printf("Effect time: %d us", effectProcessTime);
+        if (effectProcessTime > FORCE_TASK_MAX_TIME_US)
+        {
+            sprite.setTextColor(TFT_RED);
+            sprite.printf("Effect time: %d us !", effectProcessTime);
+        }
+        else
+        {
+            sprite.setTextColor(TFT_WHITE);
+            sprite.printf("Effect time: %d us", effectProcessTime);
+        }
+        sprite.setTextColor(TFT_WHITE);
         #if NUM_AXIS == 1
         sprite.setCursor(40, 23);
         sprite.printf("AX: %d", axisSnapshot[0]);

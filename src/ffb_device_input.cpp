@@ -13,8 +13,11 @@ namespace SunFFB
             return;
         }
 
-        const float alphaPos = dt / (tF_position + dt);
-        const float alphaSpeed = dt / (tF_speed + dt);
+        // Clamp dt to prevent LPF pulse on task suspension
+        const float dtClamped = dt < 0.01f ? dt : 0.01f;
+
+        const float alphaPos = dtClamped / (tF_position + dtClamped);
+        const float alphaSpeed = dtClamped / (tF_speed + dtClamped);
 
         #pragma unroll
         for(uint8_t i = 0; i < NUM_AXIS; ++i)
