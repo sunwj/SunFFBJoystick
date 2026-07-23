@@ -61,18 +61,18 @@ namespace SunFFB
         private:
         EffectBlock* get_effect_block(uint8_t idx) const;       // 1-based → 0-based lookup
         void free_all_effects();                                // free all blocks, reset pool
-        void start_effect(volatile EffectBlock* effectBlock);   // set PLAYING + init startTime
-        void stop_effect(volatile EffectBlock* effectBlock);    // clear PLAYING + update pidStates
+        void start_effect(EffectBlock* effectBlock);            // set PLAYING + init startTime
+        void stop_effect(EffectBlock* effectBlock);             // clear PLAYING + update pidStates
         void stop_all_effects();                                // stop all + clear pidStates.effectBlockIndex
-        bool is_trigger_playing(volatile EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime);
+        bool is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime);
         void update_pid_effect_index();                         // scan for first playing, set pidStates
 
         uint8_t nextEffectIdx = 0;                              // round-robin allocator cursor
-        volatile uint32_t pauseTime;                            // timestamp when paused (for resume adjustment)
+        uint32_t pauseTime;                                     // timestamp when paused (for resume adjustment)
         volatile EffectBlock effectBlocks[MAX_EFFECTS];         // effect block pool
         volatile PIDStateReportData pidStates = {0x1E, 0};      // PID state (status + playing effect index)
-        volatile BlockLoadReportData blockLoadData;             // last creation result
-        volatile PoolReportData poolData;                       // cached pool capacity info
+        BlockLoadReportData blockLoadData;                      // last creation result
+        PoolReportData poolData;                                // cached pool capacity info
     };
 } // namespace SunFFB
 

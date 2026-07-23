@@ -28,7 +28,7 @@ namespace SunFFB
         {
             blockLoadData.blockLoadStatus = 1;          // success
 
-            volatile EffectBlock* effectBlock = get_effect_block(blockLoadData.effectBlockIndex);
+            EffectBlock* effectBlock = get_effect_block(blockLoadData.effectBlockIndex);
 
             memset((void*)effectBlock, 0, sizeof(EffectBlock));
             effectBlock->state = EFFECT_STATE_ALLOCATED;
@@ -71,7 +71,7 @@ namespace SunFFB
 
     void FFBReportHandler::free_effect(uint8_t idx)
     {
-        volatile EffectBlock* effectBlock = get_effect_block(idx);
+        EffectBlock* effectBlock = get_effect_block(idx);
         if(nullptr == effectBlock) return;
 
         if (effectBlock->state != EFFECT_STATE_FREE)
@@ -101,7 +101,7 @@ namespace SunFFB
         return nullptr;
     }
 
-    void FFBReportHandler::start_effect(volatile EffectBlock* effectBlock)
+    void FFBReportHandler::start_effect(EffectBlock* effectBlock)
     {
         effectBlock->state |= EFFECT_STATE_PLAYING;
         effectBlock->startTime = _millis() + effectBlock->effectData.startDelay;
@@ -114,7 +114,7 @@ namespace SunFFB
         }
     }
 
-    void FFBReportHandler::stop_effect(volatile EffectBlock* effectBlock)
+    void FFBReportHandler::stop_effect(EffectBlock* effectBlock)
     {
         effectBlock->state &= ~EFFECT_STATE_PLAYING;
         update_pid_effect_index();
@@ -140,10 +140,10 @@ namespace SunFFB
 
     void FFBReportHandler::set_effect(const SetEffectReportData* data)
     {
-        volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
 
-        volatile SetEffectReportData* effectData = &effectBlock->effectData;
+        SetEffectReportData* effectData = &effectBlock->effectData;
         memcpy((void*)effectData, data, sizeof(SetEffectReportData));
 
         effectBlock->originalDuration = effectData->duration;
@@ -220,10 +220,10 @@ namespace SunFFB
 
     void FFBReportHandler::set_envelope(const SetEnvelopeReportData* data)
     {
-        volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
 
-        volatile SetEnvelopeReportData* envelopData = &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData);
+        SetEnvelopeReportData* envelopData = &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData);
         memcpy((void*)envelopData, data, sizeof(SetEnvelopeReportData));
         effectBlock->envelopParameter = true;
 
@@ -237,10 +237,10 @@ namespace SunFFB
         const uint8_t parameterBlockOffset = data->parameterBlockOffset & 0x0F;
         if(parameterBlockOffset > (NUM_AXIS - 1)) return;
 
-        volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
 
-        volatile SetConditionReportData* conditionData = &(effectBlock->typeSpecificData[parameterBlockOffset].conditionData);
+        SetConditionReportData* conditionData = &(effectBlock->typeSpecificData[parameterBlockOffset].conditionData);
         memcpy((void*)conditionData, data, sizeof(SetConditionReportData));
 
         effectBlock->conditionBlockFlags |= (0x01 << parameterBlockOffset);
@@ -363,7 +363,7 @@ namespace SunFFB
     void FFBReportHandler::set_effect_operation(const EffectOperationReportData* data)
     {
         pidStateDirty = true;
-        volatile EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock) return;
 
         switch (data->effectOperation)
@@ -437,7 +437,7 @@ namespace SunFFB
             pidStates.effectBlockIndex = 0;
     }
 
-    bool FFBReportHandler::is_trigger_playing(volatile EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
+    bool FFBReportHandler::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
     {
         if (effectBlock.effectData.triggerButton == 0) return false;
         const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
@@ -487,7 +487,7 @@ namespace SunFFB
 
     bool FFBReportHandler::is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
     {
-        volatile EffectBlock& eb = effectBlock;
+        EffectBlock& eb = effectBlock;
 
         if(!(eb.state & EFFECT_STATE_PLAYING))
             return false;
