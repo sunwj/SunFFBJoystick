@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programming Tips and Tools</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="programming-tips-and-tools">Programming Tips and Tools</h1>
+<p>This topic covers the following specialized programming tips.</p>
+<ul>
+<li><p><a href="ee416851(v=vs.85).html">Designing for Previous Versions of DirectInput</a></p>
+</li>
+<li><p><a href="ee416851(v=vs.85).html">Preventing Response Delays During Debugging</a></p>
+</li>
+<li><p><a href="ee416851(v=vs.85).html">Avoiding Duplicate Registry Keys</a></p>
+</li>
+<li><p><a href="ee416851(v=vs.85).html">Programming Tips and Tools</a></p>
+</li>
+</ul>
+<h2 id="designing-for-previous-versions-of-directinput">Designing for Previous Versions of DirectInput</h2>
+<p>In the <a href="ee416756(v=vs.85).html">DirectInput8Create</a>, <a href="ee417813(v=vs.85).html">IDirectInput8::Initialize</a>, <a href="ee417910(v=vs.85).html">IDirectInputDevice8::Initialize</a>, and <a href="ee417950(v=vs.85).html">IDirectInputEffect::Initialize</a> methods, you are required to pass the DirectInput version number. This parameter specifies which version of DirectX the DirectInput subsystem should emulate.</p>
+<p>Applications designed for the latest version of DirectInput should pass the value DIRECTINPUT_VERSION as defined in Dinput.h.</p>
+<p>Applications designed to run under previous versions should pass a value corresponding to the version of DirectInput for which they were designed, with the main version number in the high-order byte. For example, an application designed to run on DirectInput 3.0 should pass a value of 0x0300.</p>
+<p>If you define DIRECTINPUT_VERSION as 0x0300 before including the Dinput.h header file, the header file generates structure definitions compatible with DirectInput 3.0.</p>
+<p>If you do not define DIRECTINPUT_VERSION before including the Dinput.h header file, the header file generates structure definitions compatible with the current version of DirectInput. However, the DirectX 3-compatible structures are available under the same names with "_DX3" appended. For example, the DirectX 3-compatible <a href="ee416607(v=vs.85).html">DIDEVCAPS</a> structure is called DIDEVCAPS_DX3.</p>
+<p>You must also use the appropriate versions of the DirectInput and DirectInputDevice interfaces. For versions of DirectX prior to DirectX 7.0, you must use IDirectInput and either IDirectInputDevice or IDirectInputDevice2 (the latter is available for DirectX 5.0 or later.)</p>
+<h2 id="preventing-response-delays-during-debugging">Preventing Response Delays During Debugging</h2>
+<p>When using the keyboard or mouse with DirectInput under Microsoft Windows 2000, you might notice short delays in response when you step through code during a debugging session. This behavior occurs only in debug mode, so it is not seen by your application's end users. However, this behavior can be eliminated in debug mode as well by adding the emulation value to the following registry key.</p>
+<pre>HKEY_LOCAL_MACHINE
+    SOFTWARE
+        Microsoft
+            DirectInput
+</pre>
+<table>
+<colgroup>
+<col/>
+<col/>
+<col/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Emulation</td>
+<td>DWORD</td>
+<td>0x08 (for the keyboard)
+<p>0x10 (for the mouse)</p>
+<p>0x18 (for both)</p></td>
+</tr>
+</tbody>
+</table>
+<p>You can also switch to use emulation from the DirectX control panel by following these steps.</p>
+<ol>
+<li><p>Open the Windows control panel</p>
+</li>
+<li><p>Open the DirectX control panel. Note that if you are using Microsoft Windows XP, you might need to click Switch to Classic View to see the DirectX icon.</p>
+</li>
+<li><p>Select the DirectInput tab.</p>
+</li>
+<li><p>In the Debug Input Device Emulation section, you can check the Emulate Keyboard and Emulate Mouse boxes.</p>
+</li>
+</ol>
+<p>Without changing how DirectInput returns data, this value invokes an emulation mode that is not susceptible to those delays. These settings are global and affect all DirectInput clients. Performance only improves when using the debug binaries and only for applications that employ foreground exclusive device access. Some features, such as masking the Windows keys, are not available when devices are emulated so emulation is recommended only for debugging.</p>
+<div class="note">
+<p>Note</p>
+<p>If you are using earlier versions of DirectX, you must do a debug software development kit (SDK) install in order to get the correct debug DLL onto your computer.</p>
+</div>
+<h2 id="avoiding-duplicate-registry-keys">Avoiding Duplicate Registry Keys</h2>
+<p>For every application that uses DirectInput 8.0 or later versions, DirectInput creates a key in the following registry.</p>
+<pre>HKEY_CURRENT_USER
+	SOFTWARE
+		Microsoft
+			DirectInput
+</pre>
+<p>This allows the independent hardware vendors (IHVs) to turn off their own device mapping for certain applications. During debugging, however, each build will generate a new key which contains a time stamp and the file size. To avoid generating multiple keys in the registry, use the binary value, AppIdFlag.</p>
+<p>The following table lists the possible values for AppIdFlag.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>The time stamp is ignored when generating the key.</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>The file size is ignored when generating the key.</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Both the time stamp and file size are ignored when generating the key.</td>
+</tr>
+</tbody>
+</table>
+<p>If AppIdFlag is set to 3, all builds of applications with the same file name will use the same key.</p>
+<div class="note">
+<p>Note</p>
+<p>The AppIdFlag value should only be set on test computers to avoid the possibility of two applications that ship with the same file name interfering with each other's input control mappings.</p>
+</div>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416851(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

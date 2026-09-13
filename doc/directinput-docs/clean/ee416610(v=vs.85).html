@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIDEVICEINSTANCE Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="dideviceinstance-structure">DIDEVICEINSTANCE Structure</h1>
+<p>Describes an instance of a DirectInput device. This structure is used with the <a href="ee417804(v=vs.85).html">IDirectInput8::EnumDevices</a>, <a href="ee417807(v=vs.85).html">IDirectInput8::EnumDevicesBySemantics</a>, and <a href="ee417896(v=vs.85).html">IDirectInputDevice8::GetDeviceInfo</a> methods.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DIDEVICEINSTANCE {
+    DWORD dwSize;
+    GUID guidInstance;
+    GUID guidProduct;
+    DWORD dwDevType;
+    TCHAR tszInstanceName[MAX_PATH];
+    TCHAR tszProductName[MAX_PATH];
+    GUID guidFFDriver;
+    WORD wUsagePage;
+    WORD wUsage;
+} DIDEVICEINSTANCE, *LPDIDEVICEINSTANCE;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><strong>dwSize</strong><br/>
+Size of this structure, in bytes. This member must be initialized before the structure is used.</li>
+<li><strong>guidInstance</strong><br/>
+Unique identifier for the instance of the device. An application can save the instance globally unique identifier (GUID) into a configuration file and use it at a later time. Instance GUIDs are specific to a particular computer. An instance GUID obtained from one computer is unrelated to instance GUIDs on another.</li>
+<li><strong>guidProduct</strong><br/>
+Unique identifier for the product. This identifier is established by the manufacturer of the device.</li>
+<li><strong>dwDevType</strong><br/>
+Device type specifier. The least-significant byte of the device type description code specifies the device type. The next-significant byte specifies the device subtype. This value can also be combined with DIDEVTYPE_HID, which specifies a Human Interface Device (human interface device).</li>
+<li><strong>tszInstanceName</strong><br/>
+Friendly name for the instance. For example, "Joystick 1."</li>
+<li><strong>tszProductName</strong><br/>
+Friendly name for the product.</li>
+<li><strong>guidFFDriver</strong><br/>
+Unique identifier for the driver being used for force feedback. The driver's manufacturer establishes this identifier.</li>
+<li><strong>wUsagePage</strong><br/>
+If the device is a Human Interface Device (HID), this member contains the HID usage page code.</li>
+<li><strong>wUsage</strong><br/>
+If the device is a Human Interface Device (HID), this member contains the HID usage code.</li>
+</ul>
+<h2 id="remarks">Remarks</h2>
+<p>The following device types and subtypes are defined for use in the dwDevType member.</p>
+<ul>
+<li><p>DI8DEVTYPE_1STPERSON</p>
+<p>First-person action game device. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPE1STPERSON_LIMITED</p>
+<p>Device that does not provide the minimum number of device objects for action mapping.</p>
+</li>
+<li><p>DI8DEVTYPE1STPERSON_SHOOTER</p>
+<p>Device designed for first-person shooter games.</p>
+</li>
+<li><p>DI8DEVTYPE1STPERSON_SIXDOF</p>
+<p>Device with six degrees of freedom; that is, three lateral axes and three rotational axes.</p>
+</li>
+<li><p>DI8DEVTYPE1STPERSON_UNKNOWN</p>
+<p>Unknown subtype.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_DEVICE</p>
+<p>Device that does not fall into another category.</p>
+</li>
+<li><p>DI8DEVTYPE_DEVICECTRL</p>
+<p>Input device used to control another type of device from within the context of the application. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPEDEVICECTRL_COMMSSELECTION</p>
+<p>Control used to make communications selections.</p>
+</li>
+<li><p>DI8DEVTYPEDEVICECTRL_COMMSSELECTION_HARDWIRED</p>
+<p>Device that must use its default configuration and cannot be remapped.</p>
+</li>
+<li><p>DI8DEVTYPEDEVICECTRL_UNKNOWN</p>
+<p>Unknown subtype.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_DRIVING</p>
+<p>Device for steering. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPEDRIVING_COMBINEDPEDALS</p>
+<p>Steering device that reports acceleration and brake pedal values from a single axis.</p>
+</li>
+<li><p>DI8DEVTYPEDRIVING_DUALPEDALS</p>
+<p>Steering device that reports acceleration and brake pedal values from separate axes.</p>
+</li>
+<li><p>DI8DEVTYPEDRIVING_HANDHELD</p>
+<p>Hand-held steering device.</p>
+</li>
+<li><p>DI8DEVTYPEDRIVING_LIMITED</p>
+<p>Steering device that does not provide the minimum number of device objects for action mapping.</p>
+</li>
+<li><p>DI8DEVTYPEDRIVING_THREEPEDALS</p>
+<p>Steering device that reports acceleration, brake, and clutch pedal values from separate axes.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_FLIGHT</p>
+<p>Controller for flight simulation. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPEFLIGHT_LIMITED</p>
+<p>Flight controller that does not provide the minimum number of device objects for action mapping.</p>
+</li>
+<li><p>DI8DEVTYPEFLIGHT_RC</p>
+<p>Flight device based on a remote control for model aircraft.</p>
+</li>
+<li><p>DI8DEVTYPEFLIGHT_STICK</p>
+<p>Joystick.</p>
+</li>
+<li><p>DI8DEVTYPEFLIGHT_YOKE</p>
+<p>Yoke.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_GAMEPAD</p>
+<p>Gamepad. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPEGAMEPAD_LIMITED</p>
+<p>Gamepad that does not provide the minimum number of device objects for action mapping.</p>
+</li>
+<li><p>DI8DEVTYPEGAMEPAD_STANDARD</p>
+<p>Standard gamepad that provides the minimum number of device objects for action mapping.</p>
+</li>
+<li><p>DI8DEVTYPEGAMEPAD_TILT</p>
+<p>Gamepad that can report x-axis and y-axis data based on the attitude of the controller.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_JOYSTICK</p>
+<p>Joystick. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPEJOYSTICK_LIMITED</p>
+<p>Joystick that does not provide the minimum number of device objects for action mapping.</p>
+</li>
+<li><p>DI8DEVTYPEJOYSTICK_STANDARD</p>
+<p>Standard joystick that provides the minimum number of device objects for action mapping.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_KEYBOARD</p>
+<p>Keyboard or keyboard-like device. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPEKEYBOARD_UNKNOWN</p>
+<p>Subtype could not be determined.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_PCXT</p>
+<p>IBM PC/XT 83-key keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_OLIVETTI</p>
+<p>Olivetti 102-key keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_PCAT</p>
+<p>IBM PC/AT 84-key keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_PCENH</p>
+<p>IBM PC Enhanced 101/102-key or Microsoft Natural keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_NOKIA1050</p>
+<p>Nokia 1050 keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_NOKIA9140</p>
+<p>Nokia 9140 keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_NEC98</p>
+<p>Japanese NEC PC98 keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_NEC98LAPTOP</p>
+<p>Japanese NEC PC98 laptop keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_NEC98106</p>
+<p>Japanese NEC PC98 106-key keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_JAPAN106</p>
+<p>Japanese 106-key keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_JAPANAX</p>
+<p>Japanese AX keyboard.</p>
+</li>
+<li><p>DI8DEVTYPEKEYBOARD_J3100</p>
+<p>Japanese J3100 keyboard.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_MOUSE</p>
+<p>A mouse or mouse-like device (such as a trackball). The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPEMOUSE_ABSOLUTE</p>
+<p>Mouse that returns absolute axis data.</p>
+</li>
+<li><p>DI8DEVTYPEMOUSE_FINGERSTICK</p>
+<p>Fingerstick.</p>
+</li>
+<li><p>DI8DEVTYPEMOUSE_TOUCHPAD</p>
+<p>Touchpad.</p>
+</li>
+<li><p>DI8DEVTYPEMOUSE_TRACKBALL</p>
+<p>Trackball.</p>
+</li>
+<li><p>DI8DEVTYPEMOUSE_TRADITIONAL</p>
+<p>Traditional mouse.</p>
+</li>
+<li><p>DI8DEVTYPEMOUSE_UNKNOWN</p>
+<p>Subtype could not be determined.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_REMOTE</p>
+<p>Remote-control device. The following subtype is defined.</p>
+<ul>
+<li><p>DI8DEVTYPEREMOTE_UNKNOWN</p>
+<p>Subtype could not be determined.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_SCREENPOINTER</p>
+<p>Screen pointer. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPESCREENPTR_UNKNOWN</p>
+<p>Unknown subtype.</p>
+</li>
+<li><p>DI8DEVTYPESCREENPTR_LIGHTGUN</p>
+<p>Light gun.</p>
+</li>
+<li><p>DI8DEVTYPESCREENPTR_LIGHTPEN</p>
+<p>Light pen.</p>
+</li>
+<li><p>DI8DEVTYPESCREENPTR_TOUCH</p>
+<p>Touch screen.</p>
+</li>
+</ul>
+</li>
+<li><p>DI8DEVTYPE_SUPPLEMENTAL</p>
+<p>Specialized device with functionality unsuitable for the main control of an application, such as pedals used with a wheel. The following subtypes are defined.</p>
+<ul>
+<li><p>DI8DEVTYPESUPPLEMENTAL_2NDHANDCONTROLLER</p>
+<p>Secondary handheld controller.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_COMBINEDPEDALS</p>
+<p>Device whose primary function is to report acceleration and brake pedal values from a single axis.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_DUALPEDALS</p>
+<p>Device whose primary function is to report acceleration and brake pedal values from separate axes.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_HANDTRACKER</p>
+<p>Device that tracks hand movement.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_HEADTRACKER</p>
+<p>Device that tracks head movement.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_RUDDERPEDALS</p>
+<p>Device with rudder pedals.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_SHIFTER</p>
+<p>Device that reports gear selection from an axis.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_SHIFTSTICKGATE</p>
+<p>Device that reports gear selection from button states.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_SPLITTHROTTLE</p>
+<p>Device whose primary function is to report at least two throttle values. It may have other controls.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_THREEPEDALS</p>
+<p>Device whose primary function is to report acceleration, brake, and clutch pedal values from separate axes.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_THROTTLE</p>
+<p>Device whose primary function is to report a single throttle value. It may have other controls.</p>
+</li>
+<li><p>DI8DEVTYPESUPPLEMENTAL_UNKNOWN</p>
+<p>Unknown subtype.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Versions of DirectInput earlier than DirectX 8.0 have a somewhat different scheme of device types and subtypes. See the DIDEVTYPExxx defines in Dinput.h.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416610(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

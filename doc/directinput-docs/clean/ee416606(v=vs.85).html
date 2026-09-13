@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIDATAFORMAT Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="didataformat-structure">DIDATAFORMAT Structure</h1>
+<p>Describes a device's data format. This structure is used with the <a href="ee417925(v=vs.85).html">IDirectInputDevice8::SetDataFormat</a> method.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DIDATAFORMAT {
+    DWORD dwSize;
+    DWORD dwObjSize;
+    DWORD dwFlags;
+    DWORD dwDataSize;
+    DWORD dwNumObjs;
+    LPDIOBJECTDATAFORMAT rgodf;
+} DIDATAFORMAT, *LPDIDATAFORMAT;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><strong>dwSize</strong><br/>
+Size of this structure, in bytes.</li>
+<li><strong>dwObjSize</strong><br/>
+Size of the <a href="ee416633(v=vs.85).html">DIOBJECTDATAFORMAT</a> structure, in bytes.</li>
+<li><strong>dwFlags</strong><br/>
+Flags describing other attributes of the data format. This value can be one of the following:
+<ul>
+<li>DIDF_ABSAXIS<br/>
+The axes are in absolute mode. Setting this flag in the data format is equivalent to manually setting the axis mode property, using the <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> method. This cannot be combined with DIDF_RELAXIS flag.</li>
+<li>DIDF_RELAXIS<br/>
+The axes are in relative mode. Setting this flag in the data format is equivalent to manually setting the axis mode property using the <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> method. This cannot be combined with the DIDF_ABSAXIS flag.</li>
+</ul>
+</li>
+<li><strong>dwDataSize</strong><br/>
+Size of a data packet returned by the device, in bytes. This value must be a multiple of 4 and must exceed the largest offset value for an object's data within the data packet.</li>
+<li><strong>dwNumObjs</strong><br/>
+Number of objects in the rgodf array.</li>
+<li><strong>rgodf</strong><br/>
+Address to an array of <a href="ee416633(v=vs.85).html">DIOBJECTDATAFORMAT</a> structures. Each structure describes how one object's data should be reported in the device data. Typical errors include placing two pieces of information in the same location and placing one piece of information in more than one location.</li>
+</ul>
+<h2 id="remarks">Remarks</h2>
+<p>Applications do not typically need to create a <a href="ee416606(v=vs.85).html">DIDATAFORMAT</a> structure. An application can use one of the predefined global data format variables, c_dfDIMouse, c_dfDIMouse2, c_dfDIKeyboard, c_dfDIJoystick, or c_dfDIJoystick2.</p>
+<p>Applications that need to create a <a href="ee416606(v=vs.85).html">DIDATAFORMAT</a> structure must first call <a href="ee417889(v=vs.85).html">IDirectInputDevice8::EnumObjects</a> to determine the available objects for the current device. This is because the <a href="ee417925(v=vs.85).html">IDirectInputDevice8::SetDataFormat</a> method will return DIERR_INVALIDPARAM if an object is described in the <a href="ee416606(v=vs.85).html">DIDATAFORMAT</a> structure but does not exist on the current device.</p>
+<p>The following code example sets a data format for a device that has an X-axis and a Y-axis:</p>
+<pre>// Suppose an application uses the following 
+// structure to read device data. 
+    
+typedef struct MYDATA { 
+    LONG  lX;                   // X-axis goes here. 
+    LONG  lY;                   // Y-axis goes here. 
+    BYTE  bButtonA;             // One button goes here. 
+    BYTE  bButtonB;             // Another button goes here. 
+    BYTE  bPadding[2];          // Must be DWORD multiple in size. 
+} MYDATA; 
+    
+// Then, it can use the following data format. 
+    
+DIOBJECTDATAFORMAT rgodf[ ] = { 
+  { &amp;GUID_XAxis, FIELD_OFFSET(MYDATA, lX),
+    DIDFT_AXIS | DIDFT_ANYINSTANCE, 0, }, 
+  { &amp;GUID_YAxis, FIELD_OFFSET(MYDATA, lY), 
+    DIDFT_AXIS | DIDFT_ANYINSTANCE, 0, }, 
+  { &amp;GUID_Button, FIELD_OFFSET(MYDATA, bButtonA),
+    DIDFT_BUTTON | DIDFT_ANYINSTANCE, 0, }, 
+  { &amp;GUID_Button, FIELD_OFFSET(MYDATA, bButtonB), 
+    DIDFT_BUTTON | DIDFT_ANYINSTANCE, 0, }, 
+}; 
+#define numObjects (sizeof(rgodf) / sizeof(rgodf[0])) 
+    
+DIDATAFORMAT df = { 
+    sizeof(DIDATAFORMAT),       // Size of this structure 
+    sizeof(DIOBJECTDATAFORMAT), // Size of object data format 
+    DIDF_ABSAXIS,               // Absolute axis coordinates 
+    sizeof(MYDATA),             // Size of device data 
+    numObjects,                 // Number of objects 
+    rgodf,                      // And here they are 
+}; </pre>
+<h2 id="see-also">See Also</h2>
+<p><a href="ee416599(v=vs.85).html">DIACTIONFORMAT</a></p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416606(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

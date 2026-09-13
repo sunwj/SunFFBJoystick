@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immediate Joystick Data</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="immediate-joystick-data">Immediate Joystick Data</h1>
+<p>To retrieve the current state of the joystick, call the <a href="ee417897(v=vs.85).html">IDirectInputDevice8::GetDeviceState</a> method with a pointer to a <a href="ee416627(v=vs.85).html">DIJOYSTATE</a> or a <a href="ee416628(v=vs.85).html">DIJOYSTATE2</a> structure, depending on whether the data format was set with <em>c_dfDIJoystick</em> or <em>c_dfDIJoystick2</em>. (See <a href="ee416593(v=vs.85).html">Device Data Formats</a>.) The joystick state returned in the structure includes the coordinates of the axes, the state of the buttons, and the state of the point-of-view controllers.</p>
+<p>The first seven members of the <a href="ee416627(v=vs.85).html">DIJOYSTATE</a> structure hold the axis coordinates. The last of these seven, <strong>rglSlider</strong>, is an array of two values. (See <a href="ee418270(v=vs.85).html">Interpreting Joystick Axis Data</a>.)</p>
+<p>The <strong>rgdwPOV</strong> member contains the position of up to four point-of-view controllers in hundredths of a degree clockwise from north (or forward). The center (neutral) position is reported as -1. For controllers that have only five positions, the position is one of the following values:</p>
+<ul>
+<li><p>- 1</p>
+</li>
+<li><p>0</p>
+</li>
+<li><p>90 * DI_DEGREES</p>
+</li>
+<li><p>180 * DI_DEGREES</p>
+</li>
+<li><p>270 * DI_DEGREES.</p>
+</li>
+</ul>
+<p>Some drivers report a value of 65,535, instead of - 1, for the center position. You should check for a centered POV indicator as follows:</p>
+<pre>BOOL POVCentered = (LOWORD(dwPOV) == 0xFFFF);
+</pre>
+<p>The <strong>rgbButtons</strong> member is an array of bytes, one for each of 32 or 128 buttons, depending on the data format. For each button, the high bit is set if the button is down and it is clear if the button is up or not present.</p>
+<p>The <a href="ee416628(v=vs.85).html">DIJOYSTATE2</a> structure has additional members for information about the velocity, acceleration, force, and torque of the axes.</p>
+<h2 id="see-also">See also</h2>
+<p><a href="ee416236(v=vs.85).html">Buffered and Immediate Data</a></p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418260(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

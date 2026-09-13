@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyboard Mapping Enumeration</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="keyboard-mapping-enumeration">Keyboard Mapping Enumeration</h1>
+<p>The following constants are used in the dwSemantic member of the <a href="ee416598(v=vs.85).html">DIACTION</a> structure to map an action to a physical key.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef enum Keyboard_Mapping
+{
+    DIKEYBOARD_0,
+    DIKEYBOARD_1,
+    DIKEYBOARD_2,
+    DIKEYBOARD_3,
+    DIKEYBOARD_4,
+    DIKEYBOARD_5,
+    DIKEYBOARD_6,
+    DIKEYBOARD_7,
+    DIKEYBOARD_8,
+    DIKEYBOARD_9,
+    DIKEYBOARD_A,
+    DIKEYBOARD_ABNT_C1,
+    DIKEYBOARD_ABNT_C2,
+    DIKEYBOARD_ADD,
+    DIKEYBOARD_APOSTROPHE,
+    DIKEYBOARD_APPS,
+    DIKEYBOARD_AT,
+    DIKEYBOARD_AX,
+    DIKEYBOARD_B,
+    DIKEYBOARD_BACK,
+    DIKEYBOARD_BACKSLASH,
+    DIKEYBOARD_C,
+    DIKEYBOARD_CALCULATOR,
+    DIKEYBOARD_CAPITAL,
+    DIKEYBOARD_COLON,
+    DIKEYBOARD_COMMA,
+    DIKEYBOARD_CONVERT,
+    DIKEYBOARD_D,
+    DIKEYBOARD_DECIMAL,
+    DIKEYBOARD_DELETE,
+    DIKEYBOARD_DIVIDE,
+    DIKEYBOARD_DOWN,
+    DIKEYBOARD_E,
+    DIKEYBOARD_END,
+    DIKEYBOARD_EQUALS,
+    DIKEYBOARD_ESCAPE,
+    DIKEYBOARD_F,
+    DIKEYBOARD_F1,
+    DIKEYBOARD_F2,
+    DIKEYBOARD_F3,
+    DIKEYBOARD_F4,
+    DIKEYBOARD_F5,
+    DIKEYBOARD_F6,
+    DIKEYBOARD_F7,
+    DIKEYBOARD_F8,
+    DIKEYBOARD_F9,
+    DIKEYBOARD_F10,
+    DIKEYBOARD_F11,
+    DIKEYBOARD_F12,
+    DIKEYBOARD_F13,
+    DIKEYBOARD_F14,
+    DIKEYBOARD_F15,
+    DIKEYBOARD_G,
+    DIKEYBOARD_GRAVE,
+    DIKEYBOARD_H,
+    DIKEYBOARD_HOME,
+    DIKEYBOARD_I,
+    DIKEYBOARD_INSERT,
+    DIKEYBOARD_J,
+    DIKEYBOARD_K,
+    DIKEYBOARD_KANA,
+    DIKEYBOARD_KANJI,
+    DIKEYBOARD_L,
+    DIKEYBOARD_LBRACKET,
+    DIKEYBOARD_LCONTROL,
+    DIKEYBOARD_LEFT,
+    DIKEYBOARD_LMENU,
+    DIKEYBOARD_LSHIFT,
+    DIKEYBOARD_LWIN,
+    DIKEYBOARD_M,
+    DIKEYBOARD_MAIL,
+    DIKEYBOARD_MEDIASELECT,
+    DIKEYBOARD_MEDIASTOP,
+    DIKEYBOARD_MINUS,
+    DIKEYBOARD_MULTIPLY,
+    DIKEYBOARD_MUTE,
+    DIKEYBOARD_MYCOMPUTER,
+    DIKEYBOARD_N,
+    DIKEYBOARD_NEXT,
+    DIKEYBOARD_NEXTTRACK,
+    DIKEYBOARD_NOCONVERT,
+    DIKEYBOARD_NUMLOCK,
+    DIKEYBOARD_NUMPAD0,
+    DIKEYBOARD_NUMPAD1,
+    DIKEYBOARD_NUMPAD2,
+    DIKEYBOARD_NUMPAD3,
+    DIKEYBOARD_NUMPAD4,
+    DIKEYBOARD_NUMPAD5,
+    DIKEYBOARD_NUMPAD6,
+    DIKEYBOARD_NUMPAD7,
+    DIKEYBOARD_NUMPAD8,
+    DIKEYBOARD_NUMPAD9,
+    DIKEYBOARD_NUMPADCOMMA,
+    DIKEYBOARD_NUMPADENTER,
+    DIKEYBOARD_NUMPADEQUALS,
+    DIKEYBOARD_O,
+    DIKEYBOARD_OEM_102,
+    DIKEYBOARD_P,
+    DIKEYBOARD_PAUSE,
+    DIKEYBOARD_PERIOD,
+    DIKEYBOARD_PLAYPAUSE,
+    DIKEYBOARD_POWER,
+    DIKEYBOARD_PREVTRACK,
+    DIKEYBOARD_PRIOR,
+    DIKEYBOARD_Q,
+    DIKEYBOARD_R,
+    DIKEYBOARD_RBRACKET,
+    DIKEYBOARD_RCONTROL,
+    DIKEYBOARD_RETURN,
+    DIKEYBOARD_RIGHT,
+    DIKEYBOARD_RMENU,
+    DIKEYBOARD_RSHIFT,
+    DIKEYBOARD_RWIN,
+    DIKEYBOARD_S,
+    DIKEYBOARD_SCROLL,
+    DIKEYBOARD_SEMICOLON,
+    DIKEYBOARD_SLASH,
+    DIKEYBOARD_SLEEP,
+    DIKEYBOARD_SPACE,
+    DIKEYBOARD_STOP,
+    DIKEYBOARD_SUBTRACT,
+    DIKEYBOARD_SYSRQ,
+    DIKEYBOARD_T,
+    DIKEYBOARD_TAB,
+    DIKEYBOARD_U,
+    DIKEYBOARD_UNDERLINE,
+    DIKEYBOARD_UNLABELED,
+    DIKEYBOARD_UP,
+    DIKEYBOARD_V,
+    DIKEYBOARD_VOLUMEDOWN,
+    DIKEYBOARD_VOLUMEUP,
+    DIKEYBOARD_W,
+    DIKEYBOARD_WAKE,
+    DIKEYBOARD_WEBBACK,
+    DIKEYBOARD_WEBFAVORITES,
+    DIKEYBOARD_WEBFORWARD,
+    DIKEYBOARD_WEBHOME,
+    DIKEYBOARD_WEBREFRESH,
+    DIKEYBOARD_WEBSEARCH,
+    DIKEYBOARD_WEBSTOP,
+    DIKEYBOARD_X,
+    DIKEYBOARD_Y,
+    DIKEYBOARD_YEN,
+    DIKEYBOARD_Z
+} Keyboard Mapping, *LPKeyboard Mapping;
+</code></pre>
+<h2 id="constants">Constants</h2>
+<table>
+<thead>
+<tr class="header">
+<th> </th>
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_0"></span>DIKEYBOARD_0</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_1"></span>DIKEYBOARD_1</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_2"></span>DIKEYBOARD_2</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_3"></span>DIKEYBOARD_3</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_4"></span>DIKEYBOARD_4</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_5"></span>DIKEYBOARD_5</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_6"></span>DIKEYBOARD_6</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_7"></span>DIKEYBOARD_7</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_8"></span>DIKEYBOARD_8</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_9"></span>DIKEYBOARD_9</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_A"></span>DIKEYBOARD_A</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_ABNT_C1"></span>DIKEYBOARD_ABNT_C1</td>
+<td>On numeric pad of Brazilian keyboards</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_ABNT_C2"></span>DIKEYBOARD_ABNT_C2</td>
+<td>On numeric pad of Brazilian keyboards</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_ADD"></span>DIKEYBOARD_ADD</td>
+<td>PLUS SIGN (+) on numeric keypad</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_APOSTROPHE"></span>DIKEYBOARD_APOSTROPHE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_APPS"></span>DIKEYBOARD_APPS</td>
+<td>Application key</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_AT"></span>DIKEYBOARD_AT</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_AX"></span>DIKEYBOARD_AX</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_B"></span>DIKEYBOARD_B</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_BACK"></span>DIKEYBOARD_BACK</td>
+<td>BACKSPACE</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_BACKSLASH"></span>DIKEYBOARD_BACKSLASH</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_C"></span>DIKEYBOARD_C</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_CALCULATOR"></span>DIKEYBOARD_CALCULATOR</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_CAPITAL"></span>DIKEYBOARD_CAPITAL</td>
+<td>CAPS LOCK</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_COLON"></span>DIKEYBOARD_COLON</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_COMMA"></span>DIKEYBOARD_COMMA</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_CONVERT"></span>DIKEYBOARD_CONVERT</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_D"></span>DIKEYBOARD_D</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_DECIMAL"></span>DIKEYBOARD_DECIMAL</td>
+<td>PERIOD (decimal point) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_DELETE"></span>DIKEYBOARD_DELETE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_DIVIDE"></span>DIKEYBOARD_DIVIDE</td>
+<td>FORWARD SLASH (/) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_DOWN"></span>DIKEYBOARD_DOWN</td>
+<td>DOWN ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_E"></span>DIKEYBOARD_E</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_END"></span>DIKEYBOARD_END</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_EQUALS"></span>DIKEYBOARD_EQUALS</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_ESCAPE"></span>DIKEYBOARD_ESCAPE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F"></span>DIKEYBOARD_F</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F1"></span>DIKEYBOARD_F1</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F2"></span>DIKEYBOARD_F2</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F3"></span>DIKEYBOARD_F3</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F4"></span>DIKEYBOARD_F4</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F5"></span>DIKEYBOARD_F5</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F6"></span>DIKEYBOARD_F6</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F7"></span>DIKEYBOARD_F7</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F8"></span>DIKEYBOARD_F8</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F9"></span>DIKEYBOARD_F9</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F10"></span>DIKEYBOARD_F10</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F11"></span>DIKEYBOARD_F11</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F12"></span>DIKEYBOARD_F12</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F13"></span>DIKEYBOARD_F13</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F14"></span>DIKEYBOARD_F14</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_F15"></span>DIKEYBOARD_F15</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_G"></span>DIKEYBOARD_G</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_GRAVE"></span>DIKEYBOARD_GRAVE</td>
+<td>GRAVE ACCENT (`)</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_H"></span>DIKEYBOARD_H</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_HOME"></span>DIKEYBOARD_HOME</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_I"></span>DIKEYBOARD_I</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_INSERT"></span>DIKEYBOARD_INSERT</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_J"></span>DIKEYBOARD_J</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_K"></span>DIKEYBOARD_K</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_KANA"></span>DIKEYBOARD_KANA</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_KANJI"></span>DIKEYBOARD_KANJI</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_L"></span>DIKEYBOARD_L</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_LBRACKET"></span>DIKEYBOARD_LBRACKET</td>
+<td>Left SQUARE BRACKET ([)</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_LCONTROL"></span>DIKEYBOARD_LCONTROL</td>
+<td>Left CTRL</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_LEFT"></span>DIKEYBOARD_LEFT</td>
+<td>LEFT ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_LMENU"></span>DIKEYBOARD_LMENU</td>
+<td>Left ALT</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_LSHIFT"></span>DIKEYBOARD_LSHIFT</td>
+<td>Left SHIFT</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_LWIN"></span>DIKEYBOARD_LWIN</td>
+<td>Left Windows logo key</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_M"></span>DIKEYBOARD_M</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_MAIL"></span>DIKEYBOARD_MAIL</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_MEDIASELECT"></span>DIKEYBOARD_MEDIASELECT</td>
+<td>MEDIA SELECT key, which displays a selection of supported media players on the system</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_MEDIASTOP"></span>DIKEYBOARD_MEDIASTOP</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_MINUS"></span>DIKEYBOARD_MINUS</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_MULTIPLY"></span>DIKEYBOARD_MULTIPLY</td>
+<td>ASTERISK (*) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_MUTE"></span>DIKEYBOARD_MUTE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_MYCOMPUTER"></span>DIKEYBOARD_MYCOMPUTER</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_N"></span>DIKEYBOARD_N</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NEXT"></span>DIKEYBOARD_NEXT</td>
+<td>PAGE DOWN</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NEXTTRACK"></span>DIKEYBOARD_NEXTTRACK</td>
+<td>NEXT TRACK</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NOCONVERT"></span>DIKEYBOARD_NOCONVERT</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMLOCK"></span>DIKEYBOARD_NUMLOCK</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD0"></span>DIKEYBOARD_NUMPAD0</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD1"></span>DIKEYBOARD_NUMPAD1</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD2"></span>DIKEYBOARD_NUMPAD2</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD3"></span>DIKEYBOARD_NUMPAD3</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD4"></span>DIKEYBOARD_NUMPAD4</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD5"></span>DIKEYBOARD_NUMPAD5</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD6"></span>DIKEYBOARD_NUMPAD6</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD7"></span>DIKEYBOARD_NUMPAD7</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD8"></span>DIKEYBOARD_NUMPAD8</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPAD9"></span>DIKEYBOARD_NUMPAD9</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPADCOMMA"></span>DIKEYBOARD_NUMPADCOMMA</td>
+<td>On numeric keypad of NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPADENTER"></span>DIKEYBOARD_NUMPADENTER</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_NUMPADEQUALS"></span>DIKEYBOARD_NUMPADEQUALS</td>
+<td>On numeric keypad of NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_O"></span>DIKEYBOARD_O</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_OEM_102"></span>DIKEYBOARD_OEM_102</td>
+<td>On British and German keyboards</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_P"></span>DIKEYBOARD_P</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_PAUSE"></span>DIKEYBOARD_PAUSE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_PERIOD"></span>DIKEYBOARD_PERIOD</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_PLAYPAUSE"></span>DIKEYBOARD_PLAYPAUSE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_POWER"></span>DIKEYBOARD_POWER</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_PREVTRACK"></span>DIKEYBOARD_PREVTRACK</td>
+<td>PREVIOUS TRACK; CIRCUMFLEX (^) on Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_PRIOR"></span>DIKEYBOARD_PRIOR</td>
+<td>PAGE UP</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_Q"></span>DIKEYBOARD_Q</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_R"></span>DIKEYBOARD_R</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_RBRACKET"></span>DIKEYBOARD_RBRACKET</td>
+<td>Right SQUARE BRACKET (])</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_RCONTROL"></span>DIKEYBOARD_RCONTROL</td>
+<td>Right CTRL</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_RETURN"></span>DIKEYBOARD_RETURN</td>
+<td>ENTER on main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_RIGHT"></span>DIKEYBOARD_RIGHT</td>
+<td>RIGHT ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_RMENU"></span>DIKEYBOARD_RMENU</td>
+<td>Right ALT</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_RSHIFT"></span>DIKEYBOARD_RSHIFT</td>
+<td>Right SHIFT</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_RWIN"></span>DIKEYBOARD_RWIN</td>
+<td>Right Windows logo key</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_S"></span>DIKEYBOARD_S</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_SCROLL"></span>DIKEYBOARD_SCROLL</td>
+<td>SCROLL LOCK</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_SEMICOLON"></span>DIKEYBOARD_SEMICOLON</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_SLASH"></span>DIKEYBOARD_SLASH</td>
+<td>FORWARD SLASH (/) on main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_SLEEP"></span>DIKEYBOARD_SLEEP</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_SPACE"></span>DIKEYBOARD_SPACE</td>
+<td>SPACEBAR</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_STOP"></span>DIKEYBOARD_STOP</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_SUBTRACT"></span>DIKEYBOARD_SUBTRACT</td>
+<td>MINUS SIGN (-) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_SYSRQ"></span>DIKEYBOARD_SYSRQ</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_T"></span>DIKEYBOARD_T</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_TAB"></span>DIKEYBOARD_TAB</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_U"></span>DIKEYBOARD_U</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_UNDERLINE"></span>DIKEYBOARD_UNDERLINE</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_UNLABELED"></span>DIKEYBOARD_UNLABELED</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_UP"></span>DIKEYBOARD_UP</td>
+<td>UP ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_V"></span>DIKEYBOARD_V</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_VOLUMEDOWN"></span>DIKEYBOARD_VOLUMEDOWN</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_VOLUMEUP"></span>DIKEYBOARD_VOLUMEUP</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_W"></span>DIKEYBOARD_W</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WAKE"></span>DIKEYBOARD_WAKE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WEBBACK"></span>DIKEYBOARD_WEBBACK</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WEBFAVORITES"></span>DIKEYBOARD_WEBFAVORITES</td>
+<td>Displays the Microsoft Internet Explorer Favorites list, the Windows Favorites folder, or the Netscape Bookmarks list</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WEBFORWARD"></span>DIKEYBOARD_WEBFORWARD</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WEBHOME"></span>DIKEYBOARD_WEBHOME</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WEBREFRESH"></span>DIKEYBOARD_WEBREFRESH</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WEBSEARCH"></span>DIKEYBOARD_WEBSEARCH</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_WEBSTOP"></span>DIKEYBOARD_WEBSTOP</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_X"></span>DIKEYBOARD_X</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_Y"></span>DIKEYBOARD_Y</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_YEN"></span>DIKEYBOARD_YEN</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Mapping.DIKEYBOARD_Z"></span>DIKEYBOARD_Z</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418643(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

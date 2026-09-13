@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conditions</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="conditions">Conditions</h1>
+<p>Conditions are forces applied in response to current sensor values within the device. In other words, conditions require information about device motion, such as position or velocity of a joystick handle. In general, conditions are not associated with individual events during a game or other application. They represent ambient phenomena, such as the stiffness or looseness of a flight stick, or the tendency of a steering wheel to return to a straight-ahead position. A condition does not have a predefined magnitude. The magnitude is scaled in proportion to the movement or position of the input object.</p>
+<p>DirectInput defines the following types of condition effects:</p>
+<ul>
+<li><p>Friction. The force is applied when the axis is moved and depends on the defined friction coefficient.</p>
+</li>
+<li><p>Damper. The force increases in proportion to the velocity with which the user moves the axis.</p>
+</li>
+<li><p>Inertia. The force increases in proportion to the acceleration of the axis.</p>
+</li>
+<li><p>Spring. The force increases in proportion to the distance of the axis from a defined neutral point.</p>
+</li>
+</ul>
+<p>Most hardware devices do not support the application of envelopes to conditions. Conditions have the following type-specific parameters:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>Offset</td>
+<td>The offset from the zero reading of the appropriate sensor value at which the condition begins to be applied. For a spring effect, the neutral point - that is, the point along the axis at which the spring would be considered at rest - would be defined by the offset for the condition. For a damper, the offset would define the greatest velocity value for which damping force is zero. Offset is not normally used for inertia or friction effects.</td>
+</tr>
+<tr class="even">
+<td>Coefficient</td>
+<td>A multiplier that scales the effect. For some devices, you can set separate coefficients for the positive and negative direction along the axis associated with the condition. For example, a flight stick controlling a damaged aircraft might move more easily to the right than to the left.</td>
+</tr>
+<tr class="odd">
+<td>Saturation</td>
+<td>In force feedback, saturation is an expression of the maximum possible force for an effect. For example, suppose a flight stick has a spring condition on the x-axis. The offset is 0 and the coefficient is 10,000, so the maximum force is normally exerted when the stick is furthest from the center. But if you define a positive and negative saturation of 5,000, the force does not increase after the stick has been moved halfway to the right or left. Not all devices support saturation.</td>
+</tr>
+<tr class="even">
+<td>Deadband</td>
+<td>The deadband is a zone around the offset of an axis at which the condition is not active. In the case of a spring that is at rest in the middle of an axis, the deadband enlarges this area of rest. Not all devices support deadband.</td>
+</tr>
+</tbody>
+</table>
+<p>Conditions can have duration, although in most cases you would probably want to set the duration to infinite ( - 1) and stop the effect only in response to some event in the application.</p>
+<p>To create a condition, pass one of the following values in the rguid parameter of the <a href="ee417880(v=vs.85).html">IDirectInputDevice8::CreateEffect</a> method:</p>
+<ul>
+<li><p>GUID_Spring</p>
+</li>
+<li><p>GUID_Damper</p>
+</li>
+<li><p>GUID_Inertia</p>
+</li>
+<li><p>GUID_Friction</p>
+</li>
+</ul>
+<p>You can also pass any other globally unique identifier (GUID) obtained by the <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> method, provided the low byte of the dwEffType member of the <a href="ee416617(v=vs.85).html">DIEffectInfo</a> structure is equal to DIEFT_CONDITION. In this way, you can use hardware-specific conditions designed by the manufacturer.</p>
+<p>The type-specific structure for conditions is <a href="ee416601(v=vs.85).html">DICONDITION</a>. For multiple-axis conditions, you can provide an array of such structures, one for each axis, or a single structure that defines the condition in the specified direction. In either case, you must set the cbTypeSpecificParams member of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure to the number of bytes used; that is, to sizeof(DICONDITION) * n, where n is the number of structures provided.</p>
+<p>An application should call the <a href="ee417899(v=vs.85).html">IDirectInputDevice8::GetEffectInfo</a> method or the <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> method and examine the dwEffType member of the <a href="ee416617(v=vs.85).html">DIEffectInfo</a> structure to determine whether both a positive and a negative coefficient and saturation for the effect are supported on the device. If the effect does not return the DIEFT_POSNEGCOEFFICIENTS flag, it ignores the value in the lNegativeCoefficient member, and the value in lPositiveCoefficient is applied to the entire axis. Likewise, if the effect does not return the DIEFT_POSNEGSATURATION flag, it ignores the value in dwNegativeSaturation, and the value in dwPositiveSaturation is used as the negative saturation level. Finally, if the effect does not return the DIEFT_SATURATION flag, it ignores both the dwPositiveSaturationdwNegativeSaturation values, and no saturation is applied.</p>
+<p>You should also check <a href="ee416617(v=vs.85).html">DIEffectInfo</a>. dwEffType for the DIEFT_DEADBAND flag, to see if deadband is supported for the condition. If it is not supported, the value in the lDeadBand member of the <a href="ee416601(v=vs.85).html">DICONDITION</a> structure will be ignored.</p>
+<p>You can set a coefficient to a negative value, and this has the effect of generating the force in the opposite direction. For example, for a spring effect, it would cause the spring to push away from the offset point rather than pulling toward it.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416335(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

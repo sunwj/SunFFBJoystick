@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDirectInputDevice8::Initialize Method</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="idirectinputdevice8initialize-method">IDirectInputDevice8::Initialize Method</h1>
+<p>Initializes a DirectInputDevice object. The <a href="ee417803(v=vs.85).html">IDirectInput8::CreateDevice</a> method automatically initializes a device after creating it; applications normally do not need to call this method.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">HRESULT Initialize(
+         HINSTANCE hinst,
+         DWORD dwVersion,
+         REFGUID rguid
+)
+</code></pre>
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><em>hinst</em><br/>
+Instance handle to the application or dynamic-link library (DLL) that is creating the DirectInputDevice object. DirectInput uses this value to determine whether the application or DLL has been certified and to establish any special behaviors that might be necessary for backward compatibility. It is an error for a DLL to pass the handle to the parent application. For example, a Microsoft ActiveX control embedded in a Web page that uses DirectInput must pass its own instance handle, and not the handle to the browser. This ensures that DirectInput recognizes the control and can enable any special behaviors that may be necessary.</li>
+<li><em>dwVersion</em><br/>
+Version number of DirectInput for which the application is designed. This value is normally DIRECTINPUT_VERSION. Passing the version number of a previous version causes DirectInput to emulate that version.</li>
+<li><em>rguid</em><br/>
+Reference to (C++) or address of (C) the globally unique identifier (GUID) identifying the instance of the device with which the interface should be associated. The <a href="ee417804(v=vs.85).html">IDirectInput8::EnumDevices</a> method can be used to determine which instance GUIDs are supported by the system.</li>
+</ul>
+<h4 id="return-value">Return Value</h4>
+<p>If the method succeeds, the return value is DI_OK or S_FALSE. If the method returns S_FALSE, the device had already been initialized with the instance GUID passed in though rGUID. If the method fails, the return value can be one of the following error values: DIERR_ACQUIRED, DIERR_DEVICENOTREG.</p>
+<h2 id="remarks">Remarks</h2>
+<p>If this method fails, the underlying object should be considered to be in an indeterminate state and must be reinitialized before use.</p>
+<h2 id="requirements">Requirements</h2>
+<p><strong>Header:</strong> Declared in dinput.h.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417910(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

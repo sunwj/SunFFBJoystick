@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyboard Device Enumeration</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="keyboard-device-enumeration">Keyboard Device Enumeration</h1>
+<p>Keyboard device constants, defined in Dinput.h, represent offsets within a keyboard device's data packet, a 256-byte array.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef enum Keyboard_Device
+{
+    DIK_0,
+    DIK_1,
+    DIK_2,
+    DIK_3,
+    DIK_4,
+    DIK_5,
+    DIK_6,
+    DIK_7,
+    DIK_8,
+    DIK_9,
+    DIK_A,
+    DIK_ABNT_C1,
+    DIK_ABNT_C2,
+    DIK_ADD,
+    DIK_APOSTROPHE,
+    DIK_APPS,
+    DIK_AT,
+    DIK_AX,
+    DIK_B,
+    DIK_BACK,
+    DIK_BACKSLASH,
+    DIK_C,
+    DIK_CALCULATOR,
+    DIK_CAPITAL,
+    DIK_COLON,
+    DIK_COMMA,
+    DIK_CONVERT,
+    DIK_D,
+    DIK_DECIMAL,
+    DIK_DELETE,
+    DIK_DIVIDE,
+    DIK_DOWN,
+    DIK_E,
+    DIK_END,
+    DIK_EQUALS,
+    DIK_ESCAPE,
+    DIK_F,
+    DIK_F1,
+    DIK_F2,
+    DIK_F3,
+    DIK_F4,
+    DIK_F5,
+    DIK_F6,
+    DIK_F7,
+    DIK_F8,
+    DIK_F9,
+    DIK_F10,
+    DIK_F11,
+    DIK_F12,
+    DIK_F13,
+    DIK_F14,
+    DIK_F15,
+    DIK_G,
+    DIK_GRAVE,
+    DIK_H,
+    DIK_HOME,
+    DIK_I,
+    DIK_INSERT,
+    DIK_J,
+    DIK_K,
+    DIK_KANA,
+    DIK_KANJI,
+    DIK_L,
+    DIK_LBRACKET,
+    DIK_LCONTROL,
+    DIK_LEFT,
+    DIK_LMENU,
+    DIK_LSHIFT,
+    DIK_LWIN,
+    DIK_M,
+    DIK_MAIL,
+    DIK_MEDIASELECT,
+    DIK_MEDIASTOP,
+    DIK_MINUS,
+    DIK_MULTIPLY,
+    DIK_MUTE,
+    DIK_MYCOMPUTER,
+    DIK_N,
+    DIK_NEXT,
+    DIK_NEXTTRACK,
+    DIK_NOCONVERT,
+    DIK_NUMLOCK,
+    DIK_NUMPAD0,
+    DIK_NUMPAD1,
+    DIK_NUMPAD2,
+    DIK_NUMPAD3,
+    DIK_NUMPAD4,
+    DIK_NUMPAD5,
+    DIK_NUMPAD6,
+    DIK_NUMPAD7,
+    DIK_NUMPAD8,
+    DIK_NUMPAD9,
+    DIK_NUMPADCOMMA,
+    DIK_NUMPADENTER,
+    DIK_NUMPADEQUALS,
+    DIK_O,
+    DIK_OEM_102,
+    DIK_P,
+    DIK_PAUSE,
+    DIK_PERIOD,
+    DIK_PLAYPAUSE,
+    DIK_POWER,
+    DIK_PREVTRACK,
+    DIK_PRIOR,
+    DIK_Q,
+    DIK_R,
+    DIK_RBRACKET,
+    DIK_RCONTROL,
+    DIK_RETURN,
+    DIK_RIGHT,
+    DIK_RMENU,
+    DIK_RSHIFT,
+    DIK_RWIN,
+    DIK_S,
+    DIK_SCROLL,
+    DIK_SEMICOLON,
+    DIK_SLASH,
+    DIK_SLEEP,
+    DIK_SPACE,
+    DIK_STOP,
+    DIK_SUBTRACT,
+    DIK_SYSRQ,
+    DIK_T,
+    DIK_TAB,
+    DIK_U,
+    DIK_UNDERLINE,
+    DIK_UNLABELED,
+    DIK_UP,
+    DIK_V,
+    DIK_VOLUMEDOWN,
+    DIK_VOLUMEUP,
+    DIK_W,
+    DIK_WAKE,
+    DIK_WEBBACK,
+    DIK_WEBFAVORITES,
+    DIK_WEBFORWARD,
+    DIK_WEBHOME,
+    DIK_WEBREFRESH,
+    DIK_WEBSEARCH,
+    DIK_WEBSTOP,
+    DIK_X,
+    DIK_Y,
+    DIK_YEN,
+    DIK_Z
+} Keyboard Device, *LPKeyboard Device;
+</code></pre>
+<h2 id="constants">Constants</h2>
+<table>
+<thead>
+<tr class="header">
+<th> </th>
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_0"></span>DIK_0</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_1"></span>DIK_1</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_2"></span>DIK_2</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_3"></span>DIK_3</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_4"></span>DIK_4</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_5"></span>DIK_5</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_6"></span>DIK_6</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_7"></span>DIK_7</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_8"></span>DIK_8</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_9"></span>DIK_9</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_A"></span>DIK_A</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_ABNT_C1"></span>DIK_ABNT_C1</td>
+<td>On numeric pad of Brazilian keyboards</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_ABNT_C2"></span>DIK_ABNT_C2</td>
+<td>On numeric pad of Brazilian keyboards</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_ADD"></span>DIK_ADD</td>
+<td>PLUS SIGN (+) on numeric keypad</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_APOSTROPHE"></span>DIK_APOSTROPHE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_APPS"></span>DIK_APPS</td>
+<td>Application key</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_AT"></span>DIK_AT</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_AX"></span>DIK_AX</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_B"></span>DIK_B</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_BACK"></span>DIK_BACK</td>
+<td>BACKSPACE</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_BACKSLASH"></span>DIK_BACKSLASH</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_C"></span>DIK_C</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_CALCULATOR"></span>DIK_CALCULATOR</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_CAPITAL"></span>DIK_CAPITAL</td>
+<td>CAPS LOCK</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_COLON"></span>DIK_COLON</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_COMMA"></span>DIK_COMMA</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_CONVERT"></span>DIK_CONVERT</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_D"></span>DIK_D</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_DECIMAL"></span>DIK_DECIMAL</td>
+<td>PERIOD (decimal point) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_DELETE"></span>DIK_DELETE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_DIVIDE"></span>DIK_DIVIDE</td>
+<td>Forward slash (/) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_DOWN"></span>DIK_DOWN</td>
+<td>DOWN ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_E"></span>DIK_E</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_END"></span>DIK_END</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_EQUALS"></span>DIK_EQUALS</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_ESCAPE"></span>DIK_ESCAPE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F"></span>DIK_F</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F1"></span>DIK_F1</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F2"></span>DIK_F2</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F3"></span>DIK_F3</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F4"></span>DIK_F4</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F5"></span>DIK_F5</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F6"></span>DIK_F6</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F7"></span>DIK_F7</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F8"></span>DIK_F8</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F9"></span>DIK_F9</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F10"></span>DIK_F10</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F11"></span>DIK_F11</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F12"></span>DIK_F12</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F13"></span>DIK_F13</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F14"></span>DIK_F14</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_F15"></span>DIK_F15</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_G"></span>DIK_G</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_GRAVE"></span>DIK_GRAVE</td>
+<td>Grave accent (`)</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_H"></span>DIK_H</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_HOME"></span>DIK_HOME</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_I"></span>DIK_I</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_INSERT"></span>DIK_INSERT</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_J"></span>DIK_J</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_K"></span>DIK_K</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_KANA"></span>DIK_KANA</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_KANJI"></span>DIK_KANJI</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_L"></span>DIK_L</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_LBRACKET"></span>DIK_LBRACKET</td>
+<td>Left square bracket [</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_LCONTROL"></span>DIK_LCONTROL</td>
+<td>Left CTRL</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_LEFT"></span>DIK_LEFT</td>
+<td>LEFT ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_LMENU"></span>DIK_LMENU</td>
+<td>Left ALT</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_LSHIFT"></span>DIK_LSHIFT</td>
+<td>Left SHIFT</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_LWIN"></span>DIK_LWIN</td>
+<td>Left Windows logo key</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_M"></span>DIK_M</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_MAIL"></span>DIK_MAIL</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_MEDIASELECT"></span>DIK_MEDIASELECT</td>
+<td>Media Select key, which displays a selection of supported media players on the system</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_MEDIASTOP"></span>DIK_MEDIASTOP</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_MINUS"></span>DIK_MINUS</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_MULTIPLY"></span>DIK_MULTIPLY</td>
+<td>Asterisk (*) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_MUTE"></span>DIK_MUTE</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_MYCOMPUTER"></span>DIK_MYCOMPUTER</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_N"></span>DIK_N</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NEXT"></span>DIK_NEXT</td>
+<td>PAGE DOWN</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NEXTTRACK"></span>DIK_NEXTTRACK</td>
+<td>Next track</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NOCONVERT"></span>DIK_NOCONVERT</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMLOCK"></span>DIK_NUMLOCK</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD0"></span>DIK_NUMPAD0</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD1"></span>DIK_NUMPAD1</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD2"></span>DIK_NUMPAD2</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD3"></span>DIK_NUMPAD3</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD4"></span>DIK_NUMPAD4</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD5"></span>DIK_NUMPAD5</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD6"></span>DIK_NUMPAD6</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD7"></span>DIK_NUMPAD7</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD8"></span>DIK_NUMPAD8</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPAD9"></span>DIK_NUMPAD9</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPADCOMMA"></span>DIK_NUMPADCOMMA</td>
+<td>On numeric keypad of NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPADENTER"></span>DIK_NUMPADENTER</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_NUMPADEQUALS"></span>DIK_NUMPADEQUALS</td>
+<td>On numeric keypad of NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_O"></span>DIK_O</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_OEM_102"></span>DIK_OEM_102</td>
+<td>On British and German keyboards</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_P"></span>DIK_P</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_PAUSE"></span>DIK_PAUSE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_PERIOD"></span>DIK_PERIOD</td>
+<td>On main keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_PLAYPAUSE"></span>DIK_PLAYPAUSE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_POWER"></span>DIK_POWER</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_PREVTRACK"></span>DIK_PREVTRACK</td>
+<td>Previous track; circumflex on Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_PRIOR"></span>DIK_PRIOR</td>
+<td>PAGE UP</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_Q"></span>DIK_Q</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_R"></span>DIK_R</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_RBRACKET"></span>DIK_RBRACKET</td>
+<td>Right square bracket ]</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_RCONTROL"></span>DIK_RCONTROL</td>
+<td>Right CTRL</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_RETURN"></span>DIK_RETURN</td>
+<td>ENTER on main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_RIGHT"></span>DIK_RIGHT</td>
+<td>RIGHT ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_RMENU"></span>DIK_RMENU</td>
+<td>Right ALT</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_RSHIFT"></span>DIK_RSHIFT</td>
+<td>Right SHIFT</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_RWIN"></span>DIK_RWIN</td>
+<td>Right Windows logo key</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_S"></span>DIK_S</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_SCROLL"></span>DIK_SCROLL</td>
+<td>SCROLL LOCK</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_SEMICOLON"></span>DIK_SEMICOLON</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_SLASH"></span>DIK_SLASH</td>
+<td>Forward slash (/) on main keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_SLEEP"></span>DIK_SLEEP</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_SPACE"></span>DIK_SPACE</td>
+<td>SPACEBAR</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_STOP"></span>DIK_STOP</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_SUBTRACT"></span>DIK_SUBTRACT</td>
+<td>MINUS SIGN (-) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_SYSRQ"></span>DIK_SYSRQ</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_T"></span>DIK_T</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_TAB"></span>DIK_TAB</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_U"></span>DIK_U</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_UNDERLINE"></span>DIK_UNDERLINE</td>
+<td>On NEC PC-98 Japanese keyboard</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_UNLABELED"></span>DIK_UNLABELED</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_UP"></span>DIK_UP</td>
+<td>UP ARROW</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_V"></span>DIK_V</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_VOLUMEDOWN"></span>DIK_VOLUMEDOWN</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_VOLUMEUP"></span>DIK_VOLUMEUP</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_W"></span>DIK_W</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WAKE"></span>DIK_WAKE</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WEBBACK"></span>DIK_WEBBACK</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WEBFAVORITES"></span>DIK_WEBFAVORITES</td>
+<td>Displays the Microsoft Internet Explorer Favorites list, the Windows Favorites folder, or the Netscape Bookmarks list.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WEBFORWARD"></span>DIK_WEBFORWARD</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WEBHOME"></span>DIK_WEBHOME</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WEBREFRESH"></span>DIK_WEBREFRESH</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WEBSEARCH"></span>DIK_WEBSEARCH</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_WEBSTOP"></span>DIK_WEBSTOP</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_X"></span>DIK_X</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_Y"></span>DIK_Y</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span id="#Keyboard Device.DIK_YEN"></span>DIK_YEN</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span id="#Keyboard Device.DIK_Z"></span>DIK_Z</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="remarks">Remarks</h2>
+<p>The following alternate names are available:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Alternate name</th>
+<th>Regular name</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DIK_BACKSPACE</td>
+<td>DIK_BACK</td>
+<td>BACKSPACE</td>
+</tr>
+<tr class="even">
+<td>DIK_CAPSLOCK</td>
+<td>DIK_CAPITAL</td>
+<td>CAPS LOCK</td>
+</tr>
+<tr class="odd">
+<td>DIK_CIRCUMFLEX</td>
+<td>DIK_PREVTRACK</td>
+<td>On Japanese keyboard</td>
+</tr>
+<tr class="even">
+<td>DIK_DOWNARROW</td>
+<td>DIK_DOWN</td>
+<td>On arrow keypad</td>
+</tr>
+<tr class="odd">
+<td>DIK_LALT</td>
+<td>DIK_LMENU</td>
+<td>Left ALT</td>
+</tr>
+<tr class="even">
+<td>DIK_LEFTARROW</td>
+<td>DIK_LEFT</td>
+<td>On arrow keypad</td>
+</tr>
+<tr class="odd">
+<td>DIK_NUMPADMINUS</td>
+<td>DIK__SUBTRACT</td>
+<td>MINUS SIGN (-) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td>DIK_NUMPADPERIOD</td>
+<td>DIK_DECIMAL</td>
+<td>PERIOD (decimal point) on numeric keypad</td>
+</tr>
+<tr class="odd">
+<td>DIK_NUMPADPLUS</td>
+<td>DIK_ADD</td>
+<td>PLUS SIGN (+) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td>DIK_NUMPADSLASH</td>
+<td>DIK__DIVIDE</td>
+<td>Forward slash (/) on numeric keypad</td>
+</tr>
+<tr class="odd">
+<td>DIK_NUMPADSTAR</td>
+<td>DIK_MULTIPLY</td>
+<td>Asterisk (*) on numeric keypad</td>
+</tr>
+<tr class="even">
+<td>DIK_PGDN</td>
+<td>DIK_NEXT</td>
+<td>On arrow keypad</td>
+</tr>
+<tr class="odd">
+<td>DIK_PGUP</td>
+<td>DIK_PRIOR</td>
+<td>On arrow keypad</td>
+</tr>
+<tr class="even">
+<td>DIK_RALT</td>
+<td>DIK_RMENU</td>
+<td>Right ALT</td>
+</tr>
+<tr class="odd">
+<td>DIK_RIGHTARROW</td>
+<td>DIK_RIGHT</td>
+<td>On arrow keypad</td>
+</tr>
+<tr class="even">
+<td>DIK_UPARROW</td>
+<td>DIK_UP</td>
+<td>On arrow keypad</td>
+</tr>
+</tbody>
+</table>
+<p>For information about Japanese keyboards, see <a href="ee416757(v=vs.85).html">DirectInput and Japanese Keyboards</a>.</p>
+<p>The data at a given offset is associated with a keyboard key. Typically, these values are used in the dwOfs member of the <a href="ee416611(v=vs.85).html">DIDEVICEOBJECTDATA</a>, <a href="ee416633(v=vs.85).html">DIOBJECTDATAFORMAT</a> or <a href="ee416612(v=vs.85).html">DIDEVICEOBJECTINSTANCE</a> structures, or as indices when accessing data within the array using array notation.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418641(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

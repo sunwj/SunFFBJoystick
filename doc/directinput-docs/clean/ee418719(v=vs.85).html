@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Periodic Effects</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="periodic-effects">Periodic Effects</h1>
+<p>Periodic effects are waveform effects. DirectInput defines the following waveforms.</p>
+<ul>
+<li><p>Square.</p>
+</li>
+<li><p>Sine.</p>
+</li>
+<li><p>Cosine.</p>
+</li>
+<li><p>Triangle.</p>
+</li>
+<li><p>SawtoothUp. The waveform drops vertically after it reaches maximum positive force. See <a href="ee416225(v=vs.85).html">Basic Concepts of Force Feedback</a> for an example.</p>
+</li>
+<li><p>SawtoothDown. The waveform rises vertically after it reaches maximum negative force.</p>
+</li>
+</ul>
+<p>An envelope can be applied to periodic effects. See the example in <a href="ee416225(v=vs.85).html">Basic Concepts of Force Feedback</a>.</p>
+<p>The phase of a periodic effect is the point along the waveform where the effect begins. Phase is measured in hundredths of a degree, from 0 to 35,999. The following table indicates where selected phase values (in degrees) lie along the various waveforms. Max is the top (+) or bottom ( - ) of the wave, and Mid is the midpoint, where no force is applied in either direction.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Waveform</th>
+<th>0</th>
+<th>90</th>
+<th>180</th>
+<th>270</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Square</td>
+<td>+Max</td>
+<td>+Max</td>
+<td>- Max</td>
+<td>- Max</td>
+</tr>
+<tr class="even">
+<td>Sine</td>
+<td>Mid</td>
+<td>+Max</td>
+<td>Mid</td>
+<td>- Max</td>
+</tr>
+<tr class="odd">
+<td>Triangle</td>
+<td>+Max</td>
+<td>Mid</td>
+<td>- Max</td>
+<td>Mid</td>
+</tr>
+<tr class="even">
+<td>SawtoothUp</td>
+<td>- Max</td>
+<td>- Max/2</td>
+<td>Mid</td>
+<td>+Max/2 (reaches +Max just before the cycle repeats)</td>
+</tr>
+<tr class="odd">
+<td>SawtoothDown</td>
+<td>+Max</td>
+<td>+Max/2</td>
+<td>Mid</td>
+<td>- Max/2 (reaches - Max just before the cycle repeats)</td>
+</tr>
+</tbody>
+</table>
+<p>A driver may round off a phase value to the nearest supported value. For example, for a sine effect some drivers support only values of 0 and 9,000 (to create a cosine); for other effects, only values of 0 and 18,000 are supported.</p>
+<ul>
+<li><p>GUID_Square</p>
+</li>
+<li><p>GUID_Sine</p>
+</li>
+<li><p>GUID_Triangle</p>
+</li>
+<li><p>GUID_SawtoothUp</p>
+</li>
+<li><p>GUID_SawtoothDown</p>
+</li>
+</ul>
+<p>You can also pass any other globally unique identifier (GUID) obtained by the <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> method, provided the low byte of the dwEffType member of the <a href="ee416617(v=vs.85).html">DIEffectInfo</a> structure (<a href="ee416614(v=vs.85).html">DIDFT_GETTYPE</a>(dwEffType)) is equal to DIEFT_PERIODIC. In this way, you can use hardware-specific forces designed by the manufacturer. For example, a hardware device might support a periodic effect that rotates the stick in a small circle.</p>
+<p>The type-specific structure for periodic effects is <a href="ee416634(v=vs.85).html">DIPERIODIC</a>.</p>
+<p>Do not confuse the period of a periodic effect (<a href="ee416634(v=vs.85).html">DIPERIODIC</a>.dwPeriod) with the sample period (<a href="ee416616(v=vs.85).html">DIEFFECT</a>.dwSamplePeriod). The period is the time that it takes to go through a complete wave cycle. The sample period, as for all effects, is the minimum time between actual adjustments of magnitude.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418719(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

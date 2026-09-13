@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIDEVICEOBJECTINSTANCE Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="dideviceobjectinstance-structure">DIDEVICEOBJECTINSTANCE Structure</h1>
+<p>Describes a device object instance. This structure is used with the <a href="ee417889(v=vs.85).html">IDirectInputDevice8::EnumObjects</a> method to provide the <a href="ee416620(v=vs.85).html">DIEnumDeviceObjectsCallback</a> callback function with information about a particular object associated with a device, such as an axis or button. It is also used with the <a href="ee417906(v=vs.85).html">IDirectInputDevice8::GetObjectInfo</a> method to retrieve information about a device object.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DIDEVICEOBJECTINSTANCE {
+    DWORD dwSize;
+    GUID guidType;
+    DWORD dwOfs;
+    DWORD dwType;
+    DWORD dwFlags;
+    TCHAR tszName[MAX_PATH];
+    DWORD dwFFMaxForce;
+    DWORD dwFFForceResolution;
+    WORD wCollectionNumber;
+    WORD wDesignatorIndex;
+    WORD wUsagePage;
+    WORD wUsage;
+    DWORD dwDimension;
+    WORD wExponent;
+    WORD wReportId;
+} DIDEVICEOBJECTINSTANCE, *LPDIDEVICEOBJECTINSTANCE;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><strong>dwSize</strong><br/>
+Size of the structure, in bytes. During enumeration, the application can inspect this value to determine how many members of the structure are valid. When the structure is passed to the <a href="ee417906(v=vs.85).html">IDirectInputDevice8::GetObjectInfo</a> method, this member must be initialized to sizeof(DIDEVICEOBJECTINSTANCE).</li>
+<li><strong>guidType</strong><br/>
+Unique identifier that indicates the object type. This member is optional. If present, it can be one of the following values:
+<ul>
+<li>GUID_XAxis<br/>
+The horizontal axis. For example, it can represent the left-right motion of a mouse.</li>
+<li>GUID_YAxis<br/>
+The vertical axis. For example, it can represent the forward-backward motion of a mouse.</li>
+<li>GUID_ZAxis<br/>
+The z-axis. For example, it can represent the rotation of a mouse wheel or the movement of a joystick throttle control.</li>
+<li>GUID_RxAxis<br/>
+Rotation around the x-axis.</li>
+<li>GUID_RyAxis<br/>
+Rotation around the y-axis.</li>
+<li>GUID_RzAxis<br/>
+Rotation around the z-axis (often a rudder control).</li>
+<li>GUID_Slider<br/>
+A slider axis.</li>
+<li>GUID_Button<br/>
+A mouse button.</li>
+<li>GUID_Key<br/>
+A keyboard key.</li>
+<li>GUID_POV<br/>
+A point-of-view indicator.</li>
+<li>GUID_Unknown<br/>
+Unknown.</li>
+</ul>
+</li>
+<li><strong>dwOfs</strong><br/>
+Offset in the native data format of the device. The native data format corresponds to the raw device data. The dwOfs member does not correspond to the device constant, such as DIJOFS_BUTTON0, for this object.</li>
+<li><strong>dwType</strong><br/>
+Device type that describes the object. It is a combination of DIDFT_* flags that describe the object type (axis, button, and so on) and contains the object instance number in the middle 16 bits. Use the <a href="ee416613(v=vs.85).html">DIDFT_GETINSTANCE</a> macro to extract the object instance number. For the DIDFT_* flags, see <a href="ee417889(v=vs.85).html">IDirectInputDevice8::EnumObjects</a>.</li>
+<li><strong>dwFlags</strong><br/>
+Flags describing other attributes of the data format. This value can be one of the following:
+<ul>
+<li>DIDOI_ASPECTACCEL<br/>
+The object reports acceleration information.</li>
+<li>DIDOI_ASPECTFORCE<br/>
+The object reports force information.</li>
+<li>DIDOI_ASPECTMASK<br/>
+The bits that are used to report aspect information. An object can represent at most one aspect.</li>
+<li>DIDOI_ASPECTPOSITION<br/>
+The object reports position information.</li>
+<li>DIDOI_ASPECTVELOCITY<br/>
+The object reports velocity information.</li>
+<li>DIDOI_FFACTUATOR<br/>
+The object can have force-feedback effects applied to it.</li>
+<li>DIDOI_FFEFFECTTRIGGER<br/>
+The object can trigger playback of force-feedback effects.</li>
+<li>DIDOI_GUIDISUSAGE<br/>
+The pguid member of the <a href="ee416633(v=vs.85).html">DIOBJECTDATAFORMAT</a> structure contains the desired usage page and usage in a packed DWORD. See <a href="ee416629(v=vs.85).html">DIMAKEUSAGEDWORD</a>.</li>
+<li>DIDOI_POLLED<br/>
+The object does not return data until the <a href="ee417816(v=vs.85).html">IDirectInputDevice8 Interface</a> method is called.</li>
+</ul>
+</li>
+<li><strong>tszName</strong><br/>
+Name of the object; for example, "X-Axis" or "Right Shift."</li>
+<li><strong>dwFFMaxForce</strong><br/>
+The magnitude of the maximum force that can be created by the actuator associated with this object. Force is expressed in newtons and measured in relation to where the hand would be during normal operation of the device.</li>
+<li><strong>dwFFForceResolution</strong><br/>
+The force resolution of the actuator associated with this object. The returned value represents the number of gradations, or subdivisions, of the maximum force that can be expressed by the force-feedback system from 0 (no force) to maximum force.</li>
+<li><strong>wCollectionNumber</strong><br/>
+The Human Interface Device (human interface device) link collection to which the object belongs.</li>
+<li><strong>wDesignatorIndex</strong><br/>
+An index that refers to a designator in the HID physical descriptor. This number can be passed to functions in the HID parsing library (Hidpi.h) to obtain additional information about the device object.</li>
+<li><strong>wUsagePage</strong><br/>
+The Human Interface Device (HID) usage page associated with the object, if known. HIDs always report a usage page. Non-HID devices can optionally report a usage page; if they do not, the value of this member is 0.</li>
+<li><strong>wUsage</strong><br/>
+The HID usage associated with the object, if known. HIDs always report a usage. Non-HIDs can optionally report a usage; if they do not, the value of this member is 0.</li>
+<li><strong>dwDimension</strong><br/>
+A Human Interface Device (HID) code for the dimensional units in which the object's value is reported, if known, or 0 if not known.</li>
+<li><strong>wExponent</strong><br/>
+The exponent to associate with the dimension, if known. Dimensional units are always integral, so an exponent might be needed to convert them to nonintegral types.</li>
+<li><strong>wReportId</strong><br/>
+Reserved.</li>
+</ul>
+<h2 id="remarks">Remarks</h2>
+<div class="note">
+<p>Note</p>
+<p>The value in dwOfs is the offset within the raw data returned by the device, regardless of whether the data format has been set for the device.</p>
+</div>
+<p>Applications can use the wUsagePage and wUsage members to obtain additional information about how the object was designed to be used. For example, if wUsagePage has the value 0x02 (vehicle controls) and wUsage has the value 0xB9 (elevator trim), the object was designed to be the elevator trim control on a flight stick. A flight simulator application can use this information to provide more reasonable defaults for objects on the device. HID usage codes are determined by the USB standards committee.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416612(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

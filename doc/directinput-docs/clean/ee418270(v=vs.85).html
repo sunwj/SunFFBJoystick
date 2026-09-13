@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interpreting Joystick Axis Data</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="interpreting-joystick-axis-data">Interpreting Joystick Axis Data</h1>
+<p>Axis values for the joystick are like those for the mouse. The value returned for the x-axis is greater as the stick moves to the right, and the value for the y-axis increases as the stick moves toward the user.</p>
+<p>Data is in arbitrary units determined by the range property of the axis. For example, if the range for the stick's x-axis is from 0 through 10,000, a unit is one ten-thousandth of the stick's left-right travel, and the center position is 5,000. For some axes, the granularity property might be greater than 1. In this case, values are rounded off. For example, if the granularity is 10, values are reported as 0, 10, 20, and so on.</p>
+<p>Axis data is also affected by the dead zone, a region around the center position in which motion is ignored. The dead zone provides tolerance for a slight deviation from the true center position for either or both axes of the stick. An axis value within the range of the dead zone is reported as true center.</p>
+<p>The saturation property of an axis is a zone of tolerance at the minimum and maximum of the range. An axis value within this zone is reported as the minimum or maximum value. The purpose of the saturation property is to allow for slight differences between, for example, the minimum x-axis value reported at the top-left and bottom-left positions of the stick.</p>
+<p>The following illustration shows the effect of the dead zone and the saturation zones. The vertical axis represents the returned axis values, where min and max are the lower and upper limits of the reported range and ctr is the reported center. The horizontal axis shows the physical position of the stick, where pmin and pmax are the extremes of the physical range, pctr is neutral position of the axis, dmin and dmax are the limits of the dead zone, and smin and smax are the boundaries of the lower and upper saturation zones. The lower saturation zone lies between pmin and smin, the upper saturation zone lies between smax and pmax, and the dead zone lies between dmin and dmax.</p>
+<p><img alt="Graph of dead zone and saturation zones" data-linktype="relative-path" src="images/ee418270.deadzone(en-us,vs.85).gif" title="Graph of dead zone and saturation zones"/></p>
+<p>For more information about joystick properties, see the following:</p>
+<ul>
+<li><p><a href="ee417908(v=vs.85).html">IDirectInputDevice8::GetProperty</a></p>
+</li>
+<li><p><a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a></p>
+</li>
+<li><p><a href="ee416640(v=vs.85).html">DIPROPRANGE</a></p>
+</li>
+<li><p><a href="ee416599(v=vs.85).html">DIACTIONFORMAT</a></p>
+</li>
+</ul>
+<p>Axis coordinates from the joystick can be either relative or absolute. (See <a href="ee418779(v=vs.85).html">Relative and Absolute Axis Coordinates</a>.) Because a joystick is an absolute device - unlike a mouse, it cannot travel infinitely far along any axis - absolute data is returned by default. When the axis mode for the joystick is set to relative, the axis coordinate represents the number of units of movement along the axis since the last value was returned.</p>
+<p>The axis mode, which specifies whether relative or absolute data should be returned, is a property that can be changed before the device is acquired. (See <a href="ee416595(v=vs.85).html">Device Properties</a>.) To set the axis mode to relative, call the <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> method with the DIPROP_AXISMODE value in the rguidProp parameter and with DIPROPAXISMODE_REL in the dwData member of the <a href="ee416636(v=vs.85).html">DIPROPDWORD</a> structure.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418270(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

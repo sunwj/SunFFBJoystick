@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Effect Enumeration</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="effect-enumeration">Effect Enumeration</h1>
+<p>The <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> method returns information about the support offered by the device for various kinds of effects.</p>
+<p>It is important to distinguish between supported effects and created effects, or effect objects. A supported effect is a basic type which a device is capable of playing, such as a constant force. However, a constant force by itself has no properties such as magnitude, direction, duration, attack, or fade. These properties are set when you create a specific effect object in your application by shaping the raw effect type with an envelope or setting the values of a DIEFFECT structure. A supported effect can be represented by many effect objects, each with different parameters - for example, several constant forces, each with different duration, magnitude, and direction.</p>
+<p>For information about enumerating created effects, see <a href="ee417538(v=vs.85).html">Effect Object Enumeration</a>.</p>
+<p>Like other DirectInput enumerations, the <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> method requires a callback function. This is documented with the placeholder name <a href="ee416623(v=vs.85).html">DIEnumEffectsCallback</a>, but you can use a different name if you prefer. This function is called for each effect enumerated. Within the function you can obtain the globally unique identifier (GUID) for each effect, get information about the extent of hardware support, and create one or more effect objects whose methods you can use to manipulate the effect.</p>
+<p>The following code example sets the enumeration in motion. Assume that g_lpdid is an initialized pointer to the <a href="ee417816(v=vs.85).html">IDirectInputDevice8 Interface</a> interface of the device.</p>
+<pre> 
+HRESULT hr = g_lpdid-&gt;EnumEffects(&amp;DIEnumEffectsCallback,
+        g_lpdid, DIEFT_ALL);
+</pre>
+<p>A skeletal callback is shown in the following code. The pvRef parameter of the callback could be any 32-bit value, but in this case it is a pointer to the device interface (the global g_lpdid in the previous example), which is used for getting information about effects supported by the device and for creating effect objects.</p>
+<pre>BOOL CALLBACK DIEnumEffectsCallback(LPCDIEffectInfo pdei, 
+                                LPVOID pvRef)
+{
+    HRESULT              hr;
+    LPDIRECTINPUTDEVICE8 lpdid = (LPDIRECTINPUTDEVICE8)pvRef;   
+// Pointer to calling device
+    LPDIRECTINPUTEFFECT  lpdiEffect;      // Pointer to created effect
+    DIEFFECT             diEffect;        // Params for created effect
+    DICONSTANTFORCE      diConstantForce; // Type-specific parameters
+ 
+
+    if (DIEFT_GETTYPE(pdei-&gt;dwEffType) == DIEFT_CONSTANTFORCE)
+    {
+       /* Here you can extract information about support for the 
+          effect type (from pdei), and tailor your effects 
+          accordingly. For example, the device might not support
+          envelopes for this type of effect. */
+       .
+       .
+       .
+       // Create one or more constant force effects. 
+       // For each, you have to initialize a DICONSTANTFORCE 
+       // and a DIEFFECT structure. 
+       .
+       .
+       .
+        hr = lpdid-&gt;CreateEffect(pdei-&gt;guid,
+                                &amp;diEffect,
+                                &amp;lpdiEffect,
+                                NULL);
+       .
+       .
+       .
+    }
+    // And so on for other types of effect
+   .
+   .
+   .
+ 
+    return DIENUM_CONTINUE;
+    }  // End of callback
+</pre>
+<p>For a detailed example of creating an effect, and for more information about how to initialize an effect, see <a href="ee416353(v=vs.85).html">Creating an Effect</a>.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417537(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

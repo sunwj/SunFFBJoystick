@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIDEVICEIMAGEINFO Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="dideviceimageinfo-structure">DIDEVICEIMAGEINFO Structure</h1>
+<p>Carries information required to display a device image or an overlay image with a callout. This structure is passed to the <a href="ee417904(v=vs.85).html">IDirectInputDevice8::GetImageInfo</a> method as an array within a <a href="ee416609(v=vs.85).html">DIDEVICEIMAGEINFOHEADER</a> structure.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DIDEVICEIMAGEINFO {
+    TCHAR tszImagePath[MAX_PATH];
+    DWORD dwFlags;
+    DWORD dwViewID;
+    RECT rcOverlay;
+    DWORD dwObjID;
+    DWORD dwcValidPts;
+    POINT rgptCalloutLine[5];
+    RECT rcCalloutRect;
+    DWORD dwTextAlign;
+} DIDEVICEIMAGEINFO, *LPDIDEVICEIMAGEINFO;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><p><strong>tszImagePath</strong><br/>
+Fully qualified path to the file that contains an image of the device. The file format is given in dwFlags. If no image is available for the device, this member will be set to NULL. If so, the application is responsible for enumerating controls on the device and displaying a default listing of actions to device controls (similar to the method used by most applications before DirectX 8.0).</p>
+</li>
+<li><p><strong>dwFlags</strong><br/>
+Flag that describes the intended use of the image.</p>
+<ul>
+<li>DIDIFT_CONFIGURATION<br/>
+The file is used to display the current configuration of actions on the device. Overlay image coordinates are relative to the upper-left corner of the configuration image.</li>
+<li>DIDIFT_OVERLAY<br/>
+The file (if provided) is an overlay for a configuration image. The dwViewID, rcOverlay, dwObjID, rgptCalloutLine, rcCalloutRect, and dwTextAlign members are valid and contain data used to display the overlay and callout information for a single control on the device. If no file is provided (null path string), all other pertinent members are relevant except rcOverlay.</li>
+</ul>
+</li>
+<li><p><strong>dwViewID</strong><br/>
+For device view images (DIDIFT_CONFIGURATION), this is the ID of the device view. For device control overlays (DIDIFT_OVERLAY), this value refers to the device view (by ID) over which an image and callout information should be displayed.</p>
+</li>
+<li><p><strong>rcOverlay</strong><br/>
+Rectangle, using coordinates relative to the top-left pixel of the device configuration image, in which the overlay image should be painted. This member is valid only if the DIDIFT_OVERLAY flag is present in dwFlags.</p>
+</li>
+<li><p><strong>dwObjID</strong><br/>
+Control identifier, as a combination of DIDFT_* flags and an instance value, to which an overlay image corresponds for this device. Applications use the DIDFT_GETINSTANCE and DIDFT_GetType macros to decode this value to its constituent parts. This member is valid only if the DIDIFT_OVERLAY flag is present in dwFlags.</p>
+</li>
+<li><p><strong>dwcValidPts</strong><br/>
+Number of points in the array at rgptCalloutLine.</p>
+</li>
+<li><p><strong>rgptCalloutLine</strong><br/>
+Array of POINT structures that specify coordinates of the points describing a callout line. A callout line connects a device control to a caption for the game action. Each line can have from one to four segments. This member is valid only if the DIDIFT_OVERLAY flag is present in dwFlags.</p>
+</li>
+<li><p><strong>rcCalloutRect</strong><br/>
+RECT structure that describes the rectangle in which the game action string is displayed. If the string cannot fit within the rectangle, the application is responsible for handling clipping. This member is valid only if the DIDIFT_OVERLAY flag is present in dwFlags.</p>
+</li>
+<li><p><strong>dwTextAlign</strong><br/>
+DWORD value that specifies the alignment of the text in the rectangle described by the rcCalloutRect member. Must be one horizontal alignment flag combined with one vertical alignment flag. This member is valid only if the DIDIFT_OVERLAY flag is present in dwFlags.</p>
+<p>The following horizontal alignment flags are defined.</p>
+<ul>
+<li>DIDAL_LEFTALIGNED<br/>
+Text is aligned on the left border.</li>
+<li>DIDAL_CENTERED<br/>
+Text is horizontally centered.</li>
+<li>DIDAL_RIGHTALIGNED<br/>
+Text is aligned on the right border.</li>
+</ul>
+<p>The following vertical alignment flags are defined.</p>
+<ul>
+<li>DIDAL_MIDDLE<br/>
+The text is vertically centered.</li>
+<li>DIDAL_TOPALIGNED<br/>
+The text is aligned on the top border.</li>
+<li>DIDAL_BOTTOMALIGNED<br/>
+The text is aligned on the bottom border.</li>
+</ul>
+</li>
+</ul>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416608(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DICONDITION Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="dicondition-structure">DICONDITION Structure</h1>
+<p>Contains type-specific information for effects that are marked as DIEFT_CONDITION.</p>
+<p>A pointer to an array of <a href="ee416601(v=vs.85).html">DICONDITION</a> structures for an effect is passed in the lpvTypeSpecificParams member of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure. The number of elements in the array must be either one, or equal to the number of axes associated with the effect.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DICONDITION {
+    LONG lOffset;
+    LONG lPositiveCoefficient;
+    LONG lNegativeCoefficient;
+    DWORD dwPositiveSaturation;
+    DWORD dwNegativeSaturation;
+    LONG lDeadBand;
+} DICONDITION, *LPDICONDITION;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><p><strong>lOffset</strong><br/>
+Offset for the condition, in the range from - 10,000 through 10,000.</p>
+</li>
+<li><p><strong>lPositiveCoefficient</strong><br/>
+Coefficient constant on the positive side of the offset, in the range from - 10,000 through 10,000.</p>
+</li>
+<li><p><strong>lNegativeCoefficient</strong><br/>
+Coefficient constant on the negative side of the offset, in the range from - 10,000 through 10,000. If the device does not support separate positive and negative coefficients, the value of lNegativeCoefficient is ignored, and the value of lPositiveCoefficient is used as both the positive and negative coefficients.</p>
+</li>
+<li><p><strong>dwPositiveSaturation</strong><br/>
+Maximum force output on the positive side of the offset, in the range from 0 through 10,000.</p>
+<p>If the device does not support force saturation, the value of this member is ignored.</p>
+</li>
+<li><p><strong>dwNegativeSaturation</strong><br/>
+Maximum force output on the negative side of the offset, in the range from 0 through 10,000.</p>
+<p>If the device does not support force saturation, the value of this member is ignored.</p>
+<p>If the device does not support separate positive and negative saturation, the value of dwNegativeSaturation is ignored, and the value of dwPositiveSaturation is used as both the positive and negative saturation.</p>
+</li>
+<li><p><strong>lDeadBand</strong><br/>
+Region around lOffset in which the condition is not active, in the range from 0 through 10,000. In other words, the condition is not active between lOffset minus lDeadBand and lOffset plus lDeadBand.</p>
+</li>
+</ul>
+<h2 id="remarks">Remarks</h2>
+<p>Different types of conditions interpret the parameters differently, but the basic idea is that force resulting from a condition is equal to A(q - q0) where A is a scaling coefficient, q is some metric, and q0 is the neutral value for that metric.</p>
+<p>The preceding simplified formula must be adjusted if a nonzero deadband is provided. If the metric is less than lOffset - lDeadBand, the resulting force is given by the following formula:</p>
+<p>force = lNegativeCoefficient * ( q - ( lOffset - lDeadBand))</p>
+<p>Similarly, if the metric is greater than lOffset + lDeadBand, the resulting force is given by the following formula:</p>
+<p>force = lPositiveCoefficient * ( q - ( lOffset + lDeadBand))</p>
+<p>A spring condition uses axis position as the metric.</p>
+<p>A damper condition uses axis velocity as the metric.</p>
+<p>An inertia condition uses axis acceleration as the metric.</p>
+<p>If the number of <a href="ee416601(v=vs.85).html">DICONDITION</a> structures in the array is equal to the number of axes for the effect, the first structure applies to the first axis, the second applies to the second axis, and so on. For example, a two-axis spring condition with lOffset set to 0 in both <a href="ee416601(v=vs.85).html">DICONDITION</a> structures would have the same effect as the joystick self-centering spring. When a condition is defined for each axis in this way, the effect must not be rotated.</p>
+<p>If there is a single <a href="ee416601(v=vs.85).html">DICONDITION</a> structure for an effect with more than one axis, the direction along which the parameters of the <a href="ee416601(v=vs.85).html">DICONDITION</a> structure are in effect is determined by the direction parameters passed in the rglDirection field of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure. For example, a friction condition rotated 45 degrees (in polar coordinates) would resist joystick motion in the northeast-southwest direction but would have no effect on joystick motion in the northwest-southeast direction.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416601(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

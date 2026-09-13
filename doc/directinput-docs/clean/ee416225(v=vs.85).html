@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basic Concepts of Force Feedback</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="basic-concepts-of-force-feedback">Basic Concepts of Force Feedback</h1>
+<p>A particular instance of force feedback is called an effect, and the push or resistance is called the force. Most effects fall into one of the following categories:</p>
+<ul>
+<li><p>Constant force. A steady force in a single direction.</p>
+</li>
+<li><p>Ramp force. A force that steadily increases or decreases in magnitude.</p>
+</li>
+<li><p>Periodic effect. A force that pulsates according to a defined wave pattern.</p>
+</li>
+<li><p>Condition. A reaction to motion or position along an axis. Two examples are a friction effect that generates resistance to movement of the joystick, and a spring effect that pushes the stick back toward a certain position after it has been moved from that position.</p>
+</li>
+</ul>
+<p>The strength of the force is called its magnitude. Magnitude is measured in units ranging from 0 (no force) through 10,000 (maximum force for the device, defined for C/C++ and Microsoft Visual Basic as DI_FFNOMINALMAX). A negative value indicates force in the opposite direction. Magnitudes are linear: a force of 10,000 is twice as great as one of 5,000.</p>
+<p>Ramp forces have a beginning and ending magnitude. For a periodic effect, the basic magnitude is the force at the peak of the wave.</p>
+<p>The direction of a force is the direction from which it comes. A positive force on a given axis pushes from the positive toward the negative.</p>
+<p>Effects also have duration, measured in microseconds. Periodic effects have a period, or the duration of one cycle, also measured in microseconds. The phase of a periodic effect is the point along the wave at which playback begins.</p>
+<p>The following illustration represents a sawtooth periodic effect with a magnitude of 5,000, or half the maximum force for the device. The horizontal axis represents the duration of the effect, and the vertical axis represents the magnitude. Points above the center line represent positive force in the direction defined for the effect, and points below the center line represent negative force, or force in the opposite direction.</p>
+<p><img alt="Graph of sawtooth force feedback" data-linktype="relative-path" src="images/ee416225.sawtooth(en-us,vs.85).gif" title="Graph of sawtooth force feedback"/></p>
+<p>A force may be further shaped by an envelope. An envelope defines an attack value and a fade value, which modify the beginning and ending magnitude of the effect. Attack and fade also have duration, which determines how long the magnitude takes to reach or fall away from the sustain value, the magnitude in the middle portion of the effect.</p>
+<p>The following diagram shows an envelope. The attack level is set to 8,000 and the fade level to 1,000. The sustain level is defined by the basic magnitude of the force to which the envelope is being applied; in the example, it is 5,000. In this case, the attack is greater than the sustain, giving the effect an initial strong kick. Both the attack and the fade level can be either greater or less than the sustain level.</p>
+<p><img alt="Graph of envelope force feedback" data-linktype="relative-path" src="images/ee416225.envelope(en-us,vs.85).gif" title="Graph of envelope force feedback"/></p>
+<p>The next diagram shows the result of the envelope being applied to the periodic effect in the first diagram. The envelope is mirrored on the negative side of the magnitude. An attack value of 8,000 means that the initial magnitude of the force in either direction is 80 percent of the maximum possible.</p>
+<p><img alt="Graph of sawtooth and envelope force feedback" data-linktype="relative-path" src="images/ee416225.saw_env(en-us,vs.85).gif" title="Graph of sawtooth and envelope force feedback"/></p>
+<p>Periodic effects and conditions can also be modified by the addition of an offset, which defines the amount by which the waveform is shifted up or down from the base level. The practical effect of applying a positive offset to the sawtooth example would be to strengthen the positive force and weaken the negative one - in other words, the force would peak more strongly in one direction than in the other.</p>
+<p>Finally, the overall magnitude of an effect can be scaled by gain, which is analogous to a volume control in audio. A single gain value can be applied to all effects for a device. You might want to do this to compensate for stronger or weaker forces on different hardware or to accommodate the user's preferences.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416225(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Device-Specific Effects</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="device-specific-effects">Device-Specific Effects</h1>
+<p>Hardware drivers can support special effects that do not fit into the categories defined by DirectInput. The type-specific parameters for these effects may be either hard-coded or modifiable by the application.</p>
+<p>If type-specific parameters are modifiable, the application developer must obtain a header file declaring the data structure required by the effect.</p>
+<p>The hardware vendor must provide a globally unique identifier (GUID) identifying the device-specific effect and might provide a custom structure for the type-specific parameters of the effect. Your application then must initialize a <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure and a type-specific structure, as with any other effect. You then call the <a href="ee417880(v=vs.85).html">IDirectInputDevice8::CreateEffect</a> method, passing the device-specific GUID and a pointer to the <strong>DIEFFECT</strong> structure.</p>
+<p>When you obtain information about a device-specific effect in a <a href="ee416617(v=vs.85).html">DIEffectInfo</a> structure, the low byte of the <strong>dwEffType</strong> member (<a href="ee416614(v=vs.85).html">DIDFT_GETTYPE</a>(<strong>dwEffType</strong>)) indicates into which of the predefined DirectInput effect categories (constant force, ramp force, periodic, or condition) the effect falls. If it does not fall into any of the predefined categories, the value is DIEFT_HARDWARE.</p>
+<p>If a device-specific effect falls into one of the predefined categories, the <strong>lpvTypeSpecificParams</strong> member of the <strong>DIEFFECT</strong> structure must point to the corresponding <a href="ee416604(v=vs.85).html">DICONSTANTFORCE</a>, <a href="ee416642(v=vs.85).html">DIRAMPFORCE</a>, <a href="ee416634(v=vs.85).html">DIPERIODIC</a>, or <a href="ee416601(v=vs.85).html">DICONDITION</a> structure, and the <strong>cbTypeSpecificParams</strong> member must be equal to the size of that structure.</p>
+<p>If (<a href="ee416614(v=vs.85).html">DIDFT_GETTYPE</a>(<strong>dwEffType</strong>) == DIEFT_HARDWARE), the values of the <strong>lpvTypeSpecificParams</strong> and <strong>cbTypeSpecificParams</strong> members depend on whether the effect requires custom type-specific parameters. If it does, these values must refer to the appropriate structure defined in the manufacturer's header file and declared and initialized by your application. If the effect does not require custom parameters-that is, if the <strong>dwStaticParams</strong> member of the <strong>DIEFFECTINFO</strong> structure for the hardware effect does not have the DIEP_TYPESPECIFICPARAMS flag-<strong>lpvTypeSpecificParams</strong> must be NULL and <strong>cbTypeSpecificParams</strong> must be 0.</p>
+<p>DirectInput passes the GUID and the <strong>DIEFFECT</strong> structure to the device driver for verification. If the GUID is unknown, the device returns <a href="ee416869(v=vs.85).html">DIERR_DEVICENOTREG</a>. If the GUID is known but the type-specific data is incorrect for that effect, the device returns <strong>DIERR_INVALIDPARAM</strong>.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416597(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

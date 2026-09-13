@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIACTIONFORMAT Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="diactionformat-structure">DIACTIONFORMAT Structure</h1>
+<p>Contains information about the calling application and acts as a container for an array of <a href="ee416598(v=vs.85).html">DIACTION</a> structures that define action-to-control mappings for a genre.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DIACTIONFORMAT {
+    DWORD dwSize;
+    DWORD dwActionSize;
+    DWORD dwDataSize;
+    DWORD dwNumActions;
+    LPDIACTION rgoAction;
+    GUID guidActionMap;
+    DWORD dwGenre;
+    DWORD dwBufferSize;
+    LONG lAxisMin;
+    LONG lAxisMax;
+    HINSTANCE hInstString;
+    FILETIME ftTimeStamp;
+    DWORD dwCRC;
+    TCHAR tszActionMap[MAX_PATH];
+} DIACTIONFORMAT, *LPDIACTIONFORMAT;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><p><strong>dwSize</strong><br/>
+DWORD value that specifies the size of the <a href="ee416599(v=vs.85).html">DIACTIONFORMAT</a> structure, in bytes.</p>
+</li>
+<li><p><strong>dwActionSize</strong><br/>
+DWORD value that specifies the size of the <a href="ee416598(v=vs.85).html">DIACTION</a> structure, in bytes.</p>
+</li>
+<li><p><strong>dwDataSize</strong><br/>
+DWORD value that specifies the size of the device data to be returned by the device for immediate device data, in bytes. This member should be dwNumActions multiplied by four.</p>
+</li>
+<li><p><strong>dwNumActions</strong><br/>
+DWORD value that specifies the number of elements in the rgoAction array.</p>
+</li>
+<li><p><strong>rgoAction</strong><br/>
+Address of an array of <a href="ee416598(v=vs.85).html">DIACTION</a> structures, each of which describes how an action maps to a virtual control or device object, and how the mapping information should be displayed to the user.</p>
+</li>
+<li><p><strong>guidActionMap</strong><br/>
+Globally unique identifier (GUID) that identifies the action map. Device manufacturers can use this value to tune mappings for a specific title.</p>
+</li>
+<li><p><strong>dwGenre</strong><br/>
+DWORD value that specifies the genre of the application. For possible values, see <a href="ee416855(v=vs.85).html">Action Mapping Constants</a>.</p>
+</li>
+<li><p><strong>dwBufferSize</strong><br/>
+DWORD value that specifies the number of input data packets in the buffer for each device to which this action map is to be applied. The buffer size must be set to a value greater than zero in order to retrieve data by using <a href="ee417894(v=vs.85).html">IDirectInputDevice8::GetDeviceData</a>. Applications that set this member to the desired buffer size before calling <a href="ee417919(v=vs.85).html">IDirectInputDevice8::SetActionMap</a> do not need to set the DIPROP_BUFFERSIZE property by using <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a>.</p>
+</li>
+<li><p><strong>lAxisMin</strong><br/>
+Minimum value for the range of scaled data to be returned for all axes. This value is ignored for a specific action axis if the DIA_NORANGE flag is set in <a href="ee416598(v=vs.85).html">DIACTION</a>.dwFlags.</p>
+<p>This value is valid only for axis actions and should be set to zero for all other actions. It is used as the <a href="ee416640(v=vs.85).html">DIPROPRANGE</a>.lmin value to set the range property on an absolute axis when the action map is applied using <a href="ee417919(v=vs.85).html">IDirectInputDevice8::SetActionMap</a>.</p>
+</li>
+<li><p><strong>lAxisMax</strong><br/>
+Maximum value for the range of scaled data to be returned for all axes. This value is ignored for a specific action axis if the DIA_NORANGE flag is set in <a href="ee416598(v=vs.85).html">DIACTION</a>.dwFlags.</p>
+<p>This value is valid only for axis actions and should be set to zero for all other actions. It is used as the <a href="ee416640(v=vs.85).html">DIPROPRANGE</a>.lmax value to set the range property on an absolute axis when the action map is applied using <a href="ee417919(v=vs.85).html">IDirectInputDevice8::SetActionMap</a>.</p>
+</li>
+<li><p><strong>hInstString</strong><br/>
+Handle of the module containing string resources for action names, as specified in the uResIdString member of the <a href="ee416598(v=vs.85).html">DIACTION</a> structure for each action. Can be zero if action names are specified in the lptszActionName member of the <a href="ee416598(v=vs.85).html">DIACTION</a> structure for each action.</p>
+</li>
+<li><p><strong>ftTimeStamp</strong><br/>
+FILETIME structure that receives the time at which this action map was last written to disk. See Remarks.</p>
+</li>
+<li><p><strong>dwCRC</strong><br/>
+Cyclic redundancy check for this map. Used internally by DirectInput to determine when a set of mappings should be saved to disk.</p>
+</li>
+<li><p><strong>tszActionMap</strong><br/>
+Null-terminated string, of maximum length MAX_PATH, that specifies the friendly name for this action map. This string appears in the drop-down list box in the default property sheet.</p>
+</li>
+</ul>
+<h2 id="remarks">Remarks</h2>
+<p>The ftTimeStamp member can contain special values that apply to new and unused devices. New devices have never been enumerated for this application and have never had an action map applied to them. Unused devices have been enumerated for the application before but have never had an action map applied. New devices always have DIAFTS_NEWDEVICELOW and DIAFTS_NEWDEVICEHIGH in the low and high DWORDs respectively of the FILETIME structure. Unused devices have DIAFTS_UNUSEDDEVICELOW and DIAFTS_UNUSEDDEVICEHIGH in these positions.</p>
+<p>Applications should not use ftTimeStamp to check for new devices. Instead, they should look for the DIEDBS_RECENTDEVICE and DIEDBS_NEWDEVICE flags in the enumeration callback. For more information, see <a href="ee416621(v=vs.85).html">DIEnumDevicesBySemanticsCallback</a>.</p>
+<h2 id="see-also">See Also</h2>
+<p><a href="ee417807(v=vs.85).html">IDirectInput8::EnumDevicesBySemantics</a><br/>
+<a href="ee417919(v=vs.85).html">IDirectInputDevice8::SetActionMap</a><br/>
+<a href="ee417801(v=vs.85).html">IDirectInput8::ConfigureDevices</a><br/>
+<a href="ee417877(v=vs.85).html">IDirectInputDevice8::BuildActionMap</a></p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416599(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

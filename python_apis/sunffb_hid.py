@@ -5,6 +5,11 @@ import ctypes as ct
 from dataclasses import dataclass
 from typing import Optional, Type, TypeVar, Union
 
+try:
+    from .sunffb_constants_generated import *
+except ImportError:
+    from sunffb_constants_generated import *
+
 paths = [os.path.join('hidapi', 'hidapi.dll')]
 for p in paths:
     try:
@@ -14,59 +19,6 @@ for p in paths:
        break
     except:
         print(f"Failed to load hidapi from {p}")
-
-
-# =========================
-# Firmware-matched constants
-# =========================
-
-NUM_AXIS = 2
-MAX_EFFECTS = 15
-USB_NO_TRIGGER_BUTTON = 0xFF
-USB_DURATION_INFINITE = 0xFFFF
-USB_AXIS_MAX_ABSOLUTE = 32767
-USB_MAX_MAGNITUDE = 10000
-USB_MAX_EFFECT_GAIN = 255
-USB_MAX_DEVICE_GAIN = 255
-
-# Effect types
-ET_CONSTANT = 0x01
-ET_RAMP = 0x02
-ET_SQUARE = 0x03
-ET_SINE = 0x04
-ET_TRIANGLE = 0x05
-ET_SAWTOOTH_UP = 0x06
-ET_SAWTOOTH_DOWN = 0x07
-ET_SPRING = 0x08
-ET_DAMPER = 0x09
-ET_INERTIA = 0x0A
-ET_FRICTION = 0x0B
-
-# Axis enable flags for NUM_AXIS == 2
-X_AXIS_ENABLE = 0x01
-Y_AXIS_ENABLE = 0x02
-DIRECTION_ENABLE = 0x04
-
-# Report IDs
-REPORT_ID_JOYSTICK = 1
-REPORT_ID_PID_STATE = 2
-
-REPORT_ID_SET_EFFECT_REPORT = 3
-REPORT_ID_SET_ENVELOPE_REPORT = 4
-REPORT_ID_SET_CONDITION_REPORT = 5
-REPORT_ID_SET_PERIODIC_REPORT = 6
-REPORT_ID_SET_CONSTANT_FORCE_REPORT = 7
-REPORT_ID_SET_RAMP_FORCE_REPORT = 8
-REPORT_ID_CUSTOM_FORCE_DATA_REPORT = 9
-REPORT_ID_DOWNLOAD_FORCE_SAMPLE = 10
-REPORT_ID_EFFECT_OPERATION_REPORT = 11
-REPORT_ID_BLOCK_FREE_REPORT = 12
-REPORT_ID_DEVICE_CONTROL_REPORT = 13
-REPORT_ID_DEVICE_GAIN_REPORT = 14
-REPORT_ID_SET_CUSTOM_FORCE_REPORT = 15
-REPORT_ID_CREATE_NEW_EFFECT_REPORT = 16
-REPORT_ID_BLOCK_LOAD_REPORT = 17
-REPORT_ID_POOL_REPORT = 18
 
 
 T = TypeVar("T", bound="PackedStruct")

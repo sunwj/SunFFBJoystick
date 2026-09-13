@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interpreting Mouse Axis Data</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="interpreting-mouse-axis-data">Interpreting Mouse Axis Data</h1>
+<p>The data returned for the x-axis and y-axis of a mouse indicates the movement of the mouse itself, not the cursor. The units of measurement are based on the values returned by the mouse hardware and have nothing to do with pixels or any other form of screen measurement. Because DirectInput communicates directly with the mouse driver, the values for mouse speed and acceleration set by the user in Control Panel do not affect this data.</p>
+<p>Axis data returned from the mouse can be either relative or absolute. (See <a href="ee418779(v=vs.85).html">Relative and Absolute Axis Coordinates</a>.) Because a mouse is a relative device - unlike a joystick, it does not have a home position - relative data is returned by default.</p>
+<p>The axis mode, which specifies whether relative or absolute data should be returned, is a property that can be changed before the device is acquired. (See <a href="ee416595(v=vs.85).html">Device Properties</a>.) To set the axis mode to absolute, call <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> with the DIPROP_AXISMODE value in the rguidProp parameter and with DIPROPAXISMODE_ABS in the dwData member of the <a href="ee416636(v=vs.85).html">DIPROPDWORD</a> structure.</p>
+<p>When the axis mode for the mouse is set to relative, the axis coordinate represents the number of units that the device has been moved along the axis since the last value was returned. A negative value indicates that the mouse was moved to the left for the x-axis, or away from the user for the y-axis, or that the z-axis (the wheel) was rotated toward the user. Positive values indicate movement in the opposite direction.</p>
+<p>When the axis mode is set to absolute, the coordinates are a running total of all relative motions received by DirectInput. The axis coordinates are not initialized to any particular value when the device is acquired, so your application should treat absolute values as relative to an unknown origin. You can record the current absolute position whenever the device is acquired and save it as the virtual origin. This virtual origin can then be subtracted from subsequent absolute coordinates retrieved from the device to compute the relative distance that the mouse has moved from the point of acquisition.</p>
+<p>The data returned for the axis coordinates is also affected by the granularity property of the device. For the x-axis and y-axis of the mouse, granularity is normally 1. In other words, the minimum change in value is 1. For the wheel axis, it might be larger.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418272(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDirectInputDevice8 Interface</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="idirectinputdevice8-interface">IDirectInputDevice8 Interface</h1>
+<p>Applications use the methods of the IDirectInputDevice8 interface to gain and release access to Microsoft DirectInput devices, manage device properties and information, set behavior, perform initialization, create and play force-feedback effects, and invoke a device's control panel.</p>
+<h2 id="idirectinputdevice8-members">IDirectInputDevice8 Members</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="ee417818(v=vs.85).html">IDirectInputDevice8::Acquire</a></td>
+<td>Obtains access to the input device.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417877(v=vs.85).html">IDirectInputDevice8::BuildActionMap</a></td>
+<td>Builds an action map for the device and retrieves information about it.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417880(v=vs.85).html">IDirectInputDevice8::CreateEffect</a></td>
+<td>Creates and initializes an instance of an effect identified by the effect globally unique identifier (GUID).</td>
+</tr>
+<tr class="even">
+<td><a href="ee417882(v=vs.85).html">IDirectInputDevice8::EnumCreatedEffectObjects</a></td>
+<td>Enumerates all the currently created effects for this device.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a></td>
+<td>Enumerates all the effects supported by the force-feedback system on the device.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417886(v=vs.85).html">IDirectInputDevice8::EnumEffectsInFile</a></td>
+<td>Enumerates all the effects in a file created by the Force Editor utility or another application using the same file format.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417889(v=vs.85).html">IDirectInputDevice8::EnumObjects</a></td>
+<td>Enumerates the input and output objects available on a device.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417891(v=vs.85).html">IDirectInputDevice8::Escape</a></td>
+<td>Sends a hardware-specific command to the force-feedback driver.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417892(v=vs.85).html">IDirectInputDevice8::GetCapabilities</a></td>
+<td>Obtains the capabilities of the DirectInputDevice object.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417894(v=vs.85).html">IDirectInputDevice8::GetDeviceData</a></td>
+<td>Retrieves buffered data from the device.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417896(v=vs.85).html">IDirectInputDevice8::GetDeviceInfo</a></td>
+<td>Obtains information about the device's identity.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417897(v=vs.85).html">IDirectInputDevice8::GetDeviceState</a></td>
+<td>Retrieves immediate data from the device.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417899(v=vs.85).html">IDirectInputDevice8::GetEffectInfo</a></td>
+<td>Obtains information about an effect.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417902(v=vs.85).html">IDirectInputDevice8::GetForceFeedbackState</a></td>
+<td>Retrieves the state of the device's force-feedback system.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417904(v=vs.85).html">IDirectInputDevice8::GetImageInfo</a></td>
+<td>Retrieves information about a device image for use in a configuration property sheet.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417906(v=vs.85).html">IDirectInputDevice8::GetObjectInfo</a></td>
+<td>Retrieves information about a device object, such as a button or axis.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417908(v=vs.85).html">IDirectInputDevice8::GetProperty</a></td>
+<td>Retrieves information about the input device.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417910(v=vs.85).html">IDirectInputDevice8::Initialize</a></td>
+<td>Initializes a DirectInputDevice object.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417913(v=vs.85).html">IDirectInputDevice8::Poll</a></td>
+<td>Retrieves data from polled objects on a DirectInput device.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417915(v=vs.85).html">IDirectInputDevice8::RunControlPanel</a></td>
+<td>Runs the DirectInput control panel associated with this device.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417917(v=vs.85).html">IDirectInputDevice8::SendDeviceData</a></td>
+<td>Sends data to a device that accepts output.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417918(v=vs.85).html">IDirectInputDevice8::SendForceFeedbackCommand</a></td>
+<td>Sends a command to the device's force-feedback system.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417919(v=vs.85).html">IDirectInputDevice8::SetActionMap</a></td>
+<td>Sets the data format for a device and maps application-defined actions to device objects.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417921(v=vs.85).html">IDirectInputDevice8::SetCooperativeLevel</a></td>
+<td>Establishes the cooperative level for this instance of the device.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417925(v=vs.85).html">IDirectInputDevice8::SetDataFormat</a></td>
+<td>Sets the data format for the DirectInput device.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417927(v=vs.85).html">IDirectInputDevice8::SetEventNotification</a></td>
+<td>Specifies an event that is to be set when the device state changes.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a></td>
+<td>Sets properties that define the device behavior.</td>
+</tr>
+<tr class="even">
+<td><a href="ee417931(v=vs.85).html">IDirectInputDevice8::Unacquire</a></td>
+<td>Releases access to the device.</td>
+</tr>
+<tr class="odd">
+<td><a href="ee417933(v=vs.85).html">IDirectInputDevice8::WriteEffectToFile</a></td>
+<td>Saves information about one or more force-feedback effects to a file that can be read by using EnumEffectsInFile.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="remarks">Remarks</h2>
+<p>The IDirectInputDevice8 interface is obtained by using the IDirectInput8::CreateDevice method. For an example, see Creating a DirectInput Device.</p>
+<p>IDirectInputDevice8 supersedes the IDirectInputDevice, IDirectInputDevice2, and IDirectInputDevice7 interfaces used in previous versions of Microsoft DirectX, but does not inherit from them. Methods that share names with those from older interfaces perform similar services, but may not have exactly the same functionality or behavior. You cannot obtain the earlier interfaces by using QueryInterface.</p>
+<p>The LPDIRECTINPUTDEVICE8 type is defined as a pointer to the IDirectInputDevice8 interface:</p>
+<pre>typedef struct IDirectInputDevice8    *LPDIRECTINPUTDEVICE8;
+</pre>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417816(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

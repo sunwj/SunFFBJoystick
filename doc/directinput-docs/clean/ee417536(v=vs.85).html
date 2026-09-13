@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Effect Direction</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="effect-direction">Effect Direction</h1>
+<p>Directions can be defined for one or more axes. As with the mouse and joystick, the x-axis increases from left to right, and the y-axis increases from far to near.</p>
+<p>The direction of an effect is the direction from which it comes. An effect with a direction along the negative y-axis tends to push the stick along the positive y-axis (toward the user). If the user must push the stick toward the left to counteract an effect, the effect has a left direction; that is, it lies on the negative x-axis.</p>
+<p>Direction can be expressed in polar, spherical, or Cartesian coordinates.</p>
+<p>Polar coordinates are expressed as a single angle, in hundredths of a degree clockwise from whatever zero-point, or true north, has been established for the effect. Normally this is the negative y-axis; that is, away from the user. Thus an effect with a polar coordinate of 9,000 has a direction of east, or to the user's right, and the user must exert force to the right to counteract it.</p>
+<p>Spherical coordinates are also in hundredths of a degree but can contain two or more angles For each angle, the direction is rotated in the positive direction of the next axis. For a 3D device, the first angle would normally be rotated from the positive x-axis toward the positive y-axis (clockwise from east), and the second angle would be rotated toward the positive z-axis (down). Thus a force with a direction of (0, 0) would be to the user's right and parallel to the tabletop. A direction of 27,000 for the first angle and 4,500 for the second would be directly away from the user (270 degrees clockwise from east) and angling toward the floor (45 degrees downward from the tabletop); to counteract a force with this direction, the user would have to push forward and down.</p>
+<p>Cartesian coordinates are similar to 3D vectors. If you draw a straight line on graph paper with an origin of (0, 0) at the center of the page, the direction of the line can be defined by the coordinates of any intersection that it crosses, regardless of the distance from the origin. A direction of (1, - 2) and a direction of (5, - 10) are exactly the same.</p>
+<div class="note">
+<p>Note</p>
+<p>The coordinates used in creating force-feedback effects define only direction, not magnitude or distance.</p>
+</div>
+<p>When an effect is created or modified, the cAxes, rgdwAxes, and rglDirection members of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure are used to specify the direction of the force.</p>
+<p>The cAxes member specifies the number of axes involved in the effect. This will also be the number of elements in each of the arrays pointed to by the next two members.</p>
+<p>The array pointed to by rgdwAxes identifies the axes to which the effects will be applied. If the DIEFF_OBJECTOFFSETS flag has been set, the axes are identified by the offsets within the data format structure. These offsets are most readily identified by using the DIJOFS_* defines. (For a list of these values, see <a href="ee418634(v=vs.85).html">Joystick Device Constants</a>.)</p>
+<p>Finally, the rglDirection member specifies the direction of the force.</p>
+<div class="note">
+<p>Note</p>
+<p>The cAxes and rgdwAxes members cannot be modified once they have been set. An effect always has the same axis list.</p>
+</div>
+<p>Regardless of whether you are using Cartesian, polar, or spherical coordinates, you must provide exactly as many elements in rglDirection as there are axes in the array pointed to by rgdwAxes.</p>
+<p>In the polar coordinate system, north (0 degrees) lies along the vector (0, - 1), where the elements of the vector correspond to the elements in the axis list pointed to by rgdwAxes. Normally those axes are x and y, so north is directly along the negative y-axis; that is, away from the user. The last element of rglDirection must be 0.</p>
+<p>In the example in <a href="ee416353(v=vs.85).html">Creating an Effect</a>, the direction of a two-dimensional force is defined in polar coordinates. The force has a south direction - it comes from the direction of the user, so the user has to pull the stick to counteract it. The direction is 180 degrees clockwise from north, and can be assigned as follows:</p>
+<pre>LONG  lDirection[2] = { 18000, 0 };
+</pre>
+<p>For greater clarity, the assignment could also be expressed this way:</p>
+<pre>LONG  lDirection[2] = { 180 * DI_DEGREES, 0 };
+</pre>
+<p>For spherical coordinates, presuming that you are working with a three-axis device, the same direction is assigned as follows:</p>
+<pre>LONG  lDirection[3] = { 90 * DI_DEGREES, 0, 0 }
+</pre>
+<p>The first angle is measured in hundredths of a degree from the (1, 0) direction, rotated in the direction of (0, 1); the second angle is measured in hundredths of a degree toward (0, 0, 1). The elements of the vector notation again correspond to elements in the array pointed to by the rgdwAxes member. Assume that the elements of this array represent the x, y, and z axes, in that order. The point of origin is at x = 1 and y = 0; that is, to the user's right. The direction of rotation is toward the positive y-axis (0, 1); that is, toward the user, or clockwise. The force in the example is 90 degrees clockwise from the right; that is, south. Because the second element of lDirection is 0, there is no rotation on the third axis.</p>
+<p>How do you accomplish the same thing with Cartesian coordinates? Presuming that you have used the DIEFF_CARTESIAN flag in the dwFlags member, you would specify the direction like this:</p>
+<pre>LONG  lDirection[2] = { 0, 1 };
+</pre>
+<p>Here again, the elements of the array correspond to the axes listed in the array pointed to by rgdwAxes. The example sets the x-axis to 0 and the y-axis to 1; that is, the direction lies directly along the positive y-axis, or to the south.</p>
+<p>The theory of effect directions can be difficult to grasp, but the practice is fairly straightforward.</p>
+<h2 id="examples-of-setting-effect-direction">Examples of Setting Effect Direction</h2>
+<h2 id="single-axis-effects">Single-Axis Effects</h2>
+<p>Setting up the direction for a single-axis effect is easy because there is nothing to specify. Put the DIEFF_CARTESIAN flag in the dwFlags member of the DIEFFECT structure and set rglDirection to point to a single LONG containing the value 0.</p>
+<p>The following code example sets up the direction and axis parameters for an x-axis effect:</p>
+<pre>DIEFFECT eff;			
+LONG     lZero  = 0;                       // No direction
+DWORD    dwAxis = DIJOFS_X;                // X-axis effect
+
+ZeroMemory(&amp;eff, sizeof(eff));
+eff.cAxes        = 1;                                     // One axis
+eff.dwFlags      = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS; // Flags
+eff.rglDirection = &amp;lZero;                                // Direction
+eff.rgdwAxes     = &amp;dwAxis;                         // Axis for effect
+</pre>
+<h2 id="two-axis-effects-with-polar-coordinates">Two-Axis Effects with Polar Coordinates</h2>
+<p>Setting up the direction for a polar two-axis effect is only a little more complicated. Set the DIEFF_POLAR flag in dwFlags and set rglDirection to point to an array of two LONGs. The first element in this array is the direction from which you want the effect to come. The second element in the array must be 0.</p>
+<p>The following example sets up the direction and axis parameters for a two-axis effect coming from the east:</p>
+<pre>		
+DIEFFECT eff;	
+LONG     rglDirection[2] = { 90 * DI_DEGREES, 0 }; 
+DWORD    rgdwAxes[2]     = { DIJOFS_X, DIJOFS_Y };   // X- and y-axis
+
+ZeroMemory(&amp;eff, sizeof(eff));
+eff.cAxes        = 2;                                  // Two axes
+eff.dwFlags      = DIEFF_POLAR | DIEFF_OBJECTOFFSETS;  // Flags
+eff.rglDirection = rglDirection;                       // Direction
+eff.rgdwAxes     = rgdwAxes;                     // Axis for effect
+</pre>
+<h2 id="two-axis-effects-with-cartesian-coordinates">Two-Axis Effects with Cartesian Coordinates</h2>
+<p>Setting up the direction for a Cartesian two-axis effect is a bit trickier. Set the DIEFF_CARTESIAN flag in dwFlags, and again set rglDirection to point to an array of two LONGs. This time the first element in the array is the x-coordinate of the direction vector, and the second is the y-coordinate.</p>
+<p>The following code example sets up the direction and axis parameters for a two-axis effect coming from the east:</p>
+<pre>DIEFFECT eff;			
+LONG     rglDirection[2] = { 1, 0 };            // Positive x = east
+DWORD    rgdwAxes[2]     = { DIJOFS_X, DIJOFS_Y };  // X- and y-axis
+
+ZeroMemory(&amp;eff, sizeof(eff));
+eff.cAxes = 2;                                       // Two axes
+eff.dwFlags = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS; // Flags
+eff.rglDirection = rglDirection;                     // Direction
+eff.rgdwAxes = rgdwAxes;                       // Axis for effect
+</pre>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417536(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

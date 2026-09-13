@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDirectInputDevice8::SendDeviceData Method</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="idirectinputdevice8senddevicedata-method">IDirectInputDevice8::SendDeviceData Method</h1>
+<p>Sends data to a device that accepts output.</p>
+<div class="note">
+<p>Note</p>
+<p>There are no devices that accept output from <a href="ee417917(v=vs.85).html">IDirectInputDevice8::SendDeviceData</a>. See Remarks.</p>
+</div>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">HRESULT SendDeviceData(
+         DWORD cbObjectData,
+         LPCDIDEVICEOBJECTDATA rgdod,
+         LPDWORD pdwInOut,
+         DWORD fl
+)
+</code></pre>
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><em>cbObjectData</em><br/>
+Size, in bytes, of a single <a href="ee416611(v=vs.85).html">DIDEVICEOBJECTDATA</a> structure.</li>
+<li><em>rgdod</em><br/>
+Array of <a href="ee416611(v=vs.85).html">DIDEVICEOBJECTDATA</a> structures containing the data to send to the device.</li>
+<li><em>pdwInOut</em><br/>
+On entry, the variable pointed to by this parameter contains the number of elements in the array pointed to by rgdod. On exit, it contains the number of elements sent to the device.</li>
+<li><em>fl</em><br/>
+Flags controlling the manner in which data is sent. This can be 0 or the following value.
+<ul>
+<li>DISDD_CONTINUE<br/>
+The device data sent is overlaid on the previously sent device data.</li>
+</ul>
+</li>
+</ul>
+<h4 id="return-value">Return Value</h4>
+<p>If the method succeeds, the return value is DI_OK. If the method fails, the return value can be one of the following error values: DIERR_INPUTLOST, DIERR_NOTACQUIRED, DIERR_REPORTFULL, DIERR_UNPLUGGED.</p>
+<h2 id="remarks">Remarks</h2>
+<p>Applications should not use <a href="ee417917(v=vs.85).html">IDirectInputDevice8::SendDeviceData</a>. <a href="ee417563(v=vs.85).html">Force Feedback</a> is the recommended way to send data to a device. If you want to send other data to a device, such as changing LED or internal device states, the <a href="https://msdn2.microsoft.com/en-us/library/ms790173.aspx">HID</a> application programming interface (API) is the recommended way.</p>
+<h2 id="requirements">Requirements</h2>
+<p><strong>Header:</strong> Declared in dinput.h.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417917(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

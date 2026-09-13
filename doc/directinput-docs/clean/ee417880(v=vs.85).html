@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDirectInputDevice8::CreateEffect Method</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="idirectinputdevice8createeffect-method">IDirectInputDevice8::CreateEffect Method</h1>
+<p>Creates and initializes an instance of an effect identified by the effect globally unique identifier (GUID).</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">HRESULT CreateEffect(
+         REFGUID rguid,
+         LPCDIEFFECT lpeff,
+         LPDIRECTINPUTEFFECT * ppdeff,
+         LPUNKNOWN punkOuter
+)
+</code></pre>
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><em>rguid</em><br/>
+Reference to (C++) or address of (C) the GUID identifying the effect to be created. This can be a predefined effect GUID, or it can be a GUID obtained from <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a>. The following standard effect GUIDs are defined:
+<ul>
+<li><p>GUID_ConstantForce</p>
+</li>
+<li><p>GUID_RampForce</p>
+</li>
+<li><p>GUID_Square</p>
+</li>
+<li><p>GUID_Sine</p>
+</li>
+<li><p>GUID_Triangle</p>
+</li>
+<li><p>GUID_SawtoothUp</p>
+</li>
+<li><p>GUID_SawtoothDown</p>
+</li>
+<li><p>GUID_Spring</p>
+</li>
+<li><p>GUID_Damper</p>
+</li>
+<li><p>GUID_Inertia</p>
+</li>
+<li><p>GUID_Friction</p>
+</li>
+<li><p>GUID_CustomForce</p>
+</li>
+</ul>
+</li>
+<li><em>lpeff</em><br/>
+<a href="ee416616(v=vs.85).html">DIEFFECT</a> structure that provides parameters for the created effect. This parameter is optional. If it is NULL, the effect object is created without parameters. The application must then call the <a href="ee417952(v=vs.85).html">IDirectInputEffect::SetParameters</a> method to set the parameters of the effect before it can download the effect.</li>
+<li><em>ppdeff</em><br/>
+Address of a variable to receive a pointer to the <a href="ee417936(v=vs.85).html">IDirectInputEffect Interface</a> interface if successful.</li>
+<li><em>punkOuter</em><br/>
+Controlling unknown for COM aggregation. The value is NULL if the interface is not aggregated. Most calling applications pass NULL.</li>
+</ul>
+<h4 id="return-value">Return Value</h4>
+<p>If the method succeeds, the return value is DI_OK. If the method fails, the return value can be one of the following error values: DIERR_DEVICEFULL, DIERR_DEVICENOTREG, DIERR_INVALIDPARAM, DIERR_NOTINITIALIZED.</p>
+<h2 id="remarks">Remarks</h2>
+<p>If the return value is S_OK, the effect was created, and the parameters of the effect were updated, but the effect was not necessarily downloaded. For it to be downloaded, the device must be acquired in exclusive mode.</p>
+<h2 id="requirements">Requirements</h2>
+<p><strong>Header:</strong> Declared in dinput.h.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417880(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

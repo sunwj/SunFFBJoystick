@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIEFFECT Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="dieffect-structure">DIEFFECT Structure</h1>
+<p>Used by the <a href="ee417880(v=vs.85).html">IDirectInputDevice8::CreateEffect</a> method to initialize a new <a href="ee417936(v=vs.85).html">IDirectInputEffect Interface</a> object. It is also used by the <a href="ee417952(v=vs.85).html">IDirectInputEffect::SetParameters</a> and <a href="ee417948(v=vs.85).html">IDirectInputEffect::GetParameters</a> methods.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DIEFFECT {
+    DWORD dwSize;
+    DWORD dwFlags;
+    DWORD dwDuration;
+    DWORD dwSamplePeriod;
+    DWORD dwGain;
+    DWORD dwTriggerButton;
+    DWORD dwTriggerRepeatInterval;
+    DWORD cAxes;
+    LPDWORD rgdwAxes;
+    LPLONG rglDirection;
+    LPDIENVELOPE lpEnvelope;
+    DWORD cbTypeSpecificParams;
+    LPVOID lpvTypeSpecificParams;
+    DWORD dwStartDelay;
+} DIEFFECT, *LPDIEFFECT;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><p><strong>dwSize</strong><br/>
+Specifies the size, in bytes, of the structure. This member must be initialized before the structure is used.</p>
+</li>
+<li><p><strong>dwFlags</strong><br/>
+Flags associated with the effect. This value can be a combination of one or more of the following values:</p>
+<ul>
+<li>DIEFF_CARTESIAN<br/>
+The values of <em>rglDirection</em> are to be interpreted as Cartesian coordinates.</li>
+<li>DIEFF_OBJECTIDS<br/>
+The values of <em>dwTriggerButton</em> and <em>rgdwAxes</em> are object identifiers as obtained by <a href="ee417889(v=vs.85).html">IDirectInputDevice8::EnumObjects</a>.</li>
+<li>DIEFF_OBJECTOFFSETS<br/>
+The values of <em>dwTriggerButton</em> and <em>rgdwAxes</em> are data format offsets.</li>
+<li>DIEFF_POLAR<br/>
+The values of <em>rglDirection</em> are to be interpreted as polar coordinates.</li>
+<li>DIEFF_SPHERICAL<br/>
+The values of <em>rglDirection</em> are to be interpreted as spherical coordinates.</li>
+</ul>
+</li>
+<li><p><strong>dwDuration</strong><br/>
+The total duration of the effect, in microseconds. If this value is INFINITE, the effect has infinite duration. If an envelope has been applied to the effect, the attack is applied, followed by an infinite sustain.</p>
+</li>
+<li><p><strong>dwSamplePeriod</strong><br/>
+The period at which the device should play back the effect, in microseconds. A value of 0 indicates that the default playback sample rate should be used.</p>
+<p>If the device is not capable of playing back the effect at the specified rate, it chooses the supported rate that is closest to the requested value.</p>
+<p>Setting a custom <em>dwSamplePeriod</em> can be used for special effects. For example, playing a sine wave at an artificially large sample period results in a rougher texture.</p>
+</li>
+<li><p><strong>dwGain</strong><br/>
+The gain to be applied to the effect, in the range from 0 through 10,000. The gain is a scaling factor applied to all magnitudes of the effect and its envelope.</p>
+</li>
+<li><p><strong>dwTriggerButton</strong><br/>
+The identifier or offset of the button to be used to trigger playback of the effect. The flags DIEFF_OBJECTIDS and DIEFF_OBJECTOFFSETS determine the semantics of the value. If this member is set to DIEB_NOTRIGGER, no trigger button is associated with the effect.</p>
+</li>
+<li><p><strong>dwTriggerRepeatInterval</strong><br/>
+The interval, in microseconds, between the end of one playback and the start of the next when the effect is triggered by a button press and the button is held down. Setting this value to INFINITE suppresses repetition.</p>
+<p>Support for trigger repeat for an effect is indicated by the presence of the DIEP_TRIGGERREPEATINTERVAL flag in the <a href="ee416617(v=vs.85).html">dwStaticParams</a> member of the <a href="ee416617(v=vs.85).html">DIEffectInfo</a> structure.</p>
+</li>
+<li><p><strong>cAxes</strong><br/>
+Number of axes involved in the effect. This member must be filled in by the calling application if changing or setting the axis list or the direction list.</p>
+<p>The number of axes for an effect cannot be changed once it has been set.</p>
+</li>
+<li><p><strong>rgdwAxes</strong><br/>
+Pointer to a DWORD array (of <em>cAxes</em> elements) containing identifiers or offsets identifying the axes to which the effect is to be applied. The flags DIEFF_OBJECTIDS and DIEFF_OBJECTOFFSETS determine the semantics of the values in the array.</p>
+<p>The list of axes associated with an effect cannot be changed once it has been set.</p>
+<p>No more than 32 axes can be associated with a single effect.</p>
+</li>
+<li><p><strong>rglDirection</strong><br/>
+Pointer to a LONG array (of <em>cAxes</em> elements) containing either Cartesian coordinates, polar coordinates, or spherical coordinates. The flags DIEFF_CARTESIAN, DIEFF_POLAR, and DIEFF_SPHERICAL determine the semantics of the values in the array.</p>
+<p>If Cartesian, each value in <em>rglDirection</em> is associated with the corresponding axis in <em>rgdwAxes</em>.</p>
+<p>If polar, the angle is measured in hundredths of degrees from the (0, - 1) direction, rotated in the direction of (1, 0). This usually means that north is away from the user, and east is to the user's right. The last element is not used.</p>
+<p>If spherical, the first angle is measured in hundredths of a degree from the (1, 0) direction, rotated in the direction of (0, 1). The second angle (if the number of axes is three or more) is measured in hundredths of a degree toward (0, 0, 1). The third angle (if the number of axes is four or more) is measured in hundredths of a degree toward (0, 0, 0, 1), and so on. The last element is not used.</p>
+</li>
+<li><p><strong>lpEnvelope</strong><br/>
+Optional pointer to a <a href="ee416625(v=vs.85).html">DIENVELOPE</a> structure that describes the envelope to be used by this effect. Not all effect types use envelope. If no envelope is to be applied, the member should be set to NULL.</p>
+</li>
+<li><p><strong>cbTypeSpecificParams</strong><br/>
+Number of bytes of additional type-specific parameters for the corresponding effect type.</p>
+</li>
+<li><p><strong>lpvTypeSpecificParams</strong><br/>
+Pointer to type-specific parameters, or NULL if there are no type-specific parameters.</p>
+<p>If the effect is of type DIEFT_CONDITION, this member contains a pointer to an array of <a href="ee416601(v=vs.85).html">DICONDITION</a> structures that define the parameters for the condition. A single structure may be used, in which case the condition is applied in the direction specified in the <em>rglDirection</em> array. Otherwise, there must be one structure for each axis, in the same order as the axes in <em>rgdwAxes</em> array. If a structure is supplied for each axis, the effect should not be rotated; you should use the following values in the <em>rglDirection</em> array:</p>
+<ul>
+<li><p>DIEFF_SPHERICAL: 0, 0, ...</p>
+</li>
+<li><p>DIEFF_POLAR: 9000, 0, ...</p>
+</li>
+<li><p>DIEFF_CARTESIAN: 1, 0, ...</p>
+</li>
+</ul>
+<p>If the effect is of type DIEFT_CUSTOMFORCE, this member contains a pointer to a <a href="ee416605(v=vs.85).html">DICUSTOMFORCE</a> structure that defines the parameters for the custom force.</p>
+<p>If the effect is of type DIEFT_PERIODIC, this member contains a pointer to a <a href="ee416634(v=vs.85).html">DIPERIODIC</a> structure that defines the parameters for the effect.</p>
+<p>If the effect is of type DIEFT_CONSTANTFORCE, this member contains a pointer to a <a href="ee416604(v=vs.85).html">DICONSTANTFORCE</a> structure that defines the parameters for the constant force.</p>
+<p>If the effect is of type DIEFT_RAMPFORCE, this member contains a pointer to a <a href="ee416642(v=vs.85).html">DIRAMPFORCE</a> structure that defines the parameters for the ramp force.</p>
+</li>
+<li><p><strong>dwStartDelay</strong><br/>
+Time (in microseconds) that the device should wait after an <a href="ee417955(v=vs.85).html">IDirectInputEffect::Start</a> call before playing the effect. If this value is 0, effect playback begins immediately. This member is not present in versions prior to DirectX 7.0.</p>
+</li>
+</ul>
+<h2 id="remarks">Remarks</h2>
+<div class="note">
+<p>Note</p>
+<p>The <em>rglDirection</em> array must contain <em>cAxes</em> entries, even if polar or spherical coordinates are given. In these cases, the last element in the <em>rglDirection</em> array is reserved and must be 0.</p>
+</div>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416616(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDirectInputDevice8::GetProperty Method</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="idirectinputdevice8getproperty-method">IDirectInputDevice8::GetProperty Method</h1>
+<p>Retrieves information about the input device.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">HRESULT GetProperty(
+         REFGUID rguidProp,
+         LPDIPROPHEADER pdiph
+)
+</code></pre>
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><em>rguidProp</em><br/>
+Reference to (C++) or address of (C) the globally unique identifier (GUID) identifying the property to be retrieved. This can be one of the predefined values or a pointer to a GUID that identifies the property. The following properties are predefined for an input device.
+<ul>
+<li><p>DIPROP_APPDATA<br/>
+Retrieves the application-defined value associated with an in-game action, as a <a href="ee416639(v=vs.85).html">DIPROPPOINTER</a>.</p>
+</li>
+<li><p>DIPROP_AUTOCENTER<br/>
+Determines whether device objects are self centering. The value returned can be DIPROPAUTOCENTER_OFF or DIPROPAUTOCENTER_ON. See <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> for more information.</p>
+</li>
+<li><p>DIPROP_AXISMODE<br/>
+Retrieves the axis mode. The retrieved value can be DIPROPAXISMODE_ABS or DIPROPAXISMODE_REL.</p>
+</li>
+<li><p>DIPROP_BUFFERSIZE<br/>
+Retrieves the input buffer size. The buffer size determines the amount of data that the buffer can hold between calls to the <a href="ee417894(v=vs.85).html">IDirectInputDevice8::GetDeviceData</a> method before data is lost. You can set this value to 0 to indicate that the application does not read buffered data from the device. If the buffer size in the dwData member of the <a href="ee416636(v=vs.85).html">DIPROPDWORD</a> structure is too large for the device to support it, then the largest possible buffer size is set. However, this property always returns the buffer size set using the <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> method, even if the buffer cannot be supported because it is too large.</p>
+</li>
+<li><p>DIPROP_CALIBRATION<br/>
+Predefined property that allows the application to access the information that DirectInput uses to manipulate axes that require calibration. This property exists primarily for applications of the control panel type. Normal applications should not need to deal with calibration information.</p>
+<p>You can access the calibration mode property for a particular axis by setting the dwHow member of the <a href="ee416638(v=vs.85).html">DIPROPHEADER</a> structure to DIPH_BYID or to DIPH_BYOFFSET and setting the dwObj member to the object ID or offset, respectively.</p>
+<p>Control panel applications that set new calibration data must also invoke the IDirectInputJoyConfig::SendNotify method to notify other applications of the change in calibration. For more information about IDirectInputJoyConfig::SendNotify, see the DirectInput Driver Development Kit (DDK).</p>
+</li>
+<li><p>DIPROP_CALIBRATIONMODE<br/>
+For use by device drivers; not used by applications.</p>
+</li>
+<li><p>DIPROP_CPOINTS<br/>
+This property is unsupported. Retrieves calibration points used for the adjustment of incoming raw data as a <a href="ee416635(v=vs.85).html">DIPROPCPOINTS</a> structure.</p>
+</li>
+<li><p>DIPROP_DEADZONE<br/>
+Retrieves a value for the dead zone of a joystick, in the range from 0 through 10,000, where 0 indicates that there is no dead zone, 5,000 indicates that the dead zone extends over 50 percent of the physical range of the axis on both sides of center, and 10,000 indicates that the entire physical range of the axis is dead. When the axis is within the dead zone, it is reported as being at the center of its range.</p>
+</li>
+<li><p>DIPROP_FFGAIN<br/>
+Retrieves the gain of the device. This property always returns DI_OK even if the device does not support force feedback. See <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> for more information.</p>
+</li>
+<li><p>DIPROP_FFLOAD<br/>
+Retrieves the memory load for the device. This setting applies to the entire device, rather than to any particular object, so the dwHow member of the associated <a href="ee416636(v=vs.85).html">DIPROPDWORD</a> structure must be DIPH_DEVICE. The retrieved value is in the range from 0 through 100, indicating the percentage of device memory in use. The device must be acquired in exclusive mode. If it is not, the method will fail with a return value of DIERR_NOTEXCLUSIVEACQUIRED.</p>
+</li>
+<li><p>DIPROP_GETPORTDISPLAYNAME<br/>
+Retrieves the human-readable display name of the port to which this device is connected. Not generally used by applications.</p>
+</li>
+<li><p>DIPROP_GRANULARITY<br/>
+Retrieves the input granularity. Granularity represents the smallest distance over which the object reports movement. Most axis objects have a granularity of one; that is, all values are possible. Some axes have a larger granularity. For example, the wheel axis on a mouse can have a granularity of 20; that is, all reported changes in position are multiples of 20. In other words, when the user turns the wheel slowly, the device reports a position of 0, then 20, then 40, and so on. This is a read-only property.</p>
+</li>
+<li><p>DIPROP_GUIDANDPATH<br/>
+Retrieves the class GUID and device interface (path) for the device. This property lets advanced applications perform operations on a human interface device that are not supported by DirectInput. For more information, see the <a href="ee416637(v=vs.85).html">DIPROPGUIDANDPATH</a> structure.</p>
+</li>
+<li><p>DIPROP_INSTANCENAME<br/>
+Retrieves the friendly instance name of the device. For more information, see <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a>.</p>
+</li>
+<li><p>DIPROP_JOYSTICKID<br/>
+Retrieves the instance number of a joystick. This property is not implemented for the mouse or keyboard.</p>
+</li>
+<li><p>DIPROP_KEYNAME<br/>
+Retrieves the localized key name for a keyboard key, as a <a href="ee416641(v=vs.85).html">DIPROPSTRING</a>. Using this property on devices other than a keyboard will return unexpected names.</p>
+</li>
+<li><p>DIPROP_LOGICALRANGE<br/>
+Retrieves the range of the raw data returned for axes on a human interface device. Devices can return negative values.</p>
+</li>
+<li><p>DIPROP_PHYSICALRANGE<br/>
+Retrieves the range of data for axes as suggested by the manufacturer of a human interface device. Values can be negative. Normally DirectInput returns values from 0 through 0xFFFF, but the range can be made to conform to the manufacturer's suggested range by using DIPROP_RANGE.</p>
+</li>
+<li><p>DIPROP_PRODUCTNAME<br/>
+Retrieves the friendly product name of the device. For more information, see <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a>.</p>
+</li>
+<li><p>DIPROP_RANGE<br/>
+Retrieves the range of values an object can possibly report. For some devices, this is a read-only property.</p>
+</li>
+<li><p>DIPROP_SATURATION<br/>
+Retrieves a value for the saturation zones of a joystick, in the range from 0 through 10,000. The saturation level is the point at which the axis is considered to be at its most extreme position. For example, if the saturation level is set to 9,500, the axis reaches the extreme of its range when it has moved 95 percent of the physical distance from its center position (or from the dead zone).</p>
+</li>
+<li><p>DIPROP_SCANCODE<br/>
+Retrieves the scan code for a keyboard key, as a <a href="ee416636(v=vs.85).html">DIPROPDWORD</a>. If successful, S_OK is returned. E_FAIL is returned if the property cannot resolve specialized keys on USB keyboards because they do not exist in scan code form. For all other failures, E_INVALIDARG is returned.</p>
+</li>
+<li><p>DIPROP_TYPENAME<br/>
+Predefined property that retrieves the type name of a device. For most game controllers, this is the registry key name under REGSTR_PATH_JOYOEM from which static device settings can be retrieved, but predefined joystick types have special names consisting of a number sign (&amp;Sharp;) followed by a character dependent on the type. This value might not be available for all devices.</p>
+</li>
+<li><p>DIPROP_USERNAME<br/>
+Retrieves the user name for a user currently assigned to a device, as a <a href="ee416641(v=vs.85).html">DIPROPSTRING</a>. User names are set by calling <a href="ee417919(v=vs.85).html">IDirectInputDevice8::SetActionMap</a>. If no user name is set, the method returns S_FALSE.</p>
+</li>
+<li><p>DIPROP_VIDPID<br/>
+Read-only device property that retrieves the vendor identity (ID) and product ID of a HID device. This property is of type <a href="ee416636(v=vs.85).html">DIPROPDWORD</a> and contains both values. These two WORD values are combined in the dwData member of the <a href="ee416636(v=vs.85).html">DIPROPDWORD</a> structure. See Examples. This property applies to the entire device, rather than to any particular object, so the dwHow member of the <a href="ee416638(v=vs.85).html">DIPROPHEADER</a> structure must be set to DIPH_DEVICE.</p>
+</li>
+</ul>
+</li>
+<li><em>pdiph</em><br/>
+Address of the <a href="ee416638(v=vs.85).html">DIPROPHEADER</a> portion of a larger property-dependent structure that contains the <a href="ee416638(v=vs.85).html">DIPROPHEADER</a> structure as a member. The following structures are used for properties:
+<ul>
+<li><p><a href="ee416636(v=vs.85).html">DIPROPDWORD</a> is used for properties represented by a single numerical value.</p>
+</li>
+<li><p><a href="ee416637(v=vs.85).html">DIPROPGUIDANDPATH</a> is used for DIPROP_GUIDANDPATH.</p>
+</li>
+<li><p><a href="ee416640(v=vs.85).html">DIPROPRANGE</a> is used for properties represented by a pair of numerical values. Currently, the only such property is DIPROP_RANGE.</p>
+</li>
+<li><p><a href="ee416641(v=vs.85).html">DIPROPSTRING</a> is used for string properties.</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="return-value">Return Value</h4>
+<p>If the method succeeds, the return value is DI_OK or S_FALSE. If the method fails, the return value can be one of the following error values: DIERR_INVALIDPARAM, DIERR_NOTEXCLUSIVEACQUIRED, DIERR_NOTINITIALIZED, DIERR_OBJECTNOTFOUND, DIERR_UNSUPPORTED.</p>
+<h2 id="remarks">Remarks</h2>
+<p>If rguidProp is set to DIPROP_APPDATA, the dwHow member of the <a href="ee416638(v=vs.85).html">DIPROPHEADER</a> structure should only be set to DIPH_BYUSAGE when getting information about input controls, such as buttons or axes. Setting DIPH_BYUSAGE for other device objects such as a physical interface device (PID) or LED devices can lead to unpredictable results.</p>
+<p>S_FALSE is always returned when <a href="ee417908(v=vs.85).html">IDirectInputDevice8::GetProperty</a> is called with rguidProp set to DIPROP_GETPORTDISPLAYNAME, even if the method succeeds.</p>
+<p>The scan codes reported in Microsoft DirectX 8.1 are different from the ones reported in DirectX 8.0. In DirectX 8.0, the property actually reported the single byte DIK_* constant associated with the key, not the scan code. In DirectX 8.1 and later releases, the property reports the make scan code as would be reported by a PS/2 keyboard. In some cases, scan codes are multiple bytes, in which case the scan code bytes are ordered with the first byte in the least significant byte of the DWORD retrieved by the property.</p>
+<h2 id="example">Example</h2>
+<p>The following C example shows how to obtain the value of the DIPROP_BUFFERSIZE property.</p>
+<pre>DIPROPDWORD dipdw;  // DIPROPDWORD contains a DIPROPHEADER structure. 
+HRESULT hr; 
+dipdw.diph.dwSize       = sizeof(DIPROPDWORD); 
+dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER); 
+dipdw.diph.dwObj        = 0; // device property 
+dipdw.diph.dwHow        = DIPH_DEVICE; 
+
+hr = idirectinputdevice9_GetProperty(pdid, DIPROP_BUFFERSIZE, &amp;dipdw.diph); 
+if (SUCCEEDED(hr)) { 
+    // The dipdw.dwData member contains the buffer size. 
+} 
+</pre>
+<p>The following example shows how to extract the two WORD values from the dwData member of the DIPROPDWORD structure using the DIPROP_VIDPID property:</p>
+<pre>wVendorID  = LOWORD(DIPROPDWORD.dwData);
+wProductID = HIWORD(DIPROPDWORD.dwData);
+</pre>
+<h2 id="requirements">Requirements</h2>
+<p><strong>Header:</strong> Declared in dinput.h.</p>
+<h2 id="see-also">See Also</h2>
+<p><a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a></p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417908(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

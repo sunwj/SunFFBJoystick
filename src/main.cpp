@@ -61,7 +61,8 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                 // Block Load Request
                 case REPORT_ID_BLOCK_LOAD_REPORT:
                 {
-                    xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
+                    if (xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1)) != pdTRUE)
+                        return 0;
                     const SunFFB::BlockLoadReportData* data = ffbHandler.get_block_load_report_data();
                     memcpy(buffer, data, sizeof(SunFFB::BlockLoadReportData));
                     xSemaphoreGive(semaphoreFFBReportHandler);
@@ -75,7 +76,8 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                 // Pool size, max simultaneous effects, etc.
                 case REPORT_ID_POOL_REPORT:
                 {
-                    xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
+                    if (xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1)) != pdTRUE)
+                        return 0;
                     const SunFFB::PoolReportData* data = ffbHandler.get_pool_report_data();
                     memcpy(buffer, data, sizeof(SunFFB::PoolReportData));
                     xSemaphoreGive(semaphoreFFBReportHandler);
@@ -102,8 +104,10 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
     uint32_t startTime = micros();
 
     if (!buffer || bufSize == 0) return;
-    
-    xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
+
+    if (xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1)) != pdTRUE)
+        return;
+
     switch (reportId)
     {
         case REPORT_ID_SET_EFFECT_REPORT:
@@ -195,7 +199,7 @@ void lcd_task(void* params)
         sprite.drawRect(0, 0, 40, 40, TFT_RED);
 
         // snapshot axis data under semaphore for consistent reads
-        int16_t axisSnapshot[NUM_AXIS];
+        static int16_t axisSnapshot[NUM_AXIS] = {0};
         if (xSemaphoreTake(semaphoreFFBDeviceInput, pdMS_TO_TICKS(10)) == pdTRUE)
         {
             memcpy(axisSnapshot, (const int16_t*)ffbDeviceInput.inputData.axis, sizeof(axisSnapshot));
@@ -275,7 +279,7 @@ void lcd_task(void* params)
         sprite.printf("%d", currentTime);
 
         // snapshot effect states under semaphore for consistent reads
-        uint8_t effectStates[MAX_EFFECTS];
+        static uint8_t effectStates[MAX_EFFECTS] = {0};
         if (xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(10)) == pdTRUE)
         {
             for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
@@ -371,15 +375,21 @@ void send_report_task(void* params)
             continue;
         }
 
-        if (ffbHandler.pidStateDirty)
+        SunFFB::PIDStateReportData pidData;
+        bool sendPidState = false;
+        if (xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1)) == pdTRUE)
         {
-            SunFFB::PIDStateReportData pidData;
-            xSemaphoreTake(semaphoreFFBReportHandler, pdMS_TO_TICKS(1));
-            pidData = *ffbHandler.get_pid_state_report_data();
-            ffbHandler.pidStateDirty = false;
+            if (ffbHandler.pidStateDirty)
+            {
+                pidData = *ffbHandler.get_pid_state_report_data();
+                ffbHandler.pidStateDirty = false;
+                sendPidState = true;
+            }
             xSemaphoreGive(semaphoreFFBReportHandler);
-            usb_hid.sendReport(REPORT_ID_PID_STATE, &pidData, sizeof(SunFFB::PIDStateReportData));
         }
+
+        if (sendPidState)
+            usb_hid.sendReport(REPORT_ID_PID_STATE, &pidData, sizeof(SunFFB::PIDStateReportData));
 
         TickType_t now = xTaskGetTickCount();
         if ((now - lastJoystick) >= pdMS_TO_TICKS(POLLING_RATE))

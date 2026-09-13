@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDirectInputDevice8::SetEventNotification Method</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="idirectinputdevice8seteventnotification-method">IDirectInputDevice8::SetEventNotification Method</h1>
+<p>Specifies an event that is to be set when the device state changes. It is also used to turn off event notification.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">HRESULT SetEventNotification(
+         HANDLE hEvent
+)
+</code></pre>
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><p><em>hEvent</em><br/>
+Handle to the event that is to be set when the device state changes. DirectInput uses the Microsoft Win32 <a href="https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-setevent">SetEvent</a> function on the handle when the state of the device changes. If the hEvent parameter is NULL, notification is disabled.</p>
+<p>The application can create the handle as either a manual-reset or autoreset event by using the Win32 CreateEvent function. If the event is created as an autoreset event, the operating system automatically resets the event when a wait has been satisfied. If the event is created as a manual-reset event, it is the application's responsibility to call the Win32 ResetEvent function to reset it. DirectInput does not call the Win32 ResetEvent function for event notification handles. Most applications create the event as an automatic-reset event.</p>
+</li>
+</ul>
+<h4 id="return-value">Return Value</h4>
+<p>If the method succeeds, the return value is DI_OK or DI_POLLEDDEVICE. If the method fails, the return value can be one of the following error values: DIERR_ACQUIRED, DIERR_HANDLEEXISTS, DIERR_INVALIDPARAM, DIERR_NOTINITIALIZED.</p>
+<h2 id="remarks">Remarks</h2>
+<p>A device state change is defined as any of the following:</p>
+<ul>
+<li><p>A change in the position of an axis</p>
+</li>
+<li><p>A change in the state (pressed or released) of a button</p>
+</li>
+<li><p>A change in the direction of a POV control</p>
+</li>
+<li><p>Loss of acquisition</p>
+</li>
+</ul>
+<p>Do not call the Win32 <a href="https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle">CloseHandle</a> function on the event while it has been selected into a DirectInputDevice object. You must call this method with the hEvent parameter set to NULL before closing the event handle.</p>
+<p>The event notification handle cannot be changed while the device is acquired. If the function is successful, the application can use the event handle like any other Win32 event handle.</p>
+<h2 id="examples">Examples</h2>
+<p>The following code example checks whether the handle is currently set without blocking:</p>
+<pre>dwResult = WaitForSingleObject(hEvent, 0); 
+if (dwResult == WAIT_OBJECT_0) { 
+    // Event is set. If the event was created as 
+    // autoreset, it has also been reset. 
+} 
+</pre>
+<p>The following code example illustrates blocking indefinitely until the event is set. This behavior is strongly discouraged because the thread does not respond to the system until the wait is satisfied. In particular, the thread does not respond to Microsoft Windows messages.</p>
+<pre>dwResult = WaitForSingleObject(hEvent, INFINITE); 
+if (dwResult == WAIT_OBJECT_0) { 
+    // Event has been set. If the event was created 
+    // as autoreset, it has also been reset. 
+}
+</pre>
+<p>The following code example illustrates a typical application loop for a non-message-based application that uses two events:</p>
+<pre>HANDLE ah[2] = { hEvent1, hEvent2 }; 
+
+while (TRUE) { 
+
+    dwResult = MsgWaitForMultipleObjects(2, ah, FALSE, 
+                        INFINITE, QS_ALLINPUT); 
+    switch (dwResult) { 
+    case WAIT_OBJECT_0: 
+        // Event 1 has been set. If the event was created as
+        // autoreset, it has also been reset. 
+        ProcessInputEvent1(); 
+        break; 
+
+    case WAIT_OBJECT_0 + 1: 
+        // Event 2 has been set. If the event was created as
+        // autoreset, it has also been reset. 
+        ProcessInputEvent2(); 
+        break; 
+
+    case WAIT_OBJECT_0 + 2: 
+        // A Windows message has arrived. Process 
+        // messages until there aren't any more. 
+        while(PeekMessage(&amp;msg, NULL, 0, 0, PM_REMOVE)){ 
+            if (msg.message == WM_QUIT) { 
+                goto exitapp; 
+            } 
+            TranslateMessage(&amp;msg); 
+            DispatchMessage(&amp;msg); 
+        } 
+        break; 
+
+    default: 
+        // Unexpected error. 
+        Panic(); 
+        break; 
+    } 
+} 
+</pre>
+<p>The following code example illustrates a typical message loop for a message-based application that uses two events:</p>
+<pre>HANDLE ah[2] = { hEvent1, hEvent2 }; 
+DWORD dwWait = 0; 
+
+while (TRUE) { 
+
+    dwResult = MsgWaitForMultipleObjects(2, ah, FALSE, 
+                                         dwWait, QS_ALLINPUT); 
+    dwWait = 0; 
+
+    switch (dwResult) { 
+    case WAIT_OBJECT_0: 
+        // Event 1 has been set. If the event was 
+        // created as autoreset, it has also 
+        // been reset. 
+        ProcessInputEvent1(); 
+        break; 
+
+    case WAIT_OBJECT_0 + 1: 
+        // Event 2 has been set. If the event was 
+        // created as autoreset, it has also 
+        // been reset. 
+        ProcessInputEvent2(); 
+        break; 
+
+    case WAIT_OBJECT_0 + 2: 
+        // A Windows message has arrived. Process 
+        // messages until there aren't any more. 
+        while(PeekMessage(&amp;msg, NULL, 0, 0, PM_REMOVE)){ 
+            if (msg.message == WM_QUIT) { 
+                goto exitapp; 
+            } 
+            TranslateMessage(&amp;msg); 
+            DispatchMessage(&amp;msg); 
+        } 
+        break; 
+
+    default: 
+        // No input or messages waiting. 
+        // Do a frame of the game. 
+        // If the game is idle, tell the next wait 
+        // to wait indefinitely for input or a message. 
+        if (!DoGame()) { 
+            dwWait = INFINITE; 
+        } 
+        break; 
+    } 
+} 
+</pre>
+<h2 id="requirements">Requirements</h2>
+<p><strong>Header:</strong> Declared in dinput.h.</p>
+<h2 id="see-also">See Also</h2>
+<p><a href="ee418748(v=vs.85).html">Polling and Event Notification</a></p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417927(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

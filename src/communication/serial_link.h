@@ -35,6 +35,16 @@ namespace SunFFB
         return crc;
     }
 
+    __attribute__((always_inline))
+    static inline uint8_t calc_frame_crc8(uint8_t msgId, const uint8_t* payload, uint8_t len)
+    {
+        uint8_t crc = CRC8_TABLE[msgId];
+        crc = CRC8_TABLE[crc ^ len];
+        for (uint8_t i = 0; i < len; ++i)
+            crc = CRC8_TABLE[crc ^ payload[i]];
+        return crc;
+    }
+
     static constexpr uint8_t SERIAL_MSG_FORCE     = 0x01;
     static constexpr uint8_t SERIAL_MSG_POSITION  = 0x02;
     static constexpr uint8_t SERIAL_MSG_HEARTBEAT = 0x03;
@@ -77,6 +87,10 @@ namespace SunFFB
 
         uint8_t receive(uint8_t* payload)
         {
+            // Report only frames completed during this call. Keeping the previous
+            // message ID would make an idle/partial receive look like a new frame.
+            mLastMsgId = 0;
+            mLastPayloadLen = 0;
             while (mHal.available() > 0) {
                 uint8_t b = mHal.read();
                 processByte(b, payload);
@@ -115,7 +129,7 @@ namespace SunFFB
             frame[1] = msgId;
             frame[2] = len;
             memcpy(&frame[3], payload, len);
-            frame[3 + len] = calc_crc8(&frame[1], 2 + len);
+            frame[3 + len] = calc_frame_crc8(msgId, payload, len);
             mHal.write(frame, 4 + len);
         }
 
@@ -151,8 +165,7 @@ namespace SunFFB
                     break;
 
                 case SerialState_CHECK_CRC: {
-                    uint8_t expected = calc_crc8(
-                        reinterpret_cast<uint8_t*>(&mMsgId), 2 + mPayloadLen);
+                    const uint8_t expected = calc_frame_crc8(mMsgId, mBuffer, mPayloadLen);
                     if (b == expected) {
                         memcpy(payload, mBuffer, mPayloadLen);
                         mLastMsgId = mMsgId;

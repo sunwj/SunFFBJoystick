@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acquiring Devices</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="acquiring-devices">Acquiring Devices</h1>
+<p>Acquiring a DirectInput device means giving your application access to it. As long as a device is acquired, DirectInput is making its data available to your application. If the device is not acquired, you can manipulate its characteristics but not obtain any data.</p>
+<p>Acquisition is not permanent. Your application might acquire and release a device many times.</p>
+<p>In certain cases, depending on the cooperative level, a device is released automatically whenever the application moves to the background. The mouse is automatically released when the user clicks a menu, because at this point, Windows assumes control of the device.</p>
+<p>You must release a device before changing its properties. The only exception is that you can change the gain for a force-feedback device while it is in an acquired state.</p>
+<p>The acquisition mechanism is needed for two reasons:</p>
+<ol>
+<li><p>DirectInput must be able to tell the application when the flow of data from the device has been interrupted by the system. For example, if the user has switched to another application with ALT+TAB and has used the input device in that application, your application needs to know that the input no longer belongs to it and that the state of the buffers might have changed.</p>
+<p>Consider an application with the DISCL_FOREGROUND cooperative level. The user holds down the SHIFT key and switches to another application. Then the user releases the key and switches back to the first application. As far as the first application is concerned, the SHIFT key is still down. The acquisition mechanism, by telling the application that input was lost, enables it to recover from these conditions.</p>
+</li>
+<li><p>Your application can alter the properties of the device, and without safeguards, DirectInput would need to check the properties each time you wanted to retrieve data. This would be very inefficient and could allow for disaster; for example, a hardware interrupt accessing a data buffer just as you were changing the buffer size.</p>
+<p>Therefore, DirectInput requires that your application release the device before changing its properties. When you reacquire it, DirectInput checks the properties and decides on the optimal way of transferring data from the device to the application. This is done only once, so the data retrieval methods can be very fast.</p>
+</li>
+</ol>
+<p>Windows does not have access to the mouse when your application is using it in exclusive mode. If you want Windows to acquire the mouse, you must release it.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee415221(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DirectInput Documentation (Offline)</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       max-width: 900px; margin: 0 auto; padding: 40px 20px; color: #333; line-height: 1.6; }
+h1 { color: #2378c4; border-bottom: 2px solid #2378c4; padding-bottom: 10px; }
+h2 { color: #555; margin-top: 30px; }
+a { color: #2378c4; text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul { list-style-type: none; padding-left: 20px; }
+li { margin: 4px 0; }
+li > ul { margin-top: 4px; }
+strong { color: #444; }
+.info { background: #f5f5f5; padding: 15px 20px; border-radius: 6px; margin: 20px 0; }
+</style>
+</head>
+<body>
+<h1>DirectInput Documentation</h1>
+<div class="info">
+<p><strong>223</strong> pages &middot; DirectX SDK (vs.85) &middot; Offline copy</p>
+<p>Source: learn.microsoft.com &middot; Clean HTML, no JavaScript required</p>
+</div>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="ee416842(v=vs.85).html">DirectInput</a></li>
+<ul>
+<li><a href="ee418273(v=vs.85).html">Introduction to DirectInput</a></li>
+<li><a href="ee418998(v=vs.85).html">Understanding DirectInput</a></li>
+<li><a href="ee416845(v=vs.85).html">Programming Guide</a></li>
+<ul>
+<li><a href="ee416758(v=vs.85).html">DirectInput Devices</a></li>
+<ul>
+<li><a href="ee415221(v=vs.85).html">Acquiring Devices</a></li>
+<li><a href="ee416848(v=vs.85).html">Cooperative Levels</a></li>
+<li><a href="ee416359(v=vs.85).html">Creating a DirectInput Device</a></li>
+<li><a href="ee416850(v=vs.85).html">Device Capabilities</a></li>
+<li><a href="ee416593(v=vs.85).html">Device Data Formats</a></li>
+<li><a href="ee416594(v=vs.85).html">Device Object Enumeration</a></li>
+<li><a href="ee416595(v=vs.85).html">Device Properties</a></li>
+<li><a href="ee416596(v=vs.85).html">Device Setup</a></li>
+</ul>
+<li><a href="ee416759(v=vs.85).html">DirectInput Device Data</a></li>
+<ul>
+<li><a href="ee416236(v=vs.85).html">Buffered and Immediate Data</a></li>
+<li><a href="ee418748(v=vs.85).html">Polling and Event Notification</a></li>
+<li><a href="ee418779(v=vs.85).html">Relative and Absolute Axis Coordinates</a></li>
+<li><a href="ee418871(v=vs.85).html">Time Stamps and Sequence Numbers</a></li>
+<li><a href="ee418631(v=vs.85).html">Joystick Data</a></li>
+<ul>
+<li><a href="ee416237(v=vs.85).html">Buffered Joystick Data</a></li>
+<li><a href="ee416310(v=vs.85).html">Checking for Lost Joystick Input</a></li>
+<li><a href="ee418260(v=vs.85).html">Immediate Joystick Data</a></li>
+<li><a href="ee418270(v=vs.85).html">Interpreting Joystick Axis Data</a></li>
+<li><a href="ee419009(v=vs.85).html">Using CPOINTs</a></li>
+</ul>
+<li><a href="ee418640(v=vs.85).html">Keyboard Data</a></li>
+<ul>
+<li><a href="ee416238(v=vs.85).html">Buffered Keyboard Data</a></li>
+<li><a href="ee416312(v=vs.85).html">Checking for Lost Keyboard Input</a></li>
+<li><a href="ee418261(v=vs.85).html">Immediate Keyboard Data</a></li>
+<li><a href="ee418271(v=vs.85).html">Interpreting Keyboard Data</a></li>
+</ul>
+<li><a href="ee418672(v=vs.85).html">Mouse Data</a></li>
+<ul>
+<li><a href="ee416239(v=vs.85).html">Buffered Mouse Data</a></li>
+<li><a href="ee416314(v=vs.85).html">Checking for Lost Mouse Input</a></li>
+<li><a href="ee418262(v=vs.85).html">Immediate Mouse Data</a></li>
+<li><a href="ee418272(v=vs.85).html">Interpreting Mouse Axis Data</a></li>
+</ul>
+<li><a href="ee418707(v=vs.85).html">Output Data</a></li>
+</ul>
+<li><a href="ee417563(v=vs.85).html">Force Feedback</a></li>
+<ul>
+<li><a href="ee416225(v=vs.85).html">Basic Concepts of Force Feedback</a></li>
+<li><a href="ee416309(v=vs.85).html">Changing an Effect</a></li>
+<li><a href="ee416353(v=vs.85).html">Creating an Effect</a></li>
+<li><a href="ee416813(v=vs.85).html">Downloading and Unloading Effects</a></li>
+<li><a href="ee417536(v=vs.85).html">Effect Direction</a></li>
+<li><a href="ee417537(v=vs.85).html">Effect Enumeration</a></li>
+<li><a href="ee417538(v=vs.85).html">Effect Object Enumeration</a></li>
+<li><a href="ee417540(v=vs.85).html">Effect Playback</a></li>
+<li><a href="ee417546(v=vs.85).html">Envelopes and Offsets</a></li>
+<li><a href="ee417664(v=vs.85).html">Force-Feedback State</a></li>
+<li><a href="ee417675(v=vs.85).html">Gain</a></li>
+<li><a href="ee418263(v=vs.85).html">Information About a Supported Effect</a></li>
+<li><a href="ee418645(v=vs.85).html">Loading Effects from a File</a></li>
+<li><a href="ee417541(v=vs.85).html">Effect Types</a></li>
+<ul>
+<li><a href="ee416335(v=vs.85).html">Conditions</a></li>
+<li><a href="ee416339(v=vs.85).html">Constant Forces</a></li>
+<li><a href="ee416371(v=vs.85).html">Custom Forces</a></li>
+<li><a href="ee416597(v=vs.85).html">Device-Specific Effects</a></li>
+<li><a href="ee418719(v=vs.85).html">Periodic Effects</a></li>
+<li><a href="ee418773(v=vs.85).html">Ramp Forces</a></li>
+</ul>
+</ul>
+</ul>
+<li><a href="ee416851(v=vs.85).html">Programming Tips and Tools</a></li>
+<li><a href="ee416853(v=vs.85).html">Reference</a></li>
+<ul>
+<li><a href="ee416862(v=vs.85).html">Interfaces</a></li>
+<ul>
+<li><a href="ee417799(v=vs.85).html">IDirectInput8 Interface</a></li>
+<ul>
+<li><a href="ee417801(v=vs.85).html">ConfigureDevices Method</a></li>
+<li><a href="ee417803(v=vs.85).html">CreateDevice Method</a></li>
+<li><a href="ee417804(v=vs.85).html">EnumDevices Method</a></li>
+<li><a href="ee417807(v=vs.85).html">EnumDevicesBySemantics Method</a></li>
+<li><a href="ee417809(v=vs.85).html">FindDevice Method</a></li>
+<li><a href="ee417811(v=vs.85).html">GetDeviceStatus Method</a></li>
+<li><a href="ee417813(v=vs.85).html">Initialize Method</a></li>
+<li><a href="ee417815(v=vs.85).html">RunControlPanel Method</a></li>
+</ul>
+<li><a href="ee417816(v=vs.85).html">IDirectInputDevice8 Interface</a></li>
+<ul>
+<li><a href="ee417818(v=vs.85).html">Acquire Method</a></li>
+<li><a href="ee417877(v=vs.85).html">BuildActionMap Method</a></li>
+<li><a href="ee417880(v=vs.85).html">CreateEffect Method</a></li>
+<li><a href="ee417882(v=vs.85).html">EnumCreatedEffectObjects Method</a></li>
+<li><a href="ee417884(v=vs.85).html">EnumEffects Method</a></li>
+<li><a href="ee417886(v=vs.85).html">EnumEffectsInFile Method</a></li>
+<li><a href="ee417889(v=vs.85).html">EnumObjects Method</a></li>
+<li><a href="ee417891(v=vs.85).html">Escape Method</a></li>
+<li><a href="ee417892(v=vs.85).html">GetCapabilities Method</a></li>
+<li><a href="ee417894(v=vs.85).html">GetDeviceData Method</a></li>
+<li><a href="ee417896(v=vs.85).html">GetDeviceInfo Method</a></li>
+<li><a href="ee417897(v=vs.85).html">GetDeviceState Method</a></li>
+<li><a href="ee417899(v=vs.85).html">GetEffectInfo Method</a></li>
+<li><a href="ee417902(v=vs.85).html">GetForceFeedbackState Method</a></li>
+<li><a href="ee417904(v=vs.85).html">GetImageInfo Method</a></li>
+<li><a href="ee417906(v=vs.85).html">GetObjectInfo Method</a></li>
+<li><a href="ee417908(v=vs.85).html">GetProperty Method</a></li>
+<li><a href="ee417910(v=vs.85).html">Initialize Method</a></li>
+<li><a href="ee417913(v=vs.85).html">Poll Method</a></li>
+<li><a href="ee417915(v=vs.85).html">RunControlPanel Method</a></li>
+<li><a href="ee417917(v=vs.85).html">SendDeviceData Method</a></li>
+<li><a href="ee417918(v=vs.85).html">SendForceFeedbackCommand Method</a></li>
+<li><a href="ee417919(v=vs.85).html">SetActionMap Method</a></li>
+<li><a href="ee417921(v=vs.85).html">SetCooperativeLevel Method</a></li>
+<li><a href="ee417925(v=vs.85).html">SetDataFormat Method</a></li>
+<li><a href="ee417927(v=vs.85).html">SetEventNotification Method</a></li>
+<li><a href="ee417929(v=vs.85).html">SetProperty Method</a></li>
+<li><a href="ee417931(v=vs.85).html">Unacquire Method</a></li>
+<li><a href="ee417933(v=vs.85).html">WriteEffectToFile Method</a></li>
+</ul>
+<li><a href="ee417936(v=vs.85).html">IDirectInputEffect Interface</a></li>
+<ul>
+<li><a href="ee417938(v=vs.85).html">Download Method</a></li>
+<li><a href="ee417941(v=vs.85).html">Escape Method</a></li>
+<li><a href="ee417943(v=vs.85).html">GetEffectGuid Method</a></li>
+<li><a href="ee417946(v=vs.85).html">GetEffectStatus Method</a></li>
+<li><a href="ee417948(v=vs.85).html">GetParameters Method</a></li>
+<li><a href="ee417950(v=vs.85).html">Initialize Method</a></li>
+<li><a href="ee417952(v=vs.85).html">SetParameters Method</a></li>
+<li><a href="ee417955(v=vs.85).html">Start Method</a></li>
+<li><a href="ee417957(v=vs.85).html">Stop Method</a></li>
+<li><a href="ee417958(v=vs.85).html">Unload Method</a></li>
+</ul>
+</ul>
+<li><a href="ee416857(v=vs.85).html">Callback Functions</a></li>
+<ul>
+<li><a href="ee416602(v=vs.85).html">DIConfigureDevicesCallback</a></li>
+<li><a href="ee416619(v=vs.85).html">DIEnumCreatedEffectObjectsCallback</a></li>
+<li><a href="ee416620(v=vs.85).html">DIEnumDeviceObjectsCallback</a></li>
+<li><a href="ee416621(v=vs.85).html">DIEnumDevicesBySemanticsCallback</a></li>
+<li><a href="ee416622(v=vs.85).html">DIEnumDevicesCallback</a></li>
+<li><a href="ee416623(v=vs.85).html">DIEnumEffectsCallback</a></li>
+<li><a href="ee416624(v=vs.85).html">DIEnumEffectsInFileCallback</a></li>
+</ul>
+<li><a href="ee416861(v=vs.85).html">Functions</a></li>
+<ul>
+<li><a href="ee416756(v=vs.85).html">DirectInput8Create</a></li>
+<li><a href="ee418794(v=vs.85).html">ShowJoyCPL</a></li>
+</ul>
+<li><a href="ee416864(v=vs.85).html">Macros</a></li>
+<ul>
+<li><a href="ee416613(v=vs.85).html">DIDFT_GETINSTANCE Macro</a></li>
+<li><a href="ee416614(v=vs.85).html">DIDFT_GetType Macro</a></li>
+<li><a href="ee416615(v=vs.85).html">DIDFT_MAKEINSTANCE Macro</a></li>
+<li><a href="ee416614(v=vs.85).html">DIDFT_GETTYPE Macro</a></li>
+<li><a href="ee416629(v=vs.85).html">DIMAKEUSAGEDWORD Macro</a></li>
+<li><a href="ee416809(v=vs.85).html">DISEQUENCE_COMPARE Macro</a></li>
+<li><a href="ee417726(v=vs.85).html">GET_DIDEVICE_SUBTYPE Macro</a></li>
+<li><a href="ee417729(v=vs.85).html">GET_DIDEVICE_TYPE Macro</a></li>
+</ul>
+<li><a href="ee416867(v=vs.85).html">Structures</a></li>
+<ul>
+<li><a href="ee416347(v=vs.85).html">CPOINT Structure</a></li>
+<li><a href="ee416598(v=vs.85).html">DIACTION</a></li>
+<li><a href="ee416599(v=vs.85).html">DIACTIONFORMAT Structure</a></li>
+<li><a href="ee416600(v=vs.85).html">DICOLORSET Structure</a></li>
+<li><a href="ee416601(v=vs.85).html">DICONDITION Structure</a></li>
+<li><a href="ee416603(v=vs.85).html">DICONFIGUREDEVICESPARAMS Structure</a></li>
+<li><a href="ee416604(v=vs.85).html">DICONSTANTFORCE Structure</a></li>
+<li><a href="ee416605(v=vs.85).html">DICUSTOMFORCE Structure</a></li>
+<li><a href="ee416606(v=vs.85).html">DIDATAFORMAT Structure</a></li>
+<li><a href="ee416607(v=vs.85).html">DIDEVCAPS Structure</a></li>
+<li><a href="ee416608(v=vs.85).html">DIDEVICEIMAGEINFO Structure</a></li>
+<li><a href="ee416609(v=vs.85).html">DIDEVICEIMAGEINFOHEADER Structure</a></li>
+<li><a href="ee416610(v=vs.85).html">DIDEVICEINSTANCE Structure</a></li>
+<li><a href="ee416611(v=vs.85).html">DIDEVICEOBJECTDATA Structure</a></li>
+<li><a href="ee416612(v=vs.85).html">DIDEVICEOBJECTINSTANCE Structure</a></li>
+<li><a href="ee416616(v=vs.85).html">DIEFFECT Structure</a></li>
+<li><a href="ee416617(v=vs.85).html">DIEffectInfo Structure</a></li>
+<li><a href="ee416618(v=vs.85).html">DIEFFESCAPE Structure</a></li>
+<li><a href="ee416625(v=vs.85).html">DIENVELOPE Structure</a></li>
+<li><a href="ee416626(v=vs.85).html">DIFILEEFFECT Structure</a></li>
+<li><a href="ee416627(v=vs.85).html">DIJOYSTATE Structure</a></li>
+<li><a href="ee416628(v=vs.85).html">DIJOYSTATE2 Structure</a></li>
+<li><a href="ee416630(v=vs.85).html">DIMOUSESTATE Structure</a></li>
+<li><a href="ee416631(v=vs.85).html">DIMOUSESTATE2 Structure</a></li>
+<li><a href="ee416633(v=vs.85).html">DIOBJECTDATAFORMAT Structure</a></li>
+<li><a href="ee416634(v=vs.85).html">DIPERIODIC Structure</a></li>
+<li><a href="ee416635(v=vs.85).html">DIPROPCPOINTS Structure</a></li>
+<li><a href="ee416636(v=vs.85).html">DIPROPDWORD Structure</a></li>
+<li><a href="ee416637(v=vs.85).html">DIPROPGUIDANDPATH Structure</a></li>
+<li><a href="ee416638(v=vs.85).html">DIPROPHEADER Structure</a></li>
+<li><a href="ee416639(v=vs.85).html">DIPROPPOINTER Structure</a></li>
+<li><a href="ee416640(v=vs.85).html">DIPROPRANGE Structure</a></li>
+<li><a href="ee416641(v=vs.85).html">DIPROPSTRING Structure</a></li>
+<li><a href="ee416642(v=vs.85).html">DIRAMPFORCE Structure</a></li>
+</ul>
+<li><a href="ee416859(v=vs.85).html">Device Constants</a></li>
+<ul>
+<li><a href="ee416757(v=vs.85).html">DirectInput and Japanese Keyboards</a></li>
+<li><a href="ee418634(v=vs.85).html">Joystick Device Constants</a></li>
+<li><a href="ee418641(v=vs.85).html">Keyboard Device Enumeration</a></li>
+<li><a href="ee418674(v=vs.85).html">Mouse Device Enumeration</a></li>
+</ul>
+<li><a href="ee416855(v=vs.85).html">Action Mapping Constants</a></li>
+<ul>
+<li><a href="ee415224(v=vs.85).html">Action Genres</a></li>
+<ul>
+<li><a href="ee417762(v=vs.85).html">Hand-to-Hand</a></li>
+<li><a href="ee418793(v=vs.85).html">Shooting</a></li>
+<li><a href="ee418869(v=vs.85).html">Third-Person Action</a></li>
+</ul>
+<li><a href="ee415234(v=vs.85).html">Arcade Genres</a></li>
+<ul>
+<li><a href="ee418738(v=vs.85).html">Platform</a></li>
+<li><a href="ee418795(v=vs.85).html">Side-to-Side</a></li>
+</ul>
+<li><a href="ee416295(v=vs.85).html">CAD Genres</a></li>
+<ul>
+<li><a href="ee418687(v=vs.85).html">Objects in 2D</a></li>
+<li><a href="ee418668(v=vs.85).html">Models in 3D</a></li>
+<li><a href="ee418681(v=vs.85).html">Navigation in 3D</a></li>
+<li><a href="ee418690(v=vs.85).html">Objects in 3D</a></li>
+</ul>
+<li><a href="ee416342(v=vs.85).html">Control Genres</a></li>
+<ul>
+<li><a href="ee416235(v=vs.85).html">Browser</a></li>
+<li><a href="ee418782(v=vs.85).html">Remote Control</a></li>
+</ul>
+<li><a href="ee416815(v=vs.85).html">Driving Genres</a></li>
+<ul>
+<li><a href="ee416814(v=vs.85).html">Combat Racing</a></li>
+<li><a href="ee418657(v=vs.85).html">Mechanical Fighting</a></li>
+<li><a href="ee418769(v=vs.85).html">Racing</a></li>
+<li><a href="ee418865(v=vs.85).html">Tank</a></li>
+</ul>
+<li><a href="ee417558(v=vs.85).html">Flight Genres</a></li>
+<ul>
+<li><a href="ee415229(v=vs.85).html">Air Combat</a></li>
+<li><a href="ee416319(v=vs.85).html">Civilian Flight</a></li>
+<li><a href="ee417784(v=vs.85).html">Helicopter Combat</a></li>
+<li><a href="ee418804(v=vs.85).html">Space Combat</a></li>
+</ul>
+<li><a href="ee418807(v=vs.85).html">Sports Genres</a></li>
+<ul>
+<li><a href="ee416216(v=vs.85).html">Baseball Batting</a></li>
+<li><a href="ee416218(v=vs.85).html">Baseball Fielding</a></li>
+<li><a href="ee416220(v=vs.85).html">Baseball Pitching</a></li>
+<li><a href="ee416227(v=vs.85).html">Basketball Defense</a></li>
+<li><a href="ee416229(v=vs.85).html">Basketball Offense</a></li>
+<li><a href="ee417556(v=vs.85).html">Fishing</a></li>
+<li><a href="ee417559(v=vs.85).html">Football Defense</a></li>
+<li><a href="ee417560(v=vs.85).html">Football Offense</a></li>
+<li><a href="ee417561(v=vs.85).html">Football Play</a></li>
+<li><a href="ee417562(v=vs.85).html">Football Quarterback</a></li>
+<li><a href="ee417754(v=vs.85).html">Golf</a></li>
+<li><a href="ee417789(v=vs.85).html">Hockey Defense</a></li>
+<li><a href="ee417792(v=vs.85).html">Hockey Goalie</a></li>
+<li><a href="ee417794(v=vs.85).html">Hockey Offense</a></li>
+<li><a href="ee417797(v=vs.85).html">Hunting</a></li>
+<li><a href="ee418671(v=vs.85).html">Mountain Biking</a></li>
+<li><a href="ee418771(v=vs.85).html">Racquet</a></li>
+<li><a href="ee418799(v=vs.85).html">Skiing</a></li>
+<li><a href="ee418801(v=vs.85).html">Soccer Defense</a></li>
+<li><a href="ee418802(v=vs.85).html">Soccer Offense</a></li>
+</ul>
+<li><a href="ee418861(v=vs.85).html">Strategy Genres</a></li>
+<ul>
+<li><a href="ee418786(v=vs.85).html">Role-Playing</a></li>
+<li><a href="ee418874(v=vs.85).html">Turn-Based</a></li>
+</ul>
+<li><a href="ee415232(v=vs.85).html">Any-Control Enumeration</a></li>
+<li><a href="ee418643(v=vs.85).html">Keyboard Mapping Enumeration</a></li>
+<li><a href="ee418675(v=vs.85).html">Mouse Mapping Enumeration</a></li>
+</ul>
+<li><a href="ee416869(v=vs.85).html">Return Values Enumeration</a></li>
+</ul>
+</ul>
+</ul>
+</body>
+</html>

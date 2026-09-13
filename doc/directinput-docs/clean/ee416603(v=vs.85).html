@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DICONFIGUREDEVICESPARAMS Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="diconfiguredevicesparams-structure">DICONFIGUREDEVICESPARAMS Structure</h1>
+<p>Contains information for the device configuration property sheet. It is used by the <a href="ee417801(v=vs.85).html">IDirectInput8::ConfigureDevices</a> method.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DICONFIGUREDEVICESPARAMS {
+    DWORD dwSize;
+    DWORD dwcUsers;
+    LPTSTR lptszUserNames;
+    DWORD dwcFormats;
+    LPDIACTIONFORMAT lprgFormats;
+    HWND hwnd;
+    DICOLORSET dics;
+    IUnknown * lpUnkDDSTarget;
+} DICONFIGUREDEVICESPARAMS, *LPDICONFIGUREDEVICESPARAMS;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><p><strong>dwSize</strong><br/>
+Size of this structure, in bytes.</p>
+</li>
+<li><p><strong>dwcUsers</strong><br/>
+Count of user names in the buffer at lptszUserNames. If lptszUserNames is NULL (to indicate that default user names should be used), the value in this member is ignored. If the dwcUsers value exceeds the number of entries actually in the buffer, the method fails, returning DIERR_INVALIDPARAM.</p>
+</li>
+<li><p><strong>lptszUserNames</strong><br/>
+Pointer to a buffer containing a series of null-terminated name strings, the final element being designated by a double-null terminator. The lptszUserNames parameter can be set to NULL to instruct the use of default names. If the application passes more names than the dwcUsers count indicates, only the names within the count are used. If an application specifies names that are different from the names currently assigned to devices, ownership is revoked for all devices, a default name is created for the mismatched name, and the interface shows (No User) for all devices.</p>
+</li>
+<li><p><strong>dwcFormats</strong><br/>
+Count of structures in the array at lprgFormats.</p>
+</li>
+<li><p><strong>lprgFormats</strong><br/>
+Pointer to an array of <a href="ee416599(v=vs.85).html">DIACTIONFORMAT</a> structures that contains action-mapping information for each genre used by the game. On input, this array contains action-to-control mappings and strings to display as callouts for each mapping. The configuration interface displays the genres in its drop-down list in the same order as in the array.</p>
+</li>
+<li><p><strong>hwnd</strong><br/>
+Handle to the top-level window of the calling application. The member is needed only for applications that run in windowed mode and is otherwise ignored.</p>
+</li>
+<li><p><strong>dics</strong><br/>
+<a href="ee416600(v=vs.85).html">DICOLORSET</a> structure that describes the color scheme to apply to the configuration user interface. Passing a zero-initialized <a href="ee416600(v=vs.85).html">DICOLORSET</a> structure causes the default color scheme to be used.</p>
+</li>
+<li><p><strong>lpUnkDDSTarget</strong><br/>
+Pointer to the <strong>IUnknown</strong> interface for a Microsoft DirectDraw or Direct3D target surface object that will be filled to contain an image of the configuration user interface. The image represents the current state of the user interface at the time that the <a href="ee416621(v=vs.85).html">DIEnumDevicesBySemanticsCallback</a> function is invoked. The target surface will retain any alpha information passed as part of the <a href="ee416600(v=vs.85).html">DICOLORSET</a> structure above, and also any alpha information encoded into the device image by the hardware manufacturer. The target surface object referred to by the <strong>IUnknown</strong> interface must support either IDirect3DSurface8, IDirectDrawSurface7 or IDirectDrawSurface4. The <a href="https://msdn.microsoft.com/en-us/library/ee421816.aspx">IDirect3DSurface9</a> interface is not supported. For more information, see <a href="ee417801(v=vs.85).html">IDirectInput8::ConfigureDevices</a>. Full-screen applications using DirectDraw must have target surfaces created using the DDSCAPS_SYSTEMEMORY flag.</p>
+<p>Applications that are not using DirectDraw and applications that are using DirectDraw but are windowed rather than using the full screen may pass NULL in this parameter. This will cause DirectInput to use the Windows Graphics Device Interface (GDI) functions to draw the configuration user interface image. Passing NULL when using <a href="https://msdn.microsoft.com/en-us/library/ee421816.aspx">IDirect3DSurface9</a> surfaces will fail. For more information, see Remarks in <a href="ee417801(v=vs.85).html">IDirectInput8::ConfigureDevices</a>.</p>
+</li>
+</ul>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416603(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

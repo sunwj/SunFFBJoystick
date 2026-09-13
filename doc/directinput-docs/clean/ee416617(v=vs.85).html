@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIEffectInfo Structure</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="dieffectinfo-structure">DIEffectInfo Structure</h1>
+<p>Used by the <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> and <a href="ee417899(v=vs.85).html">IDirectInputDevice8::GetEffectInfo</a> methods to return information about a particular effect supported by a device.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">typedef struct DIEffectInfo {
+    DWORD dwSize;
+    GUID guid;
+    DWORD dwEffType;
+    DWORD dwStaticParams;
+    DWORD dwDynamicParams;
+    TCHAR tszName[MAX_PATH];
+} DIEffectInfo, *LPDIEffectInfo;
+</code></pre>
+<h4 id="members">Members</h4>
+<ul>
+<li><p><strong>dwSize</strong><br/>
+Size of the structure in bytes. During enumeration, the application can inspect this value to determine how many members of the structure are valid. This member must be initialized before the structure is passed to the <a href="ee417899(v=vs.85).html">IDirectInputDevice8::GetEffectInfo</a> method.</p>
+</li>
+<li><p><strong>guid</strong><br/>
+Identifier of the effect.</p>
+</li>
+<li><p><strong>dwEffType</strong><br/>
+Zero or more of the following values:</p>
+<ul>
+<li><p>DIEFT_ALL<br/>
+Valid only for <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a>. Enumerate all effects, regardless of type. This flag cannot be combined with any of the other flags.</p>
+</li>
+<li><p>DIEFT_CONDITION<br/>
+The effect represents a condition. When creating or modifying a condition, the lpvTypeSpecificParams member of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure must point to an array of <a href="ee416601(v=vs.85).html">DICONDITION</a> structures (one per axis), and the cbTypeSpecificParams member must be set to cAxis * sizeof(DICONDITION).</p>
+<p>Not all devices support all the parameters of conditions. Check the effect capability flags to determine which capabilities are available.</p>
+<p>The flag can be passed to <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> to restrict the enumeration to conditions.</p>
+</li>
+<li><p>DIEFT_CONSTANTFORCE<br/>
+The effect represents a constant-force effect. When creating or modifying a constant-force effect, the lpvTypeSpecificParams member of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> must point to a <a href="ee416604(v=vs.85).html">DICONSTANTFORCE</a> structure, and the cbTypeSpecificParams member must be set to sizeof(<a href="ee416604(v=vs.85).html">DICONSTANTFORCE</a>).</p>
+<p>The flag can be passed to <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> to restrict the enumeration to constant-force effects.</p>
+</li>
+<li><p>DIEFT_CUSTOMFORCE<br/>
+The effect represents a custom-force effect. When creating or modifying a custom-force effect, the lpvTypeSpecificParams member of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure must point to a <a href="ee416605(v=vs.85).html">DICUSTOMFORCE</a> structure, and the cbTypeSpecificParams member must be set to sizeof(<a href="ee416605(v=vs.85).html">DICUSTOMFORCE</a>).</p>
+<p>The flag can be passed to <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> to restrict the enumeration to custom-force effects.</p>
+</li>
+<li><p>DIEFT_DEADBAND<br/>
+The effect generator for this condition effect supports the lDeadBand parameter.</p>
+</li>
+<li><p>DIEFT_FFATTACK<br/>
+The effect generator for this effect supports the attack envelope parameter. If the effect generator does not support attack, the attack level and attack time parameters of the <a href="ee416625(v=vs.85).html">DIENVELOPE</a> structure are ignored by the effect.</p>
+<p>If neither DIEFT_FFATTACK nor DIEFT_FFFADE is set, the effect does not support an envelope, and any provided envelope is ignored.</p>
+</li>
+<li><p>DIEFT_FFFADE<br/>
+The effect generator for this effect supports the fade parameter. If the effect generator does not support fade, the fade level and fade time parameters of the <a href="ee416625(v=vs.85).html">DIENVELOPE</a> structure are ignored by the effect.</p>
+<p>If neither DIEFT_FFATTACK nor DIEFT_FFFADE is set, the effect does not support an envelope, and any provided envelope is ignored.</p>
+</li>
+<li><p>DIEFT_HARDWARE<br/>
+The effect represents a hardware-specific effect. For additional information about using a hardware-specific effect, consult the hardware documentation.</p>
+<p>The flag can be passed to the <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> method to restrict the enumeration to hardware-specific effects.</p>
+</li>
+<li><p>DIEFT_PERIODIC<br/>
+The effect represents a periodic effect. When creating or modifying a periodic effect, the lpvTypeSpecificParams member of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure must point to a <a href="ee416634(v=vs.85).html">DIPERIODIC</a>structure, and the cbTypeSpecificParams member must be set to sizeof(<a href="ee416634(v=vs.85).html">DIPERIODIC</a>).</p>
+<p>The flag can be passed to <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> to restrict the enumeration to periodic effects.</p>
+</li>
+<li><p>DIEFT_POSNEGCOEFFICIENTS<br/>
+The effect generator for this effect supports two coefficient values for conditions, one for the positive displacement of the axis and one for the negative displacement of the axis. If the device does not support both coefficients, the negative coefficient in the <a href="ee416601(v=vs.85).html">DICONDITION</a> structure is ignored, and the positive coefficient is used in both directions.</p>
+</li>
+<li><p>DIEFT_POSNEGSATURATION<br/>
+The effect generator for this effect supports a maximum saturation for both positive and negative force output. If the device does not support both saturation values, the negative saturation in the <a href="ee416601(v=vs.85).html">DICONDITION</a> structure is ignored, and the positive saturation is used in both directions.</p>
+</li>
+<li><p>DIEFT_RAMPFORCE<br/>
+The effect represents a ramp-force effect. When creating or modifying a ramp-force effect, the lpvTypeSpecificParams member of the <a href="ee416616(v=vs.85).html">DIEFFECT</a> structure must point to a <a href="ee416642(v=vs.85).html">DIRAMPFORCE</a> structure, and the cbTypeSpecificParams member must be set to sizeof(<a href="ee416642(v=vs.85).html">DIRAMPFORCE</a>).</p>
+<p>The flag can be passed to <a href="ee417884(v=vs.85).html">IDirectInputDevice8::EnumEffects</a> to restrict the enumeration to ramp-force effects.</p>
+</li>
+<li><p>DIEFT_SATURATION<br/>
+The effect generator for this effect supports the saturation of condition effects. If the effect generator does not support saturation, the force generated by a condition is limited only by the maximum force that the device can generate.</p>
+</li>
+<li><p>DIEFT_STARTDELAY<br/>
+The effect has a delay before it plays rather than beginning immediately. This can be used to offset effects so that they play in sequence.</p>
+</li>
+</ul>
+</li>
+<li><p><strong>dwStaticParams</strong><br/>
+Zero or more DIEP_* values describing the parameters supported by the effect. For example, if DIEP_ENVELOPE is set, the effect supports an envelope. For a list of possible values, see <a href="ee417948(v=vs.85).html">IDirectInputEffect::GetParameters</a>.</p>
+<p>It is not an error for an application to attempt to use effect parameters that are not supported by the device. The unsupported parameters are ignored.</p>
+<p>This information is provided to enable the application to tailor its use of force feedback to the capabilities of the specific device.</p>
+</li>
+<li><p><strong>dwDynamicParams</strong><br/>
+Zero or more DIEP_* values denoting parameters of the effect that can be modified while the effect is playing. For a list of possible values, see <a href="ee417948(v=vs.85).html">IDirectInputEffect::GetParameters</a>.</p>
+<p>If an application attempts to change a parameter while the effect is playing and the driver does not support modifying that effect dynamically, the driver is permitted to stop the effect, update the parameters, then restart it. For more information, see <a href="ee417952(v=vs.85).html">IDirectInputEffect::SetParameters</a>.</p>
+</li>
+<li><p><strong>tszName</strong><br/>
+Name of the effect; for example, "Sawtooth up" or "Constant force".</p>
+</li>
+</ul>
+<h2 id="remarks">Remarks</h2>
+<p>Use the <a href="ee416614(v=vs.85).html">DIDFT_GETTYPE</a> macro to extract the effect type from the dwEffType flags.</p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416617(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>

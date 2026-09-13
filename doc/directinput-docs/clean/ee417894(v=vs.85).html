@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDirectInputDevice8::GetDeviceData Method</title>
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #24292f;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #fff;
+}
+h1 { font-size: 2em; margin: 0.5em 0 0.3em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; margin: 1.5em 0 0.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; margin: 1.2em 0 0.5em; }
+h4 { font-size: 1.1em; margin: 1em 0 0.4em; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: 0.85em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+ul, ol { padding-left: 2em; }
+li { margin: 0.3em 0; }
+dl { margin: 0.8em 0; }
+dt { font-weight: 600; margin-top: 0.5em; }
+dd { margin-left: 2em; margin-bottom: 0.5em; }
+.note { background: #ddf4ff; border: 1px solid #0969da; border-left: 4px solid #0969da; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.tip { background: #dafbe1; border: 1px solid #1a7f37; border-left: 4px solid #1a7f37; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+.warning { background: #fff8c5; border: 1px solid #bf8700; border-left: 4px solid #bf8700; padding: 12px 16px; margin: 1em 0; border-radius: 6px; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0.5em 1em; margin: 1em 0; color: #57606a; }
+hr { border: none; border-top: 1px solid #d0d7de; margin: 2em 0; }
+img { max-width: 100%; height: auto; }
+.nav { background: #f6f8fa; padding: 12px 20px; margin-bottom: 20px; border-radius: 6px; }
+.nav a { font-size: 0.9em; }
+.footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaecef; color: #57606a; font-size: 0.85em; }
+
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="index.html">← DirectInput Documentation</a>
+</div>
+
+<h1 id="idirectinputdevice8getdevicedata-method">IDirectInputDevice8::GetDeviceData Method</h1>
+<p>Retrieves buffered data from the device.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-c++">HRESULT GetDeviceData(
+         DWORD cbObjectData,
+         LPDIDEVICEOBJECTDATA rgdod,
+         LPDWORD pdwInOut,
+         DWORD dwFlags
+)
+</code></pre>
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><em>cbObjectData</em><br/>
+Size of the <a href="ee416611(v=vs.85).html">DIDEVICEOBJECTDATA</a> structure, in bytes.</li>
+<li><em>rgdod</em><br/>
+Array of <a href="ee416611(v=vs.85).html">DIDEVICEOBJECTDATA</a> structures to receive the buffered data. The number of elements in this array must be equal to the value of the pdwInOut parameter. If this parameter is NULL, the buffered data is not stored anywhere, but all other side effects take place.</li>
+<li><em>pdwInOut</em><br/>
+On entry, the number of elements in the array pointed to by the rgdod parameter. On exit, the number of elements actually obtained.</li>
+<li><em>dwFlags</em><br/>
+Flags that control the manner in which data is obtained. This value can be 0 or the following flag.
+<ul>
+<li>DIGDD_PEEK<br/>
+Do not remove the items from the buffer. A subsequent <a href="ee417894(v=vs.85).html">IDirectInputDevice8::GetDeviceData</a> call will read the same data. Normally, data is removed from the buffer after it is read.</li>
+</ul>
+</li>
+</ul>
+<h4 id="return-value">Return Value</h4>
+<p>If the method succeeds, the return value is DI_OK or DI_BUFFEROVERFLOW. If the method fails, the return value can be one of the following error values: DIERR_INPUTLOST, DIERR_INVALIDPARAM, DIERR_NOTACQUIRED, DIERR_NOTBUFFERED, DIERR_NOTINITIALIZED.</p>
+<h2 id="remarks">Remarks</h2>
+<div class="note">
+<p>Note</p>
+<p>If the method returns DI_BUFFEROVERFLOW, the data in the rgdod array has been truncated.</p>
+</div>
+<p>In the debug version of DirectInput, if a call is made to <a href="ee417894(v=vs.85).html">IDirectInputDevice8::GetDeviceData</a> and the device has been unacquired, then random bytes will be sent to the device data buffer. To make sure you are not using random device data, always check for the DIERR_UNACQUIRED return code.</p>
+<p>Before device data can be obtained, you must set the data format and the buffer size by using the <a href="ee417925(v=vs.85).html">IDirectInputDevice8::SetDataFormat</a> and <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> methods, or by using the <a href="ee417919(v=vs.85).html">IDirectInputDevice8::SetActionMap</a> method. You must also acquire the device by using the <a href="ee417816(v=vs.85).html">IDirectInputDevice8 Interface</a> method.</p>
+<p>The maximum number of events that the buffer will hold is one less than the buffer size set with the <a href="ee417929(v=vs.85).html">IDirectInputDevice8::SetProperty</a> method.</p>
+<p>The following code example reads up to ten buffered data elements, removing them from the device buffer as they are read.</p>
+<pre>DIDEVICEOBJECTDATA rgdod[10]; 
+DWORD dwItems = 10; 
+hres = idirectinputdevice9_GetDeviceData( 
+    sizeof(DIDEVICEOBJECTDATA), 
+    rgdod, 
+    &amp;dwItems, 
+    0); 
+if (SUCCEEDED(hres)) { 
+    // dwItems = Number of elements read (could be zero).
+    if (hres == DI_BUFFEROVERFLOW) { 
+    // Buffer had overflowed. 
+    } 
+} 
+</pre>
+<p>Your application can flush the buffer and retrieve the number of flushed items by specifying NULL for the rgdod parameter and a pointer to a variable containing INFINITE for the pdwInOut parameter. The following code example illustrates how this can be done.</p>
+<pre>dwItems = INFINITE; 
+hres = idirectinputdevice9_GetDeviceData( 
+            pdid, 
+            sizeof(DIDEVICEOBJECTDATA), 
+            NULL, 
+            &amp;dwItems, 
+            0); 
+if (SUCCEEDED(hres)) { 
+    // Buffer successfully flushed. 
+    // dwItems = Number of elements flushed. 
+    if (hres == DI_BUFFEROVERFLOW) { 
+        // Buffer had overflowed. 
+    } 
+}
+</pre>
+<p>Your application can query for the number of elements in the device buffer by setting the rgdod parameter to NULL, setting pdwInOut to INFINITE and setting dwFlags to DIGDD_PEEK. The following code example illustrates how this can be done.</p>
+<pre>dwItems = INFINITE; 
+hres = idirectinputdevice9_GetDeviceData( 
+            pdid, 
+            sizeof(DIDEVICEOBJECTDATA), 
+            NULL, 
+            &amp;dwItems, 
+            DIGDD_PEEK); 
+if (SUCCEEDED(hres)) { 
+    // dwItems = Number of elements in buffer. 
+    if (hres == DI_BUFFEROVERFLOW) { 
+        // Buffer overflow occurred; not all data 
+        //   was successfully captured. 
+    } 
+} 
+</pre>
+<p>To query about whether a buffer overflow has occurred, set the rgdod parameter to NULL and the pdwInOut parameter to 0. The following code example illustrates how this can be done.</p>
+<pre>dwItems = 0; 
+hres = idirectinputdevice9_GetDeviceData( 
+            pdid, 
+            sizeof(DIDEVICEOBJECTDATA), 
+            NULL, 
+            &amp;dwItems, 
+            0); 
+if (hres == DI_BUFFEROVERFLOW) { 
+    // Buffer overflow occurred. 
+} 
+</pre>
+<h2 id="requirements">Requirements</h2>
+<p><strong>Header:</strong> Declared in dinput.h.</p>
+<h2 id="see-also">See Also</h2>
+<p><a href="ee417913(v=vs.85).html">IDirectInputDevice8::Poll</a><br/>
+<a href="ee418748(v=vs.85).html">Polling and Event Notification</a></p>
+
+<div class="footer">
+<p>Source: <a href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417894(v=vs.85)" target="_blank">learn.microsoft.com</a></p>
+</div>
+</body>
+</html>
