@@ -90,7 +90,7 @@ namespace SunFFB
         return force;
     }
 
-    float FFBForceCalculator::apply_condition(const SetConditionReportData& conditionData, float metric, float maxMetric) const
+    float FFBForceCalculator::apply_condition(const SetConditionReportData& conditionData, float metric) const
     {
         const int16_t cpOffset = conditionData.cpOffset;
         const int16_t postiveCoeff = conditionData.positiveCoefficient;
@@ -101,7 +101,7 @@ namespace SunFFB
 
         float force = 0.f;
 
-        const float invRange = 1.f / maxMetric;
+        const float invRange = 1.f / USB_MAX_MAGNITUDE;
         if(metric < (cpOffset - deadBand) * invRange)
         {
             force = (metric - (cpOffset - deadBand) * invRange) * negativeCoeff;
@@ -129,7 +129,7 @@ namespace SunFFB
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
                 {
                     const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
-                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]), maxMetrics[i]);
+                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]));
                 }
             }
             else
@@ -142,7 +142,7 @@ namespace SunFFB
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
                     metric += metrics[i] * directionUnitVector[i];
                 
-                const float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]), maxMetrics[0]);
+                const float force = apply_condition(conditionData, normalize_range(metric, maxMetrics[0]));
 
                 #pragma unroll
                 for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -159,7 +159,7 @@ namespace SunFFB
                 if((axisEnable >> i) & 0x01)
                 {
                     const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
-                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]), maxMetrics[i]) * directionUnitVector[i];
+                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i])) * directionUnitVector[i];
                 }
             }
         }
@@ -167,7 +167,8 @@ namespace SunFFB
 
     void FFBForceCalculator::force_calculator(FFBReportHandler& ffbReportHandler, const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const
     {
-        if(ffbReportHandler.deviceState == FFBReportHandler::DEVICE_STATE_PAUSED ||
+        if(ffbReportHandler.deviceState == FFBReportHandler::DEVICE_STATE_INIT ||
+           ffbReportHandler.deviceState == FFBReportHandler::DEVICE_STATE_PAUSED ||
            ffbReportHandler.deviceState == FFBReportHandler::DEVICE_STATE_DISABLED)
         {
             #pragma unroll
@@ -189,7 +190,12 @@ namespace SunFFB
             {
                 const uint8_t effectType = effectBlock.effectData.effectType;
                 const uint16_t duration = effectBlock.effectData.duration;
-                const uint32_t elapsedTime = currentTime - effectBlock.startTime;
+                uint32_t elapsedTime = currentTime - effectBlock.startTime;
+                // Quantize to samplePeriod boundaries if the host requested coarse refresh
+                // (HID PID Sample Period in ms; 0 = default/full rate).
+                const uint16_t samplePeriod = effectBlock.effectData.samplePeriod;
+                if(samplePeriod > 1)
+                    elapsedTime = (elapsedTime / samplePeriod) * samplePeriod;
                 const uint8_t effectGain = effectBlock.effectData.gain;
 
                 float force = 0;
@@ -218,6 +224,28 @@ namespace SunFFB
                     break;
 
                     case ET_FRICTION:
+                    {
+                        // Sliding friction: saturates to full signed force at small velocity,
+                        // matching the FFBTestTool ForceModel (sign(vel) above 2% full-scale/s).
+                        const float* speed = ffbDeviceInput.get_speed();
+                        const float speedThreshold = 0.02f * ffbDeviceInput.get_max_speed()[0];
+                        float frictionMetric[NUM_AXIS];
+                        float ones[NUM_AXIS];
+                        #pragma unroll
+                        for(uint8_t a = 0; a < NUM_AXIS; ++a)
+                        {
+                            if(speed[a] > speedThreshold)
+                                frictionMetric[a] = 1.f;
+                            else if(speed[a] < -speedThreshold)
+                                frictionMetric[a] = -1.f;
+                            else
+                                frictionMetric[a] = 0.f;
+                            ones[a] = 1.f;
+                        }
+                        condition_force_calculator(effectBlock, frictionMetric, ones, forcesCondition);
+                    }
+                    break;
+
                     case ET_DAMPER:
                         condition_force_calculator(effectBlock, ffbDeviceInput.get_speed(), ffbDeviceInput.get_max_speed(), forcesCondition);
                     break;

@@ -31,7 +31,7 @@ namespace SunFFB
         uint8_t gain;                                   // min 0, max 255
         uint8_t triggerButton;                          // min 1, max N
         uint8_t axisEnable;                             // Bits: X, Y (optional), Z (optional), Direction enable
-        uint16_t directions[NUM_AXIS];                  // min 0, max 36000
+        uint16_t directions[NUM_AXIS];                  // polar: 0..36000 (hundredths of degree); cartesian: signed values (two's complement, -32768..32767)
         uint16_t startDelay;                            // min 0, max 0xFFFE
     };
     

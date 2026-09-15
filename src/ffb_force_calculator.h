@@ -32,7 +32,8 @@ namespace SunFFB
         // Extract the base force magnitude from type-specific data (for envelope scaling).
         float get_base_magnitude(const EffectBlock& effectBlock, uint8_t effectType) const;
         // Apply a single axis of condition: deadband → offset → coeff → saturation.
-        float apply_condition(const SetConditionReportData& conditionData, float metric, float maxMetric) const;
+        // metric is pre-normalized to [-1, 1]; params are in 0..USB_MAX_MAGNITUDE units.
+        float apply_condition(const SetConditionReportData& conditionData, float metric) const;
     };
 
     // Normalize a signed value to [-1, 1] range by dividing by maxVal.

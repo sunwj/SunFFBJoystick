@@ -51,7 +51,7 @@
 
 // ===== Default Runtime Values =====
 #define DEFAULT_SPEED_TC 0.01f
-#define DEFAULT_MAX_SPEED_SCALE 100.0f
-#define DEFAULT_MAX_ACCEL_SCALE 100.0f
+#define DEFAULT_MAX_SPEED_SCALE 1.0f
+#define DEFAULT_MAX_ACCEL_SCALE 1.0f
 
 #endif

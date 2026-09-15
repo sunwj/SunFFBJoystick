@@ -32,10 +32,11 @@ Supports standard PID effects:
   - Friction
 
 ### Processing
-- Real-time force computation loop
-- Low-pass filtering for position, speed, and acceleration
+- Real-time force computation loop (1 ms task)
+- Low-pass filtering for position, speed, and acceleration (inline in `ffb_device_input`)
 - Deadband handling
-- Directional force vectors (Cartesian & polar)
+- Directional force vectors (Cartesian, polar, and spherical coordinates)
+- Effect sample-period support (HID PID coarse texture)
 
 ### USB
 - Fully compliant HID joystick + PID device
@@ -61,16 +62,17 @@ USB HID Reports (Joystick + PID)
 ## Project Structure
 
 SunFFBJoystick/
-├── main.cpp
-├── ffb_device_input.*
-├── ffb_force_calculator.*
-├── ffb_report_handler.*
-├── ffb_report_types.h
-├── ffb_report_descriptor.h
-├── hid_pid.h
-├── low_pass_filter.h
-├── math_utils.h
-├── constants.h
+├── main.cpp                  — Entry point; FreeRTOS task creation
+├── constants.h               — Forwarding header (includes config_ffb.h + config_board.h)
+├── config_ffb.h              — Compile-time config (NUM_AXIS, MAX_EFFECTS, report IDs)
+├── config_board.h            — Board config (USB VID/PID, task periods, speed/accel scaling)
+├── ffb_device_input.*        — Axis read, low-pass filtering, speed/acceleration derivation
+├── ffb_force_calculator.*    — Real-time force computation (effects, conditions, envelopes)
+├── ffb_report_handler.*      — Effect block management, PID state machine
+├── ffb_report_types.h        — Packed HID report structs
+├── ffb_report_descriptor.h   — HID report descriptor (NUM_AXIS-dependent)
+├── hid_pid.h                 — HID PID usage constants
+├── math_utils.h              — clamp, fast math stubs
 
 ---
 

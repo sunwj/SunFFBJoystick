@@ -70,7 +70,7 @@ namespace SunFFB
         uint8_t nextEffectIdx = 0;                              // round-robin allocator cursor
         uint32_t pauseTime;                                     // timestamp when paused (for resume adjustment)
         volatile EffectBlock effectBlocks[MAX_EFFECTS];         // effect block pool
-        volatile PIDStateReportData pidStates = {0x1E, 0};      // PID state (status + playing effect index)
+        volatile PIDStateReportData pidStates = {0x1C, 0};      // PID state (status + playing effect index)
         BlockLoadReportData blockLoadData;                      // last creation result
         PoolReportData poolData;                                // cached pool capacity info
     };

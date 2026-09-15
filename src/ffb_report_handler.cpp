@@ -103,6 +103,15 @@ namespace SunFFB
 
     void FFBReportHandler::start_effect(EffectBlock* effectBlock)
     {
+        // Some hosts (e.g. DirectInput-based) never send DeviceControl=Enable Actuators;
+        // treat starting playback as implicit actuator enable when in INIT state.
+        if(deviceState == DEVICE_STATE_INIT)
+        {
+            deviceState = DEVICE_STATE_ACTIVE;
+            pidStates.status |= 0x02;
+            pidStateDirty = true;
+        }
+
         effectBlock->state |= EFFECT_STATE_PLAYING;
         effectBlock->startTime = _millis() + effectBlock->effectData.startDelay;
         update_pid_effect_index();
@@ -171,14 +180,14 @@ namespace SunFFB
             const float phi = data->directions[1] * USB_NORMALIZATION_RAD;
             #ifndef USE_FAST_MATH
             const float cosPhi = cosf(phi);
-            effectBlock->directionUnitVector[0] = -sinf(phi);
+            effectBlock->directionUnitVector[0] = -cosPhi * cosf(theta);
             effectBlock->directionUnitVector[1] = -cosPhi * sinf(theta);
-            effectBlock->directionUnitVector[2] = -cosPhi * cosf(theta);
+            effectBlock->directionUnitVector[2] = -sinf(phi);
             #else
             const float cosPhi = _cosf(phi);
-            effectBlock->directionUnitVector[0] = -_sinf(phi);
+            effectBlock->directionUnitVector[0] = -cosPhi * _cosf(theta);
             effectBlock->directionUnitVector[1] = -cosPhi * _sinf(theta);
-            effectBlock->directionUnitVector[2] = -cosPhi * _cosf(theta);
+            effectBlock->directionUnitVector[2] = -_sinf(phi);
             #endif
             #endif
         }
@@ -189,17 +198,17 @@ namespace SunFFB
             #endif
 
             #if NUM_AXIS == 2
-            const float x = float(data->directions[1]);
-            const float y = float(data->directions[0]);
+            const float x = float((int16_t)data->directions[0]);
+            const float y = float((int16_t)data->directions[1]);
             float invLen = 1.f / sqrtf(x * x + y * y + 1e-6f);
             effectBlock->directionUnitVector[0] = -x * invLen;
             effectBlock->directionUnitVector[1] = -y * invLen;
             #endif
 
             #if NUM_AXIS == 3
-            const float x = float(data->directions[2]);
-            const float y = float(data->directions[1]);
-            const float z = float(data->directions[0]);
+            const float x = float((int16_t)data->directions[0]);
+            const float y = float((int16_t)data->directions[1]);
+            const float z = float((int16_t)data->directions[2]);
             float invLen = 1.f / sqrtf(x * x + y * y + z * z + 1e-6f);
             effectBlock->directionUnitVector[0] = -x * invLen;
             effectBlock->directionUnitVector[1] = -y * invLen;
@@ -324,7 +333,7 @@ namespace SunFFB
                 devicePaused = false;
                 pauseTime = 0;
                 deviceGain = USB_MAX_DEVICE_GAIN;
-                pidStates.status = 0x1E;
+                pidStates.status = 0x1C;
                 pidStates.effectBlockIndex = 0;
                 deviceState = DEVICE_STATE_INIT;
             break;
@@ -374,7 +383,12 @@ namespace SunFFB
                 if(0xFF == data->loopCount)
                     effectBlock->effectData.duration = USB_DURATION_INFINITE;
                 else if(data->loopCount > 0)
-                    effectBlock->effectData.duration = data->loopCount * effectBlock->originalDuration;
+                {
+                    uint32_t total = uint32_t(data->loopCount) * effectBlock->originalDuration;
+                    effectBlock->effectData.duration = (total >= USB_DURATION_INFINITE)
+                        ? (USB_DURATION_INFINITE - 1)
+                        : (uint16_t)total;
+                }
 
                 start_effect(effectBlock);
             }
@@ -388,7 +402,12 @@ namespace SunFFB
                 if(0xFF == data->loopCount)
                     effectBlock->effectData.duration = USB_DURATION_INFINITE;
                 else if(data->loopCount > 0)
-                    effectBlock->effectData.duration = data->loopCount * effectBlock->originalDuration;
+                {
+                    uint32_t total = uint32_t(data->loopCount) * effectBlock->originalDuration;
+                    effectBlock->effectData.duration = (total >= USB_DURATION_INFINITE)
+                        ? (USB_DURATION_INFINITE - 1)
+                        : (uint16_t)total;
+                }
 
                 start_effect(effectBlock);
             }
@@ -439,6 +458,7 @@ namespace SunFFB
 
     bool FFBReportHandler::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
     {
+        if (USB_NO_TRIGGER_BUTTON == effectBlock.effectData.triggerButton) return false;
         if (effectBlock.effectData.triggerButton == 0) return false;
         const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
         const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
@@ -454,7 +474,7 @@ namespace SunFFB
             {
                 effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
                 effectBlock.triggerButtonLatch = true;
-                if (currentTime < effectBlock.startTime) return false;
+                if ((int32_t)(effectBlock.startTime - currentTime) > 0) return false;
                 return true;
             }
             else
@@ -495,7 +515,7 @@ namespace SunFFB
         if(USB_NO_TRIGGER_BUTTON != eb.effectData.triggerButton)
             return is_trigger_playing(eb, triggerButtonState, currentTime);
 
-        if(currentTime < eb.startTime)
+        if ((int32_t)(eb.startTime - currentTime) > 0)
             return false;
 
         const uint32_t elapsedTime = currentTime - eb.startTime;
