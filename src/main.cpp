@@ -68,7 +68,7 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                     xSemaphoreGive(semaphoreFFBReportHandler);
 
                     #ifdef SERIAL_PRINT
-                    Serial.printf("Block load. idx: %d, status: %d \n", data -> effectBlockIndex, data -> blockLoadStatus);
+                    Serial.printf("Block load: idx=%d status=%d (1=success, 2=full)\n", data->effectBlockIndex, data->blockLoadStatus);
                     #endif
                     return 4;
                 }
@@ -83,7 +83,7 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                     xSemaphoreGive(semaphoreFFBReportHandler);
 
                     #ifdef SERIAL_PRINT
-                    Serial.printf("Pool report. \n");
+                    Serial.printf("Pool report.\n");
                     #endif
                     return 4;
                 }

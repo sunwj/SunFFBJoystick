@@ -151,7 +151,8 @@ namespace SunFFB
         }
         else
         {
-            const float* directionUnitVector = effectBlock.directionUnitVector;
+            // No Direction Enable: Direction field is ignored per HID PID spec.
+            // Each enabled axis applies its own condition block independently.
             #pragma unroll
             for(uint8_t i = 0; i < NUM_AXIS; ++i)
             {
@@ -159,7 +160,7 @@ namespace SunFFB
                 if((axisEnable >> i) & 0x01)
                 {
                     const SetConditionReportData& conditionData = effectBlock.typeSpecificData[i].conditionData;
-                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i])) * directionUnitVector[i];
+                    forces[i] = apply_condition(conditionData, normalize_range(metrics[i], maxMetrics[i]));
                 }
             }
         }
