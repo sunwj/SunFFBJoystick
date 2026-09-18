@@ -3,23 +3,52 @@ from __future__ import annotations
 import os
 import ctypes as ct
 from dataclasses import dataclass
-from typing import Optional, Type, TypeVar, Union
+from pathlib import Path
+from typing import Optional, Sequence, Type, TypeVar, Union
 
 try:
     from .sunffb_constants_generated import *
 except ImportError:
     from sunffb_constants_generated import *
 
-paths = [os.path.join('hidapi', 'hidapi.dll')]
-for p in paths:
-    try:
-       ct.cdll.LoadLibrary(p)
-       import hid
-       print(f"hidapi loaded from {p}")
-       break
-    except:
-        print(f"Failed to load hidapi from {p}")
 
+_HERE = Path(__file__).resolve().parent
+_HIDAPI_CANDIDATES = (
+    _HERE / "hidapi" / "hidapi.dll",
+    _HERE / "hidapi.dll",
+)
+hid = None
+_HID_IMPORT_ERROR: Optional[BaseException] = None
+
+try:
+    import hid as _hid
+    hid = _hid
+except ImportError as first_error:
+    _HID_IMPORT_ERROR = first_error
+    for _dll_path in _HIDAPI_CANDIDATES:
+        if not _dll_path.is_file():
+            continue
+        try:
+            if hasattr(os, "add_dll_directory"):
+                with os.add_dll_directory(str(_dll_path.parent)):
+                    import hid as _hid
+            else:
+                ct.CDLL(str(_dll_path))
+                import hid as _hid
+            hid = _hid
+            _HID_IMPORT_ERROR = None
+            break
+        except (ImportError, OSError) as error:
+            _HID_IMPORT_ERROR = error
+
+
+def _require_hid():
+    if hid is None:
+        detail = f": {_HID_IMPORT_ERROR}" if _HID_IMPORT_ERROR else ""
+        raise RuntimeError(
+            "The Python 'hid' package and a loadable hidapi library are required" + detail
+        )
+    return hid
 
 T = TypeVar("T", bound="PackedStruct")
 
@@ -42,17 +71,33 @@ class PackedStruct(ct.LittleEndianStructure):
 
 
 def pack_report(report_id: int, payload: PackedStruct) -> bytes:
+    if not isinstance(report_id, int) or not 0 <= report_id <= 0xFF:
+        raise ValueError(f"report_id must be an integer in 0..255, got {report_id!r}")
+    if not isinstance(payload, PackedStruct):
+        raise TypeError("payload must be a PackedStruct instance")
     return bytes([report_id]) + payload.to_bytes()
 
 
-def _as_bytes(raw: Union[bytes, bytearray, list[int]]) -> bytes:
-    return bytes(raw) if not isinstance(raw, bytes) else raw
+def _normalize_directions(directions: Sequence[int]) -> tuple[int, ...]:
+    values = tuple(int(value) for value in directions)
+    if len(values) != NUM_AXIS:
+        raise ValueError(f"directions must contain exactly {NUM_AXIS} values")
+    if any(not 0 <= value <= 0xFFFF for value in values):
+        raise ValueError("directions values must be in 0..65535")
+    return values
+
+
+def _as_bytes(raw: Union[bytes, bytearray, memoryview, Sequence[int]]) -> bytes:
+    try:
+        return raw if isinstance(raw, bytes) else bytes(raw)
+    except (TypeError, ValueError) as error:
+        raise TypeError("HID data must be a bytes-like sequence") from error
 
 
 def parse_feature_response(
     report_id: int,
     struct_type: Type[T],
-    raw: Union[bytes, bytearray, list[int]],
+    raw: Union[bytes, bytearray, memoryview, Sequence[int]],
 ) -> T:
     raw_bytes = _as_bytes(raw)
     if not raw_bytes:
@@ -211,8 +256,18 @@ class PoolReportData(PackedStruct):
     _fields_ = [
         ("ramPoolSize", ct.c_uint16),
         ("maxSimultaneousEffects", ct.c_uint8),
-        ("memoryManagement", ct.c_uint8),
+        ("managedPool", ct.c_uint8),
     ]
+
+    @property
+    def managed_pool(self) -> bool:
+        """Whether the device uses a managed effect pool."""
+        return bool(self.managedPool & 0x01)
+
+    @property
+    def memory_management(self) -> int:
+        """Python-style alias for the HID managedPool byte."""
+        return self.managedPool
 
 
 @dataclass
@@ -236,7 +291,7 @@ class SunFFBDevice:
     @staticmethod
     def enumerate(vid: int = 0, pid: int = 0) -> list[SunFFBInfo]:
         devices: list[SunFFBInfo] = []
-        for d in hid.enumerate(vid, pid):
+        for d in _require_hid().enumerate(vid, pid):
             devices.append(
                 SunFFBInfo(
                     vendor_id=d["vendor_id"],
@@ -252,7 +307,7 @@ class SunFFBDevice:
         return devices
 
     def open(self) -> None:
-        self.dev = hid.Device(self.vid, self.pid)
+        self.dev = _require_hid().Device(self.vid, self.pid)
 
     def close(self) -> None:
         if self.dev is not None:
@@ -362,7 +417,7 @@ class SunFFBDevice:
         duration_ms: int = 1000,
         gain: int = USB_MAX_EFFECT_GAIN,
         axis_enable: int = DIRECTION_ENABLE,
-        directions: tuple[int, int] = (0, 0),
+        directions: Sequence[int] = (0,) * NUM_AXIS,
         start_delay_ms: int = 0,
         loop_count: int = 1,
         start: bool = True,
@@ -385,7 +440,7 @@ class SunFFBDevice:
                 gain=max(0, min(USB_MAX_EFFECT_GAIN, int(gain))),
                 triggerButton=USB_NO_TRIGGER_BUTTON,
                 axisEnable=axis_enable,
-                directions=(ct.c_uint16 * NUM_AXIS)(*directions),
+                directions=(ct.c_uint16 * NUM_AXIS)(*_normalize_directions(directions)),
                 startDelay=max(0, min(USB_DURATION_INFINITE, int(start_delay_ms))),
             )
         )

@@ -3,19 +3,18 @@ from __future__ import annotations
 import argparse
 import time
 
-from sunffb_hid import (
-    ET_CONSTANT,
-    ET_SINE,
-    USB_NO_TRIGGER_BUTTON,
-    X_AXIS_ENABLE,
-    DIRECTION_ENABLE,
-    NUM_AXIS,
-    SunFFBDevice,
-    SetEffectReportData,
-    SetPeriodicReportData,
-    EffectOperationReportData,
-)
-
+try:
+    from .sunffb_hid import (
+        ET_CONSTANT, ET_SINE, USB_NO_TRIGGER_BUTTON, X_AXIS_ENABLE,
+        DIRECTION_ENABLE, NUM_AXIS, SunFFBDevice, SetEffectReportData,
+        SetPeriodicReportData, EffectOperationReportData,
+    )
+except ImportError:
+    from sunffb_hid import (
+        ET_CONSTANT, ET_SINE, USB_NO_TRIGGER_BUTTON, X_AXIS_ENABLE,
+        DIRECTION_ENABLE, NUM_AXIS, SunFFBDevice, SetEffectReportData,
+        SetPeriodicReportData, EffectOperationReportData,
+    )
 
 def auto_select_device(vid: int, pid: int):
     devices = SunFFBDevice.enumerate(vid, pid)
@@ -46,51 +45,51 @@ def cmd_list(args):
 
 
 def cmd_pool(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         pool = dev.get_pool_report()
         print(f"ramPoolSize={pool.ramPoolSize}")
         print(f"maxSimultaneousEffects={pool.maxSimultaneousEffects}")
-        print(f"memoryManagement={pool.memoryManagement}")
+        print(f"managedPool={pool.managedPool}")
 
 
 def cmd_enable(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         dev.device_control(1)
         print("Actuators enabled.")
 
 
 def cmd_disable(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         dev.device_control(2)
         print("Actuators disabled.")
 
 
 def cmd_stop_all(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         dev.device_control(3)
         print("Stopped all effects.")
 
 
 def cmd_reset(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         dev.device_control(4)
         print("Device reset command sent.")
 
 
 def cmd_gain(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         dev.set_device_gain(args.gain)
         print(f"Device gain set to {args.gain}.")
 
 
 def cmd_constant(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         effect_id = dev.create_constant_effect(
             magnitude=args.magnitude,
@@ -110,7 +109,7 @@ def cmd_constant(args):
 
 
 def cmd_sine(args):
-    dev_info = auto_select_device(args.vid, args.pid)
+    auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
         block = dev.create_new_effect(ET_SINE)
         if block.blockLoadStatus != 1 or block.effectBlockIndex == 0:
@@ -129,7 +128,7 @@ def cmd_sine(args):
                 gain=args.gain,
                 triggerButton=USB_NO_TRIGGER_BUTTON,
                 axisEnable=X_AXIS_ENABLE,
-                directions=(__import__("ctypes").c_uint16 * NUM_AXIS)(0, 0),
+                directions=(ct.c_uint16 * NUM_AXIS)(*[0] * NUM_AXIS),
                 startDelay=0,
             )
         )
