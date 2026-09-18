@@ -142,7 +142,7 @@ namespace SunFFB
     {
         poolData.ramPoolSize = sizeof(effectBlocks);
         poolData.maxSimultaneousEffects = MAX_EFFECTS;
-        poolData.managedPool = 3;
+        poolData.managedPool = 1;
 
         return (const PoolReportData*)&poolData;
     }
@@ -336,9 +336,9 @@ namespace SunFFB
                 devicePaused = false;
                 pauseTime = 0;
                 deviceGain = USB_MAX_DEVICE_GAIN;
-                pidStates.status = 0x1C;
+                pidStates.status = 0x1E;
                 pidStates.effectBlockIndex = 0;
-                deviceState = DEVICE_STATE_INIT;
+                deviceState = DEVICE_STATE_ACTIVE;
             break;
 
             case 5:                 // pause
@@ -359,7 +359,6 @@ namespace SunFFB
                 {
                     if(effectBlocks[i].state & EFFECT_STATE_PLAYING)
                     {
-                        if(pauseTime < effectBlocks[i].startTime) continue;
                         effectBlocks[i].startTime += pauseLength;
                     }
                 }
@@ -383,23 +382,7 @@ namespace SunFFB
             case 1:                 // start
             {
                 effectBlock->effectData.duration = effectBlock->originalDuration;
-                if(0xFF == data->loopCount)
-                    effectBlock->effectData.duration = USB_DURATION_INFINITE;
-                else if(data->loopCount > 0)
-                {
-                    if(USB_DURATION_INFINITE == effectBlock->originalDuration)
-                    {
-                        // N iterations of an infinite effect is still infinite.
-                        effectBlock->effectData.duration = USB_DURATION_INFINITE;
-                    }
-                    else
-                    {
-                        uint32_t total = uint32_t(data->loopCount) * effectBlock->originalDuration;
-                        effectBlock->effectData.duration = (total >= USB_DURATION_INFINITE)
-                            ? (USB_DURATION_INFINITE - 1)
-                            : (uint16_t)total;
-                    }
-                }
+                effectBlock->remainingLoops = data->loopCount == 0 ? 1 : data->loopCount;
 
                 start_effect(effectBlock);
             }
@@ -410,23 +393,7 @@ namespace SunFFB
                 stop_all_effects();
 
                 effectBlock->effectData.duration = effectBlock->originalDuration;
-                if(0xFF == data->loopCount)
-                    effectBlock->effectData.duration = USB_DURATION_INFINITE;
-                else if(data->loopCount > 0)
-                {
-                    if(USB_DURATION_INFINITE == effectBlock->originalDuration)
-                    {
-                        // N iterations of an infinite effect is still infinite.
-                        effectBlock->effectData.duration = USB_DURATION_INFINITE;
-                    }
-                    else
-                    {
-                        uint32_t total = uint32_t(data->loopCount) * effectBlock->originalDuration;
-                        effectBlock->effectData.duration = (total >= USB_DURATION_INFINITE)
-                            ? (USB_DURATION_INFINITE - 1)
-                            : (uint16_t)total;
-                    }
-                }
+                effectBlock->remainingLoops = data->loopCount == 0 ? 1 : data->loopCount;
 
                 start_effect(effectBlock);
             }
@@ -538,8 +505,26 @@ namespace SunFFB
             return false;
 
         const uint32_t elapsedTime = currentTime - eb.startTime;
-        if((USB_DURATION_INFINITE != eb.effectData.duration) && (elapsedTime >= eb.effectData.duration))
+        const uint16_t duration = eb.effectData.duration;
+        if((USB_DURATION_INFINITE != duration) && (elapsedTime >= duration))
         {
+            if(duration > 0)
+            {
+                const uint32_t completedLoops = elapsedTime / duration;
+                if(eb.remainingLoops == 0xFF)
+                {
+                    eb.startTime += completedLoops * duration;
+                    return true;
+                }
+                if(completedLoops < eb.remainingLoops)
+                {
+                    eb.remainingLoops -= completedLoops;
+                    eb.startTime += completedLoops * duration;
+                    return true;
+                }
+            }
+
+            eb.remainingLoops = 0;
             eb.state &= ~EFFECT_STATE_PLAYING;
             update_pid_effect_index();
             pidStateDirty = true;

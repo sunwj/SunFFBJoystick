@@ -152,7 +152,8 @@ namespace SunFFB
         bool envelopParameter;                          // true if envelope has been configured for this effect
         bool triggerButtonLatch;                        // edge-detect state for trigger-button start
         uint8_t conditionBlockFlags = 0x00;             // bitmask: which typeSpecificData slots hold condition data
-        uint16_t originalDuration = 0;                  // duration before loop-count multiplication
+        uint16_t originalDuration = 0;                  // duration of one playback iteration
+        uint8_t remainingLoops = 1;                     // iterations left; 0xFF repeats until explicitly stopped
     
         SetEffectReportData effectData;                                 // common effect parameters
         TypeSpecificParameterBlock typeSpecificData[NUM_AXIS];          // per-axis type-specific data + envelope

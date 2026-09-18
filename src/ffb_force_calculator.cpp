@@ -274,7 +274,14 @@ namespace SunFFB
                             const SetEnvelopeReportData& envelopeData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData;
                             float baseMag = get_base_magnitude(effectBlock, effectType);
                             if(baseMag < 1.f) baseMag = USB_MAX_MAGNITUDE;
-                            force *= get_envelope(envelopeData, elapsedTime, duration, baseMag);
+                            const float envelope = get_envelope(envelopeData, elapsedTime, duration, baseMag);
+                            if(effectType >= ET_SQUARE && effectType <= ET_SAWTOOTH_DOWN)
+                            {
+                                const float offset = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData.offset;
+                                force = offset + (force - offset) * envelope;
+                            }
+                            else
+                                force *= envelope;
                         }
 
                         force *= effectGain / float(USB_MAX_EFFECT_GAIN);
