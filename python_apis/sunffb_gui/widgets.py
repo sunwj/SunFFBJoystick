@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import math
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QPainter, QPen, QBrush
+from PyQt6.QtCore import Qt, pyqtSignal, QPointF
+from PyQt6.QtGui import QColor, QPainter, QPen, QBrush, QPolygonF
 from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton
 
 PAD_LABEL_ANGLE = {'pull': 0.0, 'pull-left': 45.0, 'left': 90.0, 'left-push': 135.0,
@@ -22,7 +22,7 @@ class DirectionPad(QWidget):
     angle_changed = pyqtSignal(float)
 
     _POSITIONS = [
-        ('pull-left', 0, 0), ('pull', 0, 1), ('pull-right', 0, 2),
+        ('pull-left', 0, 0), ('pull', 0, 1), ('right-pull', 0, 2),
         ('left', 1, 0), ('right', 1, 2),
         ('left-push', 2, 0), ('push', 2, 1), ('push-right', 2, 2),
     ]
@@ -95,9 +95,11 @@ class ForceCanvas(QWidget):
 
     @staticmethod
     def _draw_arrow_head(painter, cx, cy, ux, uy, length):
-        ah = 8.0
-        tip_x, tip_y = cx + ux * length, cy - uy * length
-        bx, by = -uy, ux
-        p1 = (tip_x - ux * ah + bx * ah * 0.5, tip_y + uy * ah + by * ah * 0.5)
-        p2 = (tip_x - ux * ah - bx * ah * 0.5, tip_y + uy * ah - by * ah * 0.5)
-        painter.drawPolygon(int(p1[0]), int(p1[1]), int(tip_x), int(tip_y), int(p2[0]), int(p2[1]))
+        dirx = ux
+        diry = -uy
+        tip = QPointF(cx + dirx * length, cy + diry * length)
+        bx, by = tip.x() - dirx * 8, tip.y() - diry * 8
+        arrowhead = QPolygonF([tip,
+                               QPointF(bx - diry * 5, by + dirx * 5),
+                               QPointF(bx + diry * 5, by - dirx * 5)])
+        painter.drawPolygon(arrowhead)
