@@ -56,6 +56,7 @@ class EffectParams:
     neg_sat_y: int = 10000
     dead_band_y: int = 0
     center_y: int = 0
+    duration_ms: int = 1000
 
 
 def u_from_angle(deg: float) -> Tuple[float, float]:
@@ -78,7 +79,33 @@ class ForceModel:
             ux, uy = u_from_angle(params.direction_deg)
             scale = params.magnitude * params.gain / 255.0
             return scale * ux, scale * uy
+        ux, uy = u_from_angle(params.direction_deg)
+        if params.effect_type == RAMP:
+            return self.ramp_value(params, 0.5) * ux, self.ramp_value(params, 0.5) * uy
+        if params.effect_type in (SINE, SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN):
+            frac = (0.25 + params.phase / 35999.0) % 1.0
+            val = params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac)
+            return val * ux, val * uy
         return 0.0, 0.0
+
+    @staticmethod
+    def ramp_value(params: EffectParams, frac: float) -> float:
+        return params.ramp_start + (params.ramp_end - params.ramp_start) * frac
+
+    @staticmethod
+    def periodic_wave(wave: str, u01: float) -> float:
+        u = u01 % 1.0
+        if wave == SINE:
+            return math.sin(2 * math.pi * u)
+        if wave == SQUARE:
+            return 1.0 if u < 0.5 else -1.0
+        if wave == TRIANGLE:
+            return 1.0 - 4.0 * u if u < 0.5 else 4.0 * u - 3.0
+        if wave == SAWTOOTH_UP:
+            return 2.0 * u01 - 1.0
+        if wave == SAWTOOTH_DOWN:
+            return 1.0 - 2.0 * u01
+        return 0.0
 
     def evaluate_combined(self, kin: Kinematics) -> Tuple[float, float]:
         fx, fy = 0.0, 0.0
