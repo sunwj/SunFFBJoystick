@@ -1,0 +1,90 @@
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from typing import Optional, Tuple
+
+MAX_FORCE = 10000
+
+CONSTANT = "constant"
+RAMP = "ramp"
+SINE = "sine"
+SQUARE = "square"
+TRIANGLE = "triangle"
+SAWTOOTH_UP = "sawtoothUp"
+SAWTOOTH_DOWN = "sawtoothDown"
+SPRING = "spring"
+DAMPER = "damper"
+INERTIA = "inertia"
+FRICTION = "friction"
+
+
+@dataclass(frozen=True)
+class Kinematics:
+    roll: float = 0.0
+    pitch: float = 0.0
+    vel_roll: float = 0.0
+    vel_pitch: float = 0.0
+    acc_roll: float = 0.0
+    acc_pitch: float = 0.0
+
+
+@dataclass
+class EffectParams:
+    effect_type: str = CONSTANT
+    magnitude: int = 4000
+    direction_deg: float = 270.0
+    period_ms: int = 100
+    phase: int = 0
+    offset: int = 0
+    ramp_start: int = 0
+    ramp_end: int = 0
+    gain: int = 255
+    attack_level: int = 0
+    fade_level: int = 0
+    attack_time_ms: int = 0
+    fade_time_ms: int = 0
+    pos_coeff_x: int = 6000
+    neg_coeff_x: int = 6000
+    pos_sat_x: int = 10000
+    neg_sat_x: int = 10000
+    dead_band_x: int = 0
+    center_x: int = 0
+    pos_coeff_y: int = 6000
+    neg_coeff_y: int = 6000
+    pos_sat_y: int = 10000
+    neg_sat_y: int = 10000
+    dead_band_y: int = 0
+    center_y: int = 0
+
+
+def u_from_angle(deg: float) -> Tuple[float, float]:
+    rad = math.radians(deg)
+    return (-math.sin(rad), math.cos(rad))
+
+
+def direction_degrees(fx: float, fy: float) -> float:
+    deg = math.degrees(math.atan2(-fx, fy))
+    return deg % 360.0
+
+
+class ForceModel:
+    def __init__(self, main: EffectParams, spring: Optional[EffectParams] = None):
+        self.main = main
+        self.spring = spring
+
+    def evaluate_effect(self, params: EffectParams, kin: Kinematics) -> Tuple[float, float]:
+        if params.effect_type == CONSTANT:
+            ux, uy = u_from_angle(params.direction_deg)
+            scale = params.magnitude * params.gain / 255.0
+            return scale * ux, scale * uy
+        return 0.0, 0.0
+
+    def evaluate_combined(self, kin: Kinematics) -> Tuple[float, float]:
+        fx, fy = 0.0, 0.0
+        if self.spring is not None:
+            sx, sy = self.evaluate_effect(self.spring, kin)
+            fx += sx
+            fy += sy
+        mx, my = self.evaluate_effect(self.main, kin)
+        return fx + mx, fy + my
