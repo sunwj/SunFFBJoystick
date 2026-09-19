@@ -103,6 +103,7 @@ class MainWindow(QMainWindow):
         self.controller = DeviceController()
         self._effect_idx = 0
         self._effect_type = None
+        self._spring_idx = 0
         self._main_params = EffectParams()
         self._spring_params = None
         self._run_started_at = 0.0
@@ -258,13 +259,21 @@ class MainWindow(QMainWindow):
 
     def _on_tick(self):
         if self._run_total_ms > 0:
-            elapsed_ms = (time.monotonic() - self._run_started_at) * 1000.0
+            elapsed_ms = self._elapsed_ms()
             if elapsed_ms >= self._run_total_ms:
                 self.stop_effect()
         self._update_canvas()
 
+    def _elapsed_ms(self) -> float:
+        if self._run_started_at == 0.0:
+            return 0.0
+        return (time.monotonic() - self._run_started_at) * 1000.0
+
     def _update_canvas(self):
-        fx, fy = self._model.evaluate_combined(self._last_kin, 0.0)
+        if self._model is None:
+            fx, fy = 0.0, 0.0
+        else:
+            fx, fy = self._model.evaluate_combined(self._last_kin, self._elapsed_ms())
         self.canvas.set_force(fx, fy)
 
     def _gather_params(self) -> EffectParams:
@@ -303,6 +312,18 @@ class MainWindow(QMainWindow):
                 return False
             self._effect_idx = idx
             self._effect_type = effect_type
+        return True
+
+    def _ensure_spring(self) -> bool:
+        if not self.controller.is_connected:
+            self._log("device not connected")
+            return False
+        if self._spring_idx == 0:
+            idx = self.controller.create_effect(ET_SPRING)
+            if idx == 0:
+                self._log("create spring effect failed")
+                return False
+            self._spring_idx = idx
         return True
 
     @staticmethod
@@ -379,39 +400,56 @@ class MainWindow(QMainWindow):
             dead_band_x=0, dead_band_y=0, center_x=0, center_y=0,
             duration_ms=main.duration_ms, gain=main.gain,
         )
-        if not self._ensure_effect(SPRING):
+        if not self._ensure_spring():
             return False
         dev = self.controller._device
         if dev is None:
             return False
         try:
-            dev.set_effect(build_set_effect(spring, self._effect_idx))
-            dev.set_condition(build_condition(spring, self._effect_idx, 'x'))
-            dev.set_condition(build_condition(spring, self._effect_idx, 'y'))
+            dev.set_effect(build_set_effect(spring, self._spring_idx))
+            dev.set_condition(build_condition(spring, self._spring_idx, 'x'))
+            dev.set_condition(build_condition(spring, self._spring_idx, 'y'))
+            dev.effect_operation(EffectOperationReportData(
+                effectBlockIndex=self._spring_idx,
+                effectOperation=1,
+                loopCount=0))
         except Exception as exc:  # noqa: BLE001
             self._log(f"spring apply failed: {exc}")
             return False
         self._spring_params = spring
         self._model = ForceModel(main, spring)
-        self._log(f"applied spring block {self._effect_idx}")
+        self._log(f"applied spring block {self._spring_idx}")
         return True
 
     def start_effect(self):
         self._apply_and_start()
 
     def stop_effect(self):
-        if self._effect_idx == 0:
+        idxs = [i for i in (self._effect_idx, self._spring_idx) if i]
+        if not idxs:
             return
         dev = self.controller._device
         if dev is not None:
-            try:
-                dev.effect_operation(EffectOperationReportData(
-                    effectBlockIndex=self._effect_idx, effectOperation=3, loopCount=0))
-            except Exception as exc:  # noqa: BLE001
-                self._log(f"stop failed: {exc}")
+            for idx in idxs:
+                try:
+                    dev.effect_operation(EffectOperationReportData(
+                        effectBlockIndex=idx, effectOperation=3, loopCount=0))
+                except Exception as exc:  # noqa: BLE001
+                    self._log(f"stop failed: {exc}")
+                try:
+                    self.controller.free_effect(idx)
+                except Exception as exc:  # noqa: BLE001
+                    self._log(f"free failed: {exc}")
+        self._effect_idx = 0
+        self._effect_type = None
+        self._spring_idx = 0
+        self._spring_params = None
+        self._model = None
         self._timer.stop()
         self._run_total_ms = 0
-        self._log(f"stopped block {self._effect_idx}")
+        self._run_started_at = 0.0
+        self._update_canvas()
+        self._log("stopped")
 
     def _log(self, msg: str) -> None:
         stamp = time.strftime("%H:%M:%S")
@@ -419,5 +457,6 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self._timer.stop()
+        self.stop_effect()
         self.controller.disconnect()
         super().closeEvent(event)

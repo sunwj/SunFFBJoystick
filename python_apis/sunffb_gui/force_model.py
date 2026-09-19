@@ -85,7 +85,7 @@ class ForceModel:
             val = self.ramp_value(params, 0.5) * env
             return val * ux, val * uy
         if params.effect_type in (SINE, SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN):
-            frac = (0.25 + params.phase / 35999.0) % 1.0
+            frac = self.periodic_u(params, elapsed_ms)
             val = (params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac)) * env
             return val * ux, val * uy
         if params.effect_type in (SPRING, DAMPER, INERTIA, FRICTION):
@@ -152,6 +152,14 @@ class ForceModel:
         return params.ramp_start + (params.ramp_end - params.ramp_start) * frac
 
     @staticmethod
+    def periodic_u(params: EffectParams, elapsed_ms: float) -> float:
+        # Mirrors FFBTestTool ForceModel.Periodic: u = t/period + PhaseDeg/360.
+        # Phase arrives in HID hundredths of a degree, so /100 converts to degrees,
+        # then /360 gives the cycle fraction: phase/36000.
+        period_ms = max(1.0, float(params.period_ms))
+        return (elapsed_ms / period_ms + params.phase / 36000.0) % 1.0
+
+    @staticmethod
     def periodic_wave(wave: str, u01: float) -> float:
         u = u01 % 1.0
         if wave == SINE:
@@ -159,7 +167,8 @@ class ForceModel:
         if wave == SQUARE:
             return 1.0 if u < 0.5 else -1.0
         if wave == TRIANGLE:
-            return 1.0 - 4.0 * u if u < 0.5 else 4.0 * u - 3.0
+            # DI triangle: starts at min (-1), peak at u=0.5, back to min.
+            return 4.0 * u - 1.0 if u < 0.5 else 3.0 - 4.0 * u
         if wave == SAWTOOTH_UP:
             return 2.0 * u01 - 1.0
         if wave == SAWTOOTH_DOWN:

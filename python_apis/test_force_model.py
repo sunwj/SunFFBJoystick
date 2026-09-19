@@ -71,9 +71,9 @@ class PeriodicTests(unittest.TestCase):
             (SINE, 0.75, -1.0),
             (SQUARE, 0.0, 1.0),
             (SQUARE, 0.5, -1.0),
-            (TRIANGLE, 0.0, 1.0),
+            (TRIANGLE, 0.0, -1.0),
             (TRIANGLE, 0.25, 0.0),
-            (TRIANGLE, 0.5, -1.0),
+            (TRIANGLE, 0.5, 1.0),
             (TRIANGLE, 0.75, 0.0),
             (SAWTOOTH_UP, 0.0, -1.0),
             (SAWTOOTH_UP, 1.0, 1.0),
@@ -88,13 +88,45 @@ class PeriodicTests(unittest.TestCase):
         p = EffectParams(effect_type=SINE, magnitude=4000, offset=1000,
                          period_ms=100, phase=9000, direction_deg=0.0)
         m = ForceModel(main=p)
-        # u from 0 deg = (0,1); value = 1000 + 4000*sin(2pi*0.25 + phase/360*2pi)
-        import math
-        frac = 0.25 + (9000 / 35999.0)  # note: simplified phase normalization by 35999
-        val = 1000 + 4000 * math.sin(2 * math.pi * (frac % 1.0))
+        # phase 9000 (hundredths of a degree) == 90 deg == 0.25 cycle; FFBTestTool:
+        # u = t/period + PhaseDeg/360 with PhaseDeg in degrees -> 0.25 at t=0.
+        val = 1000 + 4000 * math.sin(2 * math.pi * 0.25)
         fx, fy = m.evaluate_effect(p, Kinematics())
         self.assertAlmostEqual(fx, 0.0, places=2)
         self.assertAlmostEqual(fy, val, places=2)
+
+    def test_periodic_phase_hundredths_cycle(self):
+        # Phase is in HID hundredths of a degree: 9000 -> 90deg -> u=0.25.
+        for phase, u in [(0, 0.0), (9000, 0.25), (18000, 0.5), (27000, 0.75)]:
+            p = EffectParams(effect_type=SINE, magnitude=4000, offset=0,
+                             period_ms=100, phase=phase, direction_deg=0.0)
+            m = ForceModel(main=p)
+            fx, fy = m.evaluate_effect(p, Kinematics())
+            self.assertAlmostEqual(fy, 4000 * math.sin(2 * math.pi * u), places=2)
+
+    def test_periodic_uses_elapsed_time(self):
+        # FFBTestTool uses real elapsed time: u = t/period + phase/360.
+        p = EffectParams(effect_type=TRIANGLE, magnitude=4000, offset=0,
+                         period_ms=100, phase=0, direction_deg=0.0)
+        m = ForceModel(main=p)
+        fx, fy = m.evaluate_effect(p, Kinematics(), elapsed_ms=25.0)
+        self.assertAlmostEqual(fy, 0.0, places=2)   # u=0.25 -> wave=0
+        fx2, fy2 = m.evaluate_effect(p, Kinematics(), elapsed_ms=50.0)
+        self.assertAlmostEqual(fy2, 4000.0, places=2)  # u=0.5 -> wave=+1 (peak)
+        fx3, fy3 = m.evaluate_effect(p, Kinematics(), elapsed_ms=100.0)
+        self.assertAlmostEqual(fy3, -4000.0, places=2)  # u wraps to 0 -> -1 (start min)
+
+    def test_periodic_sawtooth_full_amplitude(self):
+        # Sawtooth spans -magnitude..+magnitude per single period (C# 2u-1 / 1-2u).
+        p = EffectParams(effect_type=SAWTOOTH_UP, magnitude=4000, offset=0,
+                         period_ms=100, phase=0, direction_deg=0.0)
+        m = ForceModel(main=p)
+        _, y0 = m.evaluate_effect(p, Kinematics(), elapsed_ms=0.0)
+        self.assertAlmostEqual(y0, -4000.0, places=2)
+        _, y50 = m.evaluate_effect(p, Kinematics(), elapsed_ms=50.0)
+        self.assertAlmostEqual(y50, 0.0, places=2)
+        _, y99 = m.evaluate_effect(p, Kinematics(), elapsed_ms=99.0)
+        self.assertAlmostEqual(y99, 4000.0 * (2 * 0.99 - 1.0), places=2)
 
 
 class EnvelopeTests(unittest.TestCase):
