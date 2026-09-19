@@ -40,7 +40,7 @@ The GUI is a Python module (`sunffb_gui`), so it must be launched as `python -m 
    - Spring, Damper, Inertia, Friction
 4. **Conditions**: Spring/Damper/Inertia/Friction conditions are per-axis. Each axis has its own coefficient, saturation, deadband, and center parameters. Conditions use the axis metrics directly and ignore the direction pad.
 5. **Background spring**: The background spring effect is added on top of the main effect, so the total force is the main effect plus the background spring.
-6. **Log panel**: The log panel shows the messages sent to/received from the device. Pair it with the firmware's serial debug output to cross-check behavior end to end.
+6. **Log panel**: The log panel shows event/status messages from the GUI session (connect/disconnect, effect start/stop, worker errors). It does not log raw HID report bytes; pair it with the firmware's serial debug output to cross-check behavior end to end.
 
 ## Notes
 
