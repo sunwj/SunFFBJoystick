@@ -24,8 +24,11 @@ class DeviceWorker(QThread):
             try:
                 joy = self._device.read_joystick_report(timeout_ms=self._poll_ms)
                 self.joystick_ready.emit(joy)
-                pid = self._device.read_pid_state_report(timeout_ms=50)
-                self.pid_ready.emit(pid)
+                try:
+                    pid = self._device.read_pid_state_report(timeout_ms=50)
+                    self.pid_ready.emit(pid.status)
+                except TimeoutError:
+                    pass
             except Exception as exc:  # noqa: BLE001
                 self.error.emit(str(exc))
                 self._running = False
@@ -61,6 +64,7 @@ class DeviceController:
             return True
         except Exception:
             self._device = None
+            self._open = False
             return False
 
     def disconnect(self) -> None:
