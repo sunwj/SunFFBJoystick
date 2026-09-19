@@ -74,19 +74,33 @@ class ForceModel:
         self.main = main
         self.spring = spring
 
-    def evaluate_effect(self, params: EffectParams, kin: Kinematics) -> Tuple[float, float]:
+    def evaluate_effect(self, params: EffectParams, kin: Kinematics, elapsed_ms: float = 0.0) -> Tuple[float, float]:
+        env = self.envelope_factor(params, elapsed_ms)
         if params.effect_type == CONSTANT:
             ux, uy = u_from_angle(params.direction_deg)
-            scale = params.magnitude * params.gain / 255.0
+            scale = params.magnitude * params.gain / 255.0 * env
             return scale * ux, scale * uy
         ux, uy = u_from_angle(params.direction_deg)
         if params.effect_type == RAMP:
-            return self.ramp_value(params, 0.5) * ux, self.ramp_value(params, 0.5) * uy
+            val = self.ramp_value(params, 0.5) * env
+            return val * ux, val * uy
         if params.effect_type in (SINE, SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN):
             frac = (0.25 + params.phase / 35999.0) % 1.0
-            val = params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac)
+            val = (params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac)) * env
             return val * ux, val * uy
         return 0.0, 0.0
+
+    @staticmethod
+    def envelope_factor(params: EffectParams, elapsed_ms: float) -> float:
+        t = max(0.0, elapsed_ms)
+        if params.attack_time_ms > 0 and t < params.attack_time_ms:
+            a0 = params.attack_level / MAX_FORCE
+            return a0 + (1.0 - a0) * (t / params.attack_time_ms)
+        fade_window = params.attack_time_ms if params.attack_time_ms > 0 else 0.0
+        if params.fade_time_ms > 0 and fade_window < t <= fade_window + params.fade_time_ms:
+            tgt = params.fade_level / MAX_FORCE
+            return 1.0 + (tgt - 1.0) * ((t - fade_window) / params.fade_time_ms)
+        return 1.0
 
     @staticmethod
     def ramp_value(params: EffectParams, frac: float) -> float:
@@ -107,11 +121,11 @@ class ForceModel:
             return 1.0 - 2.0 * u01
         return 0.0
 
-    def evaluate_combined(self, kin: Kinematics) -> Tuple[float, float]:
+    def evaluate_combined(self, kin: Kinematics, elapsed_ms: float = 0.0) -> Tuple[float, float]:
         fx, fy = 0.0, 0.0
         if self.spring is not None:
-            sx, sy = self.evaluate_effect(self.spring, kin)
+            sx, sy = self.evaluate_effect(self.spring, kin, elapsed_ms)
             fx += sx
             fy += sy
-        mx, my = self.evaluate_effect(self.main, kin)
+        mx, my = self.evaluate_effect(self.main, kin, elapsed_ms)
         return fx + mx, fy + my

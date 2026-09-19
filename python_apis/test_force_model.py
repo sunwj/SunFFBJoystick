@@ -95,5 +95,26 @@ class PeriodicTests(unittest.TestCase):
         self.assertAlmostEqual(fy, val, places=2)
 
 
+class EnvelopeTests(unittest.TestCase):
+    def test_envelope_attack_fade(self):
+        p = EffectParams(attack_level=5000, attack_time_ms=500,
+                         fade_level=2000, fade_time_ms=1000)
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 0), 0.5, places=3)
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 250), 0.75, places=3)   # attack half
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 500), 1.0, places=3)
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 1000), 0.6, places=3)   # fade half: 1.0 + (0.2-1.0)*((1000-500)/1000)
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 1500), 0.2, places=3)   # fade end
+    def test_envelope_zero_levels(self):
+        p = EffectParams(attack_level=0, attack_time_ms=0, fade_level=0, fade_time_ms=0)
+        self.assertEqual(ForceModel.envelope_factor(p, 0), 1.0)
+    def test_envelope_applied_to_constant(self):
+        p = EffectParams(effect_type=CONSTANT, magnitude=10000, direction_deg=270.0,
+                         attack_level=5000, attack_time_ms=500)
+        m = ForceModel(main=p)
+        fx, fy = m.evaluate_effect(p, Kinematics(), elapsed_ms=250.0)
+        self.assertAlmostEqual(fx, 7500.0, places=3)
+        self.assertAlmostEqual(fy, 0.0, places=3)
+
+
 if __name__ == "__main__":
     unittest.main()
