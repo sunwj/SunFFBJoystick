@@ -4,12 +4,14 @@ import unittest
 try:
     from sunffb_gui.force_model import (
         Kinematics, EffectParams, ForceModel, CONSTANT, RAMP, SINE, SQUARE, TRIANGLE,
-        SAWTOOTH_UP, SAWTOOTH_DOWN, direction_degrees, u_from_angle,
+        SAWTOOTH_UP, SAWTOOTH_DOWN, SPRING, DAMPER, INERTIA, FRICTION,
+        direction_degrees, u_from_angle,
     )
 except ImportError:
     from python_apis.sunffb_gui.force_model import (
         Kinematics, EffectParams, ForceModel, CONSTANT, RAMP, SINE, SQUARE, TRIANGLE,
-        SAWTOOTH_UP, SAWTOOTH_DOWN, direction_degrees, u_from_angle,
+        SAWTOOTH_UP, SAWTOOTH_DOWN, SPRING, DAMPER, INERTIA, FRICTION,
+        direction_degrees, u_from_angle,
     )
 
 
@@ -114,6 +116,73 @@ class EnvelopeTests(unittest.TestCase):
         fx, fy = m.evaluate_effect(p, Kinematics(), elapsed_ms=250.0)
         self.assertAlmostEqual(fx, 7500.0, places=3)
         self.assertAlmostEqual(fy, 0.0, places=3)
+
+
+class ConditionTests(unittest.TestCase):
+    def test_spring_neutral(self):
+        p = EffectParams(effect_type=SPRING, pos_coeff_x=6000, neg_coeff_x=6000,
+                         pos_sat_x=10000, neg_sat_x=10000, dead_band_x=0, center_x=0,
+                         pos_coeff_y=6000, neg_coeff_y=6000,
+                         pos_sat_y=10000, neg_sat_y=10000, dead_band_y=0, center_y=0)
+        m = ForceModel(main=p)
+        fx, fy = m.evaluate_effect(p, Kinematics(roll=0.5, pitch=0.0))
+        self.assertAlmostEqual(fx, -3000.0, places=3)  # -6000*0.5
+        self.assertAlmostEqual(fy, 0.0, places=3)
+
+    def test_spring_deadband_and_center(self):
+        p = EffectParams(effect_type=SPRING, pos_coeff_x=6000, neg_coeff_x=6000,
+                         pos_sat_x=10000, neg_sat_x=10000, dead_band_x=2000, center_x=1000,
+                         pos_coeff_y=6000, neg_coeff_y=6000,
+                         pos_sat_y=10000, neg_sat_y=10000, dead_band_y=0, center_y=0)
+        m = ForceModel(main=p)
+        fx, _ = m.evaluate_effect(p, Kinematics(roll=0.0, pitch=0.0))
+        self.assertAlmostEqual(fx, 0.0, places=3)  # inside deadband around center=0.1
+        fx2, _ = m.evaluate_effect(p, Kinematics(roll=0.4, pitch=0.0))
+        # d = 0.4 - 0.1 = 0.3; db=0.2; (d-db)=0.1 -> -6000*0.1 = -600
+        self.assertAlmostEqual(fx2, -600.0, places=3)
+
+    def test_damper_clamp_and_inertia(self):
+        p = EffectParams(effect_type=DAMPER, pos_coeff_x=6000, neg_coeff_x=6000,
+                         pos_sat_x=10000, neg_sat_x=10000, dead_band_x=0, center_x=0,
+                         pos_coeff_y=6000, neg_coeff_y=6000,
+                         pos_sat_y=10000, neg_sat_y=10000, dead_band_y=0, center_y=0)
+        m = ForceModel(main=p)
+        fx, _ = m.evaluate_effect(p, Kinematics(roll=0.0, pitch=0.0, vel_roll=0.5))
+        self.assertAlmostEqual(fx, -3000.0, places=3)
+        fx2, _ = m.evaluate_effect(p, Kinematics(roll=0.0, pitch=0.0, vel_roll=3.0))
+        self.assertAlmostEqual(fx2, -6000.0, places=3)  # Clamp1 caps at 1.0
+
+    def test_friction_threshold(self):
+        p = EffectParams(effect_type=FRICTION, pos_coeff_x=4000, neg_coeff_x=4000,
+                         pos_sat_x=10000, neg_sat_x=10000, dead_band_x=0, center_x=0,
+                         pos_coeff_y=4000, neg_coeff_y=4000,
+                         pos_sat_y=10000, neg_sat_y=10000, dead_band_y=0, center_y=0)
+        m = ForceModel(main=p)
+        fx, _ = m.evaluate_effect(p, Kinematics(roll=0.0, pitch=0.0, vel_roll=0.5))
+        self.assertAlmostEqual(fx, -4000.0, places=3)
+        fx2, _ = m.evaluate_effect(p, Kinematics(roll=0.0, pitch=0.0, vel_roll=0.01))
+        self.assertAlmostEqual(fx2, 0.0, places=3)
+
+    def test_saturation_clamp(self):
+        p = EffectParams(effect_type=SPRING, pos_coeff_x=6000, neg_coeff_x=6000,
+                         pos_sat_x=2000, neg_sat_x=2000, dead_band_x=0, center_x=0,
+                         pos_coeff_y=6000, neg_coeff_y=6000,
+                         pos_sat_y=10000, neg_sat_y=10000, dead_band_y=0, center_y=0)
+        m = ForceModel(main=p)
+        fx, _ = m.evaluate_effect(p, Kinematics(roll=0.9, pitch=0.0))
+        self.assertAlmostEqual(fx, -2000.0, places=3)  # clamp at pos_sat on negative side
+
+    def test_combined_adds_spring(self):
+        main = EffectParams(effect_type=CONSTANT, magnitude=1000, direction_deg=180.0)
+        spring = EffectParams(effect_type=SPRING, magnitude=0, pos_coeff_x=5000, center_x=0,
+                              pos_coeff_y=5000, center_y=0,
+                              pos_sat_x=10000, neg_sat_x=10000,
+                              pos_sat_y=10000, neg_sat_y=10000)
+        m = ForceModel(main=main, spring=spring)
+        fx, fy = m.evaluate_combined(Kinematics(roll=0.5, pitch=0.0))
+        # spring spring metric=0.5 -> f=-5000*0.5=-2500 (x), main pushes -y*1000 -> (0,-1000)
+        self.assertAlmostEqual(fx, -2500.0, places=3)
+        self.assertAlmostEqual(fy, -1000.0, places=3)
 
 
 if __name__ == "__main__":

@@ -88,7 +88,52 @@ class ForceModel:
             frac = (0.25 + params.phase / 35999.0) % 1.0
             val = (params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac)) * env
             return val * ux, val * uy
+        if params.effect_type in (SPRING, DAMPER, INERTIA, FRICTION):
+            mx = self._condition_metric(params, 'x', kin)
+            my = self._condition_metric(params, 'y', kin)
+            return self._condition_axis(params, 'x', mx), self._condition_axis(params, 'y', my)
         return 0.0, 0.0
+
+    @staticmethod
+    def clampi(v: float) -> float:
+        return max(-1.0, min(1.0, v))
+
+    @staticmethod
+    def _condition_metric(params: EffectParams, axis: str, kin: Kinematics) -> float:
+        if axis == 'x':
+            pos, vel, acc = kin.roll, kin.vel_roll, kin.acc_roll
+        else:
+            pos, vel, acc = kin.pitch, kin.vel_pitch, kin.acc_pitch
+        if params.effect_type == SPRING:
+            return pos
+        if params.effect_type == DAMPER:
+            return ForceModel.clampi(vel)
+        if params.effect_type == INERTIA:
+            return ForceModel.clampi(acc)
+        if params.effect_type == FRICTION:
+            return 1.0 if vel > 0.02 else (-1.0 if vel < -0.02 else 0.0)
+        return 0.0
+
+    @staticmethod
+    def _condition_axis(params: EffectParams, axis: str, metric: float) -> float:
+        if axis == 'x':
+            pc, nc, ps, ns, db, ce = (params.pos_coeff_x, params.neg_coeff_x,
+                                      params.pos_sat_x, params.neg_sat_x,
+                                      params.dead_band_x, params.center_x)
+        else:
+            pc, nc, ps, ns, db, ce = (params.pos_coeff_y, params.neg_coeff_y,
+                                      params.pos_sat_y, params.neg_sat_y,
+                                      params.dead_band_y, params.center_y)
+        center = ce / MAX_FORCE
+        dead = db / MAX_FORCE
+        d = metric - center
+        if d > dead:
+            f = -pc * (d - dead)
+            return max(f, -ps)
+        if d < -dead:
+            f = -nc * (d + dead)
+            return min(f, ns)
+        return 0.0
 
     @staticmethod
     def envelope_factor(params: EffectParams, elapsed_ms: float) -> float:
