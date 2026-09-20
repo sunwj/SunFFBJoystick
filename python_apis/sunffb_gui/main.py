@@ -6,7 +6,8 @@ import time
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QComboBox, QSpinBox, QSlider, QCheckBox, QPushButton, QLabel,
-                             QPlainTextEdit, QGroupBox, QDoubleSpinBox)
+                             QPlainTextEdit, QGroupBox, QDoubleSpinBox, QSplitter,
+                             QScrollArea, QFormLayout)
 
 try:
     from sunffb_hid import (SetEffectReportData, SetEnvelopeReportData, SetConditionReportData,
@@ -23,11 +24,18 @@ except ImportError:
                                         ET_INERTIA, ET_FRICTION, X_AXIS_ENABLE, Y_AXIS_ENABLE, DIRECTION_ENABLE,
                                         USB_NO_TRIGGER_BUTTON, NUM_AXIS)
 
-from sunffb_gui.force_model import (EffectParams, ForceModel, Kinematics, CONSTANT, RAMP, SINE,
-                                    SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN, SPRING, DAMPER,
-                                    INERTIA, FRICTION)
-from sunffb_gui.device import DeviceController
-from sunffb_gui.widgets import DirectionPad, ForceCanvas, direction_from_pad
+try:
+    from .force_model import (EffectParams, ForceModel, Kinematics, CONSTANT, RAMP, SINE,
+                              SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN, SPRING, DAMPER,
+                              INERTIA, FRICTION)
+    from .device import DeviceController
+    from .widgets import DirectionPad, ForceCanvas, direction_from_pad
+except ImportError:
+    from sunffb_gui.force_model import (EffectParams, ForceModel, Kinematics, CONSTANT, RAMP, SINE,
+                                        SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN, SPRING, DAMPER,
+                                        INERTIA, FRICTION)
+    from sunffb_gui.device import DeviceController
+    from sunffb_gui.widgets import DirectionPad, ForceCanvas, direction_from_pad
 
 ET_MAP = {CONSTANT: ET_CONSTANT, RAMP: ET_RAMP, SINE: ET_SINE, SQUARE: ET_SQUARE,
           TRIANGLE: ET_TRIANGLE, SAWTOOTH_UP: ET_SAWTOOTH_UP, SAWTOOTH_DOWN: ET_SAWTOOTH_DOWN,
@@ -38,16 +46,19 @@ PERIODIC_TYPES = {SINE, SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN}
 
 def build_set_effect(params: EffectParams, idx: int) -> SetEffectReportData:
     if params.effect_type in CONDITION_TYPES:
-        axis_enable = X_AXIS_ENABLE | Y_AXIS_ENABLE
+        axis_enable = (X_AXIS_ENABLE if params.apply_x else 0)
+        if NUM_AXIS >= 2 and params.apply_y:
+            axis_enable |= Y_AXIS_ENABLE
         directions = (ct.c_uint16 * NUM_AXIS)(*([0] * NUM_AXIS))
     else:
-        axis_enable = X_AXIS_ENABLE | Y_AXIS_ENABLE | DIRECTION_ENABLE
+        axis_enable = X_AXIS_ENABLE | (Y_AXIS_ENABLE if NUM_AXIS >= 2 else 0) | DIRECTION_ENABLE
         theta = int(round(params.direction_deg * 100)) % 36000
-        directions = (ct.c_uint16 * NUM_AXIS)(*([theta, 0] + [0] * (NUM_AXIS - 2)))
+        directions = (ct.c_uint16 * NUM_AXIS)(*([theta] + [0] * (NUM_AXIS - 1)))
     return SetEffectReportData(
         effectBlockIndex=idx,
         effectType=ET_MAP[params.effect_type],
-        duration=min(0xFFFE, max(1, params.duration_ms)),
+        duration=(0xFFFF if params.effect_type in CONDITION_TYPES or params.duration_ms >= 0xFFFF
+                  else max(1, params.duration_ms)),
         triggerRepeatInterval=0,
         samplePeriod=0,
         gain=max(0, min(255, params.gain)),
@@ -99,7 +110,7 @@ class MainWindow(QMainWindow):
     def __init__(self, show_hid: bool = True, parent=None):
         super().__init__(parent)
         self.setWindowTitle("SunFFB Joystick GUI Tester")
-        self.resize(900, 620)
+        self.resize(1280, 860)
         self.controller = DeviceController()
         self._effect_idx = 0
         self._effect_type = None
@@ -109,22 +120,34 @@ class MainWindow(QMainWindow):
         self._run_started_at = 0.0
         self._run_total_ms = 0
         self._last_kin = Kinematics()
-        self._model = ForceModel(self._main_params)
+        self._last_sample_time = None
+        self._last_position = None
+        self._last_velocity = None
+        self._model = None
 
         central = QWidget(self)
         root = QHBoxLayout(central)
         left = QVBoxLayout()
         right = QVBoxLayout()
-        root.addLayout(left, 1)
+        # Match FFBTestTool: live device/force view on the left, controls on the right.
         root.addLayout(right, 1)
+        root.addLayout(left, 1)
         self.setCentralWidget(central)
 
         dev_group = QGroupBox("Device", self)
         dev_layout = QHBoxLayout(dev_group)
+        self.cmb_devices = QComboBox(dev_group)
+        self.btn_rescan = QPushButton("Rescan", dev_group)
         self.btn_connect = QPushButton("Connect", dev_group)
+        self.btn_log = QPushButton("Open log", dev_group)
         self.btn_connect.clicked.connect(self.toggle_connect)
+        self.btn_rescan.clicked.connect(self.rescan_devices)
+        self.btn_log.clicked.connect(lambda: self._log("session log is shown below"))
         self.lbl_status = QLabel("not connected", dev_group)
+        dev_layout.addWidget(self.cmb_devices, 2)
+        dev_layout.addWidget(self.btn_rescan)
         dev_layout.addWidget(self.btn_connect)
+        dev_layout.addWidget(self.btn_log)
         dev_layout.addWidget(self.lbl_status, 1)
         left.addWidget(dev_group)
 
@@ -159,6 +182,7 @@ class MainWindow(QMainWindow):
         self.spn_ramp_start.setRange(-10000, 10000)
         self.spn_ramp_end = QSpinBox(params_group)
         self.spn_ramp_end.setRange(-10000, 10000)
+        self.spn_ramp_end.setValue(4000)
         self.spn_loop = QSpinBox(params_group)
         self.spn_loop.setRange(0, 255)
         self.spn_loop.setValue(1)
@@ -191,7 +215,21 @@ class MainWindow(QMainWindow):
         self.pad = DirectionPad(params_group)
         grid.addWidget(self.pad, len(rows), 0, 1, 4)
         self.pad.angle_changed.connect(self.spn_dir.setValue)
+        self.spn_dir.valueChanged.connect(self.pad.set_angle)
+        self.pad.set_angle(self.spn_dir.value())
         left.addWidget(params_group)
+
+        spring_group = QGroupBox("Background spring safeguard", self)
+        spring_layout = QHBoxLayout(spring_group)
+        self.chk_spring_on = QCheckBox("on (centring safeguard)", spring_group)
+        self.chk_spring_on.setChecked(True)
+        self.spn_bg_spring = QSpinBox(spring_group)
+        self.spn_bg_spring.setRange(0, 10000)
+        self.spn_bg_spring.setValue(8000)
+        spring_layout.addWidget(self.chk_spring_on)
+        spring_layout.addWidget(QLabel("stiffness", spring_group))
+        spring_layout.addWidget(self.spn_bg_spring)
+        left.addWidget(spring_group)
 
         btns = QHBoxLayout()
         self.btn_start = QPushButton("Start", self)
@@ -200,10 +238,20 @@ class MainWindow(QMainWindow):
         self.btn_stop.clicked.connect(self.stop_effect)
         self.btn_spring = QPushButton("Apply spring", self)
         self.btn_spring.clicked.connect(self.apply_spring)
+        self.chk_effect_on = QCheckBox("effect on", self)
+        self.chk_effect_on.stateChanged.connect(self._on_effect_toggle)
+        self.chk_spring_on.stateChanged.connect(self._on_spring_toggle)
+        btns.insertWidget(0, self.chk_effect_on)
         btns.addWidget(self.btn_start)
         btns.addWidget(self.btn_stop)
         btns.addWidget(self.btn_spring)
         left.addLayout(btns)
+        # FFBTestTool uses checkboxes for playback; retain the buttons as a
+        # compatibility surface for tests and scripts, but keep them out of
+        # the normal GUI workflow.
+        self.btn_start.hide()
+        self.btn_stop.hide()
+        self.btn_spring.hide()
         left.addStretch(1)
 
         right.addWidget(QLabel("force", self))
@@ -215,23 +263,306 @@ class MainWindow(QMainWindow):
         self.log.setReadOnly(True)
         right.addWidget(self.log, 2)
 
+        self._build_reference_layout()
+
         self._timer = QTimer(self)
         self._timer.setInterval(20)
         self._timer.timeout.connect(self._on_tick)
+        for control in (self.spn_dir, self.spn_mag, self.spn_duration, self.spn_gain,
+                        self.spn_period, self.spn_phase, self.spn_offset,
+                        self.spn_ramp_start, self.spn_ramp_end, self.spn_loop,
+                        self.spn_cond_coeff, self.spn_cond_sat, self.spn_cond_db,
+                        self.spn_cond_center, self.spn_bg_spring,
+                        self.spn_spring_x, self.spn_spring_y,
+                        self.spn_ramp_duration, self.spn_cond_neg_coeff,
+                        self.spn_cond_neg_sat, self.spn_attack_level,
+                        self.spn_attack_time, self.spn_fade_level, self.spn_fade_time):
+            control.valueChanged.connect(self._on_live_change)
+        self.cmb_type.currentIndexChanged.connect(self._on_live_change)
+        for control in (self.chk_infinite, self.chk_envelope, self.chk_axis_x, self.chk_axis_y):
+            control.stateChanged.connect(self._on_live_change)
 
         if show_hid:
+            self.rescan_devices()
             self.toggle_connect()
         self._log("ready")
 
+    def _slider_row(self, label: str, spin: QSpinBox, parent=None) -> QWidget:
+        row = QWidget(parent)
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(4, 1, 4, 1)
+        caption = QLabel(label, row)
+        caption.setMinimumWidth(126)
+        slider = QSlider(Qt.Orientation.Horizontal, row)
+        if isinstance(spin, QDoubleSpinBox):
+            slider.setRange(round(spin.minimum() * 10), round(spin.maximum() * 10))
+            slider.setValue(round(spin.value() * 10))
+            slider.setSingleStep(max(1, round(spin.singleStep() * 10)))
+            slider.valueChanged.connect(lambda value: spin.setValue(value / 10.0))
+            spin.valueChanged.connect(lambda value: slider.setValue(round(value * 10)))
+        else:
+            slider.setRange(spin.minimum(), spin.maximum())
+            slider.setValue(spin.value())
+            slider.setSingleStep(max(1, spin.singleStep()))
+            slider.valueChanged.connect(spin.setValue)
+            spin.valueChanged.connect(slider.setValue)
+        spin.setFixedWidth(82)
+        layout.addWidget(caption)
+        layout.addWidget(slider, 1)
+        layout.addWidget(spin)
+        return row
+
+    def _build_reference_layout(self):
+        """Build the visible UI following FFBTestTool's MainForm layout."""
+        central = QWidget(self)
+        root = QHBoxLayout(central)
+        root.setContentsMargins(0, 0, 0, 0)
+        split = QSplitter(Qt.Orientation.Horizontal, central)
+        root.addWidget(split)
+        self.setCentralWidget(central)
+
+        # Left: device/yoke visualisation and a fixed-width diagnostic readout.
+        view = QWidget(split)
+        view_layout = QVBoxLayout(view)
+        view_layout.setContentsMargins(8, 6, 8, 6)
+        rotation_row = QHBoxLayout()
+        rotation_row.addWidget(QLabel("Device rotation range", view))
+        self.spn_rotation = QSpinBox(view)
+        self.spn_rotation.setRange(10, 3600)
+        self.spn_rotation.setValue(180)
+        self.spn_rotation.setSuffix(" deg")
+        rotation_row.addWidget(self.spn_rotation)
+        rotation_row.addStretch(1)
+        view_layout.addLayout(rotation_row)
+        self.canvas.setStyleSheet("background:#11151b; color:#c4d0c4;")
+        view_layout.addWidget(self.canvas, 1)
+        view_layout.addWidget(self.lbl_pos)
+        self.lbl_debug = QLabel(view)
+        self.lbl_debug.setMinimumHeight(112)
+        self.lbl_debug.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.lbl_debug.setStyleSheet("background:#11151b;color:#c4d0c4;font-family:Consolas;padding:6px;")
+        view_layout.addWidget(self.lbl_debug)
+        self.log.setMaximumBlockCount(1000)
+        self.log.setFixedHeight(100)
+        self.log.setStyleSheet("background:#11151b;color:#c4d0c4;font-family:Consolas;")
+        view_layout.addWidget(self.log)
+
+        # Right: scrollable control console.
+        scroll = QScrollArea(split)
+        scroll.setWidgetResizable(True)
+        controls = QWidget(scroll)
+        control_layout = QVBoxLayout(controls)
+        control_layout.setContentsMargins(8, 8, 8, 8)
+        scroll.setWidget(controls)
+
+        device_group = QGroupBox("Device", controls)
+        device_layout = QVBoxLayout(device_group)
+        device_row = QHBoxLayout()
+        for widget, stretch in ((self.cmb_devices, 1), (self.btn_rescan, 0),
+                                (self.btn_connect, 0), (self.btn_log, 0)):
+            device_row.addWidget(widget, stretch)
+        device_layout.addLayout(device_row)
+        device_layout.addWidget(self.lbl_status)
+        self.spn_device_gain = QSpinBox(device_group)
+        self.spn_device_gain.setRange(0, 10000)
+        self.spn_device_gain.setValue(10000)
+        self.spn_device_gain.valueChanged.connect(
+            lambda value: self.controller.set_device_gain(round(value * 255 / 10000))
+            if self.controller.is_connected else None)
+        device_layout.addWidget(self._slider_row("Device gain", self.spn_device_gain, device_group))
+        control_layout.addWidget(device_group)
+
+        effects_row = QHBoxLayout()
+        spring_group = QGroupBox("Spring Effect", controls)
+        spring_layout = QVBoxLayout(spring_group)
+        spring_layout.addWidget(self.chk_spring_on)
+        spring_layout.addWidget(self._slider_row("Magnitude", self.spn_bg_spring, spring_group))
+        self.spn_spring_x = QSpinBox(spring_group)
+        self.spn_spring_y = QSpinBox(spring_group)
+        for spin in (self.spn_spring_x, self.spn_spring_y):
+            spin.setRange(-10000, 10000)
+        spring_layout.addWidget(self._slider_row("Offset X", self.spn_spring_x, spring_group))
+        spring_layout.addWidget(self._slider_row("Offset Y", self.spn_spring_y, spring_group))
+        effects_row.addWidget(spring_group, 1)
+
+        effect_group = QGroupBox("Effect", controls)
+        effect_layout = QVBoxLayout(effect_group)
+        type_row = QHBoxLayout()
+        type_row.addWidget(self.chk_effect_on)
+        type_row.addWidget(self.cmb_type, 1)
+        effect_layout.addLayout(type_row)
+        effect_layout.addWidget(self._slider_row("Magnitude", self.spn_mag, effect_group))
+        effect_layout.addWidget(self._slider_row("Direction °", self.spn_dir, effect_group))
+        effect_layout.addWidget(self.pad)
+        self.duration_row = self._slider_row("Duration ms", self.spn_duration, effect_group)
+        duration_row = self.duration_row
+        self.chk_infinite = QCheckBox("inf", duration_row)
+        self.chk_infinite.setChecked(True)
+        duration_row.layout().insertWidget(2, self.chk_infinite)
+        effect_layout.addWidget(duration_row)
+        effect_layout.addWidget(self._slider_row("Effect gain", self.spn_gain, effect_group))
+        # ``params_group`` is replaced by this reference layout below.  Keep
+        # every legacy control that is still used by the start path parented
+        # to a live widget; otherwise Qt destroys it with the old group and
+        # ``start_effect`` sees a wrapped/deleted QSpinBox.
+        effect_layout.addWidget(self._slider_row("Loop count", self.spn_loop, effect_group))
+        effects_row.addWidget(effect_group, 1)
+        control_layout.addLayout(effects_row)
+
+        self.grp_periodic = QGroupBox("Periodic  (square / sine / triangle / sawtooth)", controls)
+        periodic_layout = QVBoxLayout(self.grp_periodic)
+        periodic_layout.addWidget(self._slider_row("Period ms", self.spn_period, self.grp_periodic))
+        periodic_layout.addWidget(self._slider_row("Phase °×100", self.spn_phase, self.grp_periodic))
+        periodic_layout.addWidget(self._slider_row("Offset", self.spn_offset, self.grp_periodic))
+        control_layout.addWidget(self.grp_periodic)
+
+        self.grp_ramp = QGroupBox("Ramp force", controls)
+        ramp_layout = QVBoxLayout(self.grp_ramp)
+        ramp_layout.addWidget(self._slider_row("Ramp start", self.spn_ramp_start, self.grp_ramp))
+        ramp_layout.addWidget(self._slider_row("Ramp end", self.spn_ramp_end, self.grp_ramp))
+        self.spn_ramp_duration = QSpinBox(self.grp_ramp)
+        self.spn_ramp_duration.setRange(1, 20000)
+        self.spn_ramp_duration.setValue(1500)
+        ramp_layout.addWidget(self._slider_row("Ramp duration ms", self.spn_ramp_duration, self.grp_ramp))
+        control_layout.addWidget(self.grp_ramp)
+
+        self.grp_condition = QGroupBox("Condition  (spring / damper / inertia / friction)", controls)
+        condition_layout = QVBoxLayout(self.grp_condition)
+        self.spn_cond_neg_coeff = QSpinBox(self.grp_condition)
+        self.spn_cond_neg_coeff.setRange(-10000, 10000)
+        self.spn_cond_neg_coeff.setValue(self.spn_cond_coeff.value())
+        self.spn_cond_neg_sat = QSpinBox(self.grp_condition)
+        self.spn_cond_neg_sat.setRange(0, 10000)
+        self.spn_cond_neg_sat.setValue(self.spn_cond_sat.value())
+        condition_layout.addWidget(self._slider_row("Pos coeff", self.spn_cond_coeff, self.grp_condition))
+        condition_layout.addWidget(self._slider_row("Neg coeff", self.spn_cond_neg_coeff, self.grp_condition))
+        condition_layout.addWidget(self._slider_row("Pos saturation", self.spn_cond_sat, self.grp_condition))
+        condition_layout.addWidget(self._slider_row("Neg saturation", self.spn_cond_neg_sat, self.grp_condition))
+        condition_layout.addWidget(self._slider_row("Dead band", self.spn_cond_db, self.grp_condition))
+        condition_layout.addWidget(self._slider_row("Centre offset", self.spn_cond_center, self.grp_condition))
+        axes_row = QHBoxLayout()
+        axes_row.addWidget(QLabel("Axes", self.grp_condition))
+        self.chk_axis_x = QCheckBox("roll (X)", self.grp_condition)
+        self.chk_axis_y = QCheckBox("pitch (Y)", self.grp_condition)
+        self.chk_axis_x.setChecked(True)
+        self.chk_axis_y.setChecked(NUM_AXIS >= 2)
+        self.chk_axis_y.setEnabled(NUM_AXIS >= 2)
+        axes_row.addWidget(self.chk_axis_x)
+        axes_row.addWidget(self.chk_axis_y)
+        axes_row.addStretch(1)
+        condition_layout.addLayout(axes_row)
+        control_layout.addWidget(self.grp_condition)
+
+        self.grp_envelope = QGroupBox("Envelope  (constant / ramp / periodic)", controls)
+        envelope_layout = QVBoxLayout(self.grp_envelope)
+        self.chk_envelope = QCheckBox("use envelope", self.grp_envelope)
+        envelope_layout.addWidget(self.chk_envelope)
+        self.spn_attack_level = QSpinBox(self.grp_envelope)
+        self.spn_attack_time = QSpinBox(self.grp_envelope)
+        self.spn_fade_level = QSpinBox(self.grp_envelope)
+        self.spn_fade_time = QSpinBox(self.grp_envelope)
+        for spin in (self.spn_attack_level, self.spn_fade_level):
+            spin.setRange(0, 10000)
+        for spin in (self.spn_attack_time, self.spn_fade_time):
+            spin.setRange(0, 5000)
+            spin.setValue(200)
+        envelope_layout.addWidget(self._slider_row("Attack level", self.spn_attack_level, self.grp_envelope))
+        envelope_layout.addWidget(self._slider_row("Attack ms", self.spn_attack_time, self.grp_envelope))
+        envelope_layout.addWidget(self._slider_row("Fade level", self.spn_fade_level, self.grp_envelope))
+        envelope_layout.addWidget(self._slider_row("Fade ms", self.spn_fade_time, self.grp_envelope))
+        control_layout.addWidget(self.grp_envelope)
+        control_layout.addStretch(1)
+
+        split.addWidget(view)
+        split.addWidget(scroll)
+        split.setSizes([530, 750])
+        self.cmb_type.currentIndexChanged.connect(self._update_effect_panels)
+        self._update_effect_panels()
+
+    def _update_effect_panels(self, *_args):
+        effect_type = str(self.cmb_type.currentData())
+        self.grp_periodic.setEnabled(effect_type in PERIODIC_TYPES)
+        self.grp_ramp.setEnabled(effect_type == RAMP)
+        self.grp_condition.setEnabled(effect_type in CONDITION_TYPES)
+        self.grp_envelope.setEnabled(effect_type not in CONDITION_TYPES)
+        is_condition = effect_type in CONDITION_TYPES
+        is_ramp = effect_type == RAMP
+        self.duration_row.setEnabled(not is_condition and not is_ramp)
+        self.spn_mag.parentWidget().setEnabled(not is_condition and not is_ramp)
+        self.grp_ramp.setToolTip("Ramp uses start/end force and its own duration; Magnitude does not apply.")
+        if is_condition:
+            self.chk_infinite.setChecked(True)
+        self.chk_infinite.setEnabled(not is_condition and not is_ramp)
+
+    def rescan_devices(self):
+        self.cmb_devices.clear()
+        try:
+            devices = self.controller.enumerate()
+            for info in devices:
+                label = (getattr(info, "product_string", None)
+                         or getattr(info, "manufacturer_string", None)
+                         or getattr(info, "path", "SunFFB device"))
+                self.cmb_devices.addItem(str(label), info)
+            self._log(f"found {len(devices)} device(s)")
+        except Exception as exc:  # noqa: BLE001
+            self._log(f"rescan failed: {exc}")
+
+    def _on_effect_toggle(self, state: int):
+        if state and self.controller.is_connected:
+            self.start_effect()
+        elif not state:
+            self._stop_main_effect()
+
+    def _on_spring_toggle(self, state: int):
+        if state and self.controller.is_connected:
+            self.apply_spring()
+        elif not state and self._spring_idx:
+            idx = self._spring_idx
+            dev = self.controller._device
+            if dev is not None:
+                try:
+                    dev.effect_operation(EffectOperationReportData(
+                        effectBlockIndex=idx, effectOperation=3, loopCount=0))
+                    self.controller.free_effect(idx)
+                except Exception as exc:  # noqa: BLE001
+                    self._log(f"spring stop failed: {exc}")
+            self._spring_idx = 0
+            self._spring_params = None
+            self._model = ForceModel(self._main_params) if self._effect_idx else None
+            self._update_canvas()
+
+    def _on_live_change(self, *_args):
+        if self.sender() in (self.spn_bg_spring, self.spn_spring_x, self.spn_spring_y):
+            if self.chk_spring_on.isChecked():
+                self.apply_spring()
+            return
+        if self.controller.is_connected and self.chk_effect_on.isChecked():
+            # New blocks are not playing until an Effect Operation is sent.
+            # Timing edits also need a fresh start to synchronize the device
+            # duration/loop count and the GUI's expiry timer.
+            timing_controls = (self.spn_duration, self.spn_ramp_duration,
+                               self.spn_loop, self.chk_infinite)
+            if (not self._effect_idx or self._effect_type != self.cmb_type.currentData()
+                    or self.sender() in timing_controls):
+                self.start_effect()
+            else:
+                self.apply_main_effect()
+
     def toggle_connect(self):
         if self.controller.is_connected:
+            restore_effect = self.chk_effect_on.isChecked()
+            restore_spring = self.chk_spring_on.isChecked()
+            self.stop_effect()
             self.controller.disconnect()
             self._timer.stop()
             self.btn_connect.setText("Connect")
             self.lbl_status.setText("not connected")
+            self._desired_effect_on = restore_effect
+            self._desired_spring_on = restore_spring
             self._log("disconnected")
             return
-        if self.controller.connect():
+        selected = self.cmb_devices.currentData()
+        if self.controller.connect(getattr(selected, "path", None), start_worker=False):
             self.btn_connect.setText("Disconnect")
             self.lbl_status.setText("connected")
             worker = self.controller.worker
@@ -239,16 +570,47 @@ class MainWindow(QMainWindow):
                 worker.joystick_ready.connect(self._on_joystick)
                 worker.pid_ready.connect(self._on_pid)
                 worker.error.connect(self._on_error)
+            self.controller.start_worker()
             self._log("connected")
+            restore_spring = getattr(self, "_desired_spring_on", self.chk_spring_on.isChecked())
+            restore_effect = getattr(self, "_desired_effect_on", self.chk_effect_on.isChecked())
+            self._set_toggle_silent(self.chk_spring_on, restore_spring)
+            if restore_spring:
+                self.apply_spring()
+            self._set_toggle_silent(self.chk_effect_on, restore_effect)
+            if restore_effect:
+                self.start_effect()
         else:
             self.lbl_status.setText("not connected")
-            self._log("connect failed")
+            detail = self.controller.last_error
+            self._log(f"connect failed{': ' + detail if detail else ''}")
 
     def _on_joystick(self, joy):
         ax = joy.axis
-        self._last_kin = Kinematics(roll=ax[0] / 32767.0,
-                                    pitch=ax[1] / 32767.0 if NUM_AXIS >= 2 else 0.0)
-        self.lbl_pos.setText(f"pos: ({ax[0]}, {ax[1]})")
+        now = time.monotonic()
+        roll = ax[0] / 32767.0
+        pitch = ax[1] / 32767.0 if NUM_AXIS >= 2 else 0.0
+        if self._last_sample_time is None or self._last_position is None:
+            vel_roll = vel_pitch = acc_roll = acc_pitch = 0.0
+        else:
+            dt = now - self._last_sample_time
+            if dt <= 0.0 or dt > 0.5:
+                vel_roll = vel_pitch = acc_roll = acc_pitch = 0.0
+            else:
+                vel_roll = (roll - self._last_position[0]) / dt
+                vel_pitch = (pitch - self._last_position[1]) / dt
+                acc_roll = ((vel_roll - self._last_velocity[0]) / dt
+                            if self._last_velocity is not None else 0.0)
+                acc_pitch = ((vel_pitch - self._last_velocity[1]) / dt
+                             if self._last_velocity is not None else 0.0)
+        self._last_sample_time = now
+        self._last_position = (roll, pitch)
+        self._last_velocity = (vel_roll, vel_pitch)
+        self._last_kin = Kinematics(roll=roll, pitch=pitch,
+                                    vel_roll=vel_roll, vel_pitch=vel_pitch,
+                                    acc_roll=acc_roll, acc_pitch=acc_pitch)
+        self.lbl_pos.setText("pos: (" + ", ".join(str(ax[i]) for i in range(NUM_AXIS)) + ")")
+        self.canvas.set_position(self._last_kin.roll, self._last_kin.pitch)
         self._update_canvas()
 
     def _on_pid(self, status: int):
@@ -256,12 +618,18 @@ class MainWindow(QMainWindow):
 
     def _on_error(self, msg: str):
         self._log(f"worker error: {msg}")
+        self.stop_effect()
+        self.controller.disconnect()
+        self._desired_effect_on = False
+        self._desired_spring_on = False
+        self.btn_connect.setText("Connect")
+        self.lbl_status.setText("not connected")
 
     def _on_tick(self):
         if self._run_total_ms > 0:
             elapsed_ms = self._elapsed_ms()
             if elapsed_ms >= self._run_total_ms:
-                self.stop_effect()
+                self._stop_main_effect()
         self._update_canvas()
 
     def _elapsed_ms(self) -> float:
@@ -275,11 +643,30 @@ class MainWindow(QMainWindow):
         else:
             fx, fy = self._model.evaluate_combined(self._last_kin, self._elapsed_ms())
         self.canvas.set_force(fx, fy)
+        if hasattr(self, "lbl_debug"):
+            mag = math.hypot(fx, fy)
+            direction = math.degrees(math.atan2(-fx, fy)) % 360.0 if mag >= 1 else 0.0
+            self.lbl_debug.setText(
+                f"DEVICE  {'connected' if self.controller.is_connected else 'not connected'}"
+                f"    axes {'XY' if NUM_AXIS >= 2 else 'X'}\n"
+                f"POS     roll {self._last_kin.roll:+.3f}  pitch {self._last_kin.pitch:+.3f}\n"
+                f"SPRING  {'ON' if self._spring_idx else 'off'}"
+                f"    EFFECT {'ON' if self._effect_idx else 'off'}"
+                f"  {self._main_params.effect_type}\n\n"
+                f"COMMANDED FORCE   Fx {fx:+.0f}   Fy {fy:+.0f}\n"
+                f"                  |F| {mag:.0f}   dir {direction:.1f}°")
 
     def _gather_params(self) -> EffectParams:
         cond = self.spn_cond_coeff.value()
+        effect_type = str(self.cmb_type.currentData())
+        duration = self.spn_ramp_duration.value() if effect_type == RAMP else self.spn_duration.value()
+        if effect_type in CONDITION_TYPES:
+            duration = 0xFFFF
+        elif effect_type != RAMP and self.chk_infinite.isChecked():
+            duration = 0xFFFF
+        use_envelope = self.chk_envelope.isChecked() and effect_type not in CONDITION_TYPES
         return EffectParams(
-            effect_type=str(self.cmb_type.currentData()),
+            effect_type=effect_type,
             magnitude=self.spn_mag.value(),
             direction_deg=float(self.spn_dir.value()),
             period_ms=self.spn_period.value(),
@@ -288,13 +675,19 @@ class MainWindow(QMainWindow):
             ramp_start=self.spn_ramp_start.value(),
             ramp_end=self.spn_ramp_end.value(),
             gain=self.spn_gain.value(),
-            pos_coeff_x=cond, neg_coeff_x=cond,
-            pos_coeff_y=cond, neg_coeff_y=cond,
-            pos_sat_x=self.spn_cond_sat.value(), neg_sat_x=self.spn_cond_sat.value(),
-            pos_sat_y=self.spn_cond_sat.value(), neg_sat_y=self.spn_cond_sat.value(),
+            pos_coeff_x=cond, neg_coeff_x=self.spn_cond_neg_coeff.value(),
+            pos_coeff_y=cond, neg_coeff_y=self.spn_cond_neg_coeff.value(),
+            pos_sat_x=self.spn_cond_sat.value(), neg_sat_x=self.spn_cond_neg_sat.value(),
+            pos_sat_y=self.spn_cond_sat.value(), neg_sat_y=self.spn_cond_neg_sat.value(),
             dead_band_x=self.spn_cond_db.value(), dead_band_y=self.spn_cond_db.value(),
             center_x=self.spn_cond_center.value(), center_y=self.spn_cond_center.value(),
-            duration_ms=self.spn_duration.value(),
+            duration_ms=duration,
+            attack_level=self.spn_attack_level.value() if use_envelope else 0,
+            attack_time_ms=self.spn_attack_time.value() if use_envelope else 0,
+            fade_level=self.spn_fade_level.value() if use_envelope else 0,
+            fade_time_ms=self.spn_fade_time.value() if use_envelope else 0,
+            apply_x=self.chk_axis_x.isChecked(),
+            apply_y=self.chk_axis_y.isChecked(),
         )
 
     def _ensure_effect(self, effect_type: str) -> bool:
@@ -302,10 +695,19 @@ class MainWindow(QMainWindow):
             self._log("device not connected")
             return False
         if self._effect_idx == 0 or self._effect_type != effect_type:
-            if self._effect_idx:
-                self.controller.free_effect(self._effect_idx)
-                self._effect_idx = 0
-            idx = self.controller.create_effect(ET_MAP[effect_type])
+            old_idx = self._effect_idx
+            self._effect_idx = 0
+            try:
+                if old_idx:
+                    dev = self.controller._device
+                    if dev is not None:
+                        dev.effect_operation(EffectOperationReportData(
+                            effectBlockIndex=old_idx, effectOperation=3, loopCount=0))
+                    self.controller.free_effect(old_idx)
+                idx = self.controller.create_effect(ET_MAP[effect_type])
+            except Exception as exc:  # noqa: BLE001
+                self._log(f"create effect failed: {exc}")
+                return False
             if idx == 0:
                 self._effect_type = None
                 self._log("create effect failed")
@@ -329,8 +731,10 @@ class MainWindow(QMainWindow):
     @staticmethod
     def _send_payload(dev, params, idx):
         if params.effect_type in CONDITION_TYPES:
-            dev.set_condition(build_condition(params, idx, 'x'))
-            dev.set_condition(build_condition(params, idx, 'y'))
+            if params.apply_x:
+                dev.set_condition(build_condition(params, idx, 'x'))
+            if NUM_AXIS >= 2 and params.apply_y:
+                dev.set_condition(build_condition(params, idx, 'y'))
         elif params.effect_type in PERIODIC_TYPES:
             dev.set_periodic(build_periodic(params, idx))
         elif params.effect_type == CONSTANT:
@@ -348,7 +752,8 @@ class MainWindow(QMainWindow):
         try:
             dev.set_effect(build_set_effect(params, self._effect_idx))
             self._send_payload(dev, params, self._effect_idx)
-            dev.set_envelope(build_envelope(params, self._effect_idx))
+            if params.effect_type not in CONDITION_TYPES:
+                dev.set_envelope(build_envelope(params, self._effect_idx))
             dev.effect_operation(EffectOperationReportData(
                 effectBlockIndex=self._effect_idx,
                 effectOperation=1,
@@ -361,7 +766,7 @@ class MainWindow(QMainWindow):
         self._run_started_at = time.monotonic()
         dur = params.duration_ms
         loop = self.spn_loop.value()
-        self._run_total_ms = dur * loop if (0 < dur < 0xFFFF and loop > 0) else 0
+        self._run_total_ms = dur * max(1, loop) if (0 < dur < 0xFFFF) else 0
         if not self._timer.isActive():
             self._timer.start()
         self._log(f"started {params.effect_type} block {self._effect_idx} "
@@ -377,7 +782,8 @@ class MainWindow(QMainWindow):
         try:
             dev.set_effect(build_set_effect(params, self._effect_idx))
             self._send_payload(dev, params, self._effect_idx)
-            dev.set_envelope(build_envelope(params, self._effect_idx))
+            if params.effect_type not in CONDITION_TYPES:
+                dev.set_envelope(build_envelope(params, self._effect_idx))
         except Exception as exc:  # noqa: BLE001
             self._log(f"apply failed: {exc}")
             return False
@@ -390,14 +796,15 @@ class MainWindow(QMainWindow):
         if not self.controller.is_connected:
             self._log("device not connected")
             return False
-        main = self._gather_params()
+        main = self._main_params if self._effect_idx else EffectParams(magnitude=0)
         spring = EffectParams(
             effect_type=SPRING,
-            pos_coeff_x=self.spn_spring.value(), neg_coeff_x=self.spn_spring.value(),
-            pos_coeff_y=self.spn_spring.value(), neg_coeff_y=self.spn_spring.value(),
+            pos_coeff_x=self.spn_bg_spring.value(), neg_coeff_x=self.spn_bg_spring.value(),
+            pos_coeff_y=self.spn_bg_spring.value(), neg_coeff_y=self.spn_bg_spring.value(),
             pos_sat_x=self.spn_cond_sat.value(), neg_sat_x=self.spn_cond_sat.value(),
             pos_sat_y=self.spn_cond_sat.value(), neg_sat_y=self.spn_cond_sat.value(),
-            dead_band_x=0, dead_band_y=0, center_x=0, center_y=0,
+            dead_band_x=0, dead_band_y=0,
+            center_x=self.spn_spring_x.value(), center_y=self.spn_spring_y.value(),
             duration_ms=main.duration_ms, gain=main.gain,
         )
         if not self._ensure_spring():
@@ -408,7 +815,8 @@ class MainWindow(QMainWindow):
         try:
             dev.set_effect(build_set_effect(spring, self._spring_idx))
             dev.set_condition(build_condition(spring, self._spring_idx, 'x'))
-            dev.set_condition(build_condition(spring, self._spring_idx, 'y'))
+            if NUM_AXIS >= 2:
+                dev.set_condition(build_condition(spring, self._spring_idx, 'y'))
             dev.effect_operation(EffectOperationReportData(
                 effectBlockIndex=self._spring_idx,
                 effectOperation=1,
@@ -426,8 +834,6 @@ class MainWindow(QMainWindow):
 
     def stop_effect(self):
         idxs = [i for i in (self._effect_idx, self._spring_idx) if i]
-        if not idxs:
-            return
         dev = self.controller._device
         if dev is not None:
             for idx in idxs:
@@ -448,8 +854,41 @@ class MainWindow(QMainWindow):
         self._timer.stop()
         self._run_total_ms = 0
         self._run_started_at = 0.0
+        self._set_toggle_silent(self.chk_effect_on, False)
+        self._set_toggle_silent(self.chk_spring_on, False)
+        self._last_sample_time = None
+        self._last_position = None
+        self._last_velocity = None
         self._update_canvas()
         self._log("stopped")
+
+    @staticmethod
+    def _set_toggle_silent(control, checked: bool):
+        blocked = control.blockSignals(True)
+        control.setChecked(checked)
+        control.blockSignals(blocked)
+
+    def _stop_main_effect(self):
+        if not self._effect_idx:
+            return
+        idx = self._effect_idx
+        dev = self.controller._device
+        if dev is not None:
+            try:
+                dev.effect_operation(EffectOperationReportData(
+                    effectBlockIndex=idx, effectOperation=3, loopCount=0))
+                self.controller.free_effect(idx)
+            except Exception as exc:  # noqa: BLE001
+                self._log(f"effect stop failed: {exc}")
+        self._effect_idx = 0
+        self._effect_type = None
+        self._model = ForceModel(EffectParams(magnitude=0), self._spring_params) if self._spring_idx else None
+        self._timer.stop()
+        self._run_total_ms = 0
+        self._run_started_at = 0.0
+        self._set_toggle_silent(self.chk_effect_on, False)
+        self._update_canvas()
+        self._log("effect stopped")
 
     def _log(self, msg: str) -> None:
         stamp = time.strftime("%H:%M:%S")

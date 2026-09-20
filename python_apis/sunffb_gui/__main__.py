@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication
 
-from sunffb_gui.main import MainWindow
+from .main import MainWindow
 
 
 def main():

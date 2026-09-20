@@ -274,9 +274,12 @@ void lcd_task(void* params)
         sprite.printf("FY: %d", forces[1]);
         #endif
 
-        uint32_t currentTime = millis() * 1e-3;
-        sprite.setCursor(124, 70);
-        sprite.printf("%d", currentTime);
+        const uint32_t uptimeSeconds = millis() / 1000U;
+        const uint32_t uptimeHours = uptimeSeconds / 3600U;
+        const uint32_t uptimeMinutes = (uptimeSeconds / 60U) % 60U;
+        const uint32_t uptimeSecondsPart = uptimeSeconds % 60U;
+        sprite.setCursor(100, 70);
+        sprite.printf("%02lu:%02lu:%02lu", uptimeHours, uptimeMinutes, uptimeSecondsPart);
 
         // snapshot effect states under semaphore for consistent reads
         static uint8_t effectStates[MAX_EFFECTS] = {0};

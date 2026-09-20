@@ -53,10 +53,12 @@ class RampTests(unittest.TestCase):
     def test_ramp_start_end(self):
         p = EffectParams(effect_type=RAMP, ramp_start=-5000, ramp_end=5000,
                          direction_deg=0.0, magnitude=0)
-        p.duration_ms = 1000  # not in dataclass; use explicit frac via helper
+        p.duration_ms = 1000
         m = ForceModel(main=p)
-        # evaluate_effect for ramp uses params.direction and uses internal
-        # elapsed fraction; we test the static interp helper instead:
+        _, y250 = m.evaluate_effect(p, Kinematics(), elapsed_ms=250)
+        _, y750 = m.evaluate_effect(p, Kinematics(), elapsed_ms=750)
+        self.assertAlmostEqual(y250, -2500.0, places=3)
+        self.assertAlmostEqual(y750, 2500.0, places=3)
         self.assertAlmostEqual(ForceModel.ramp_value(p, 0.0), -5000.0, places=3)
         self.assertAlmostEqual(ForceModel.ramp_value(p, 1.0), 5000.0, places=3)
         self.assertAlmostEqual(ForceModel.ramp_value(p, 0.5), 0.0, places=3)
@@ -132,12 +134,13 @@ class PeriodicTests(unittest.TestCase):
 class EnvelopeTests(unittest.TestCase):
     def test_envelope_attack_fade(self):
         p = EffectParams(attack_level=5000, attack_time_ms=500,
-                         fade_level=2000, fade_time_ms=1000)
+                         fade_level=2000, fade_time_ms=1000, duration_ms=2000)
         self.assertAlmostEqual(ForceModel.envelope_factor(p, 0), 0.5, places=3)
         self.assertAlmostEqual(ForceModel.envelope_factor(p, 250), 0.75, places=3)   # attack half
         self.assertAlmostEqual(ForceModel.envelope_factor(p, 500), 1.0, places=3)
-        self.assertAlmostEqual(ForceModel.envelope_factor(p, 1000), 0.6, places=3)   # fade half: 1.0 + (0.2-1.0)*((1000-500)/1000)
-        self.assertAlmostEqual(ForceModel.envelope_factor(p, 1500), 0.2, places=3)   # fade end
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 1000), 1.0, places=3)
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 1500), 0.6, places=3)
+        self.assertAlmostEqual(ForceModel.envelope_factor(p, 2000), 0.2, places=3)
     def test_envelope_zero_levels(self):
         p = EffectParams(attack_level=0, attack_time_ms=0, fade_level=0, fade_time_ms=0)
         self.assertEqual(ForceModel.envelope_factor(p, 0), 1.0)

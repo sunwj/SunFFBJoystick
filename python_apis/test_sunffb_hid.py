@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 try:
     from .sunffb_hid import (
@@ -11,6 +12,7 @@ try:
         pack_report,
         parse_feature_response,
         _normalize_directions,
+        SunFFBDevice,
     )
 except ImportError:
     from sunffb_hid import (
@@ -23,10 +25,27 @@ except ImportError:
         pack_report,
         parse_feature_response,
         _normalize_directions,
+        SunFFBDevice,
     )
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_open_selected_path_uses_hid_device_path(self):
+        class FakeHidDevice:
+            def __init__(self, **kwargs):
+                self.kwargs = kwargs
+            def close(self):
+                pass
+
+        class FakeHid:
+            Device = FakeHidDevice
+
+        with patch("sunffb_hid._require_hid", return_value=FakeHid):
+            device = SunFFBDevice(0xFFFF, 0x2010, path=b"selected")
+            device.open()
+            self.assertEqual(device.dev.kwargs, {"path": b"selected"})
+            device.close()
+
     def test_packed_sizes_match_num_axis_two_layout(self):
         self.assertEqual(JoystickInputReportData.sizeof(), 1 + 2 * NUM_AXIS)
         self.assertEqual(SetEffectReportData.sizeof(), 17 if NUM_AXIS == 2 else 1 + 1 + 2 + 2 + 2 + 1 + 1 + 1 + 2 * NUM_AXIS + 2)

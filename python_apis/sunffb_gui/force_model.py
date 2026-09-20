@@ -57,6 +57,8 @@ class EffectParams:
     dead_band_y: int = 0
     center_y: int = 0
     duration_ms: int = 1000
+    apply_x: bool = True
+    apply_y: bool = True
 
 
 def u_from_angle(deg: float) -> Tuple[float, float]:
@@ -75,23 +77,28 @@ class ForceModel:
         self.spring = spring
 
     def evaluate_effect(self, params: EffectParams, kin: Kinematics, elapsed_ms: float = 0.0) -> Tuple[float, float]:
-        env = self.envelope_factor(params, elapsed_ms)
+        gain = params.gain / 255.0
         if params.effect_type == CONSTANT:
             ux, uy = u_from_angle(params.direction_deg)
-            scale = params.magnitude * params.gain / 255.0 * env
+            env = self.envelope_factor(params, elapsed_ms, abs(params.magnitude))
+            scale = params.magnitude * gain * env
             return scale * ux, scale * uy
         ux, uy = u_from_angle(params.direction_deg)
         if params.effect_type == RAMP:
-            val = self.ramp_value(params, 0.5) * env
+            frac = min(1.0, max(0.0, elapsed_ms / max(1.0, params.duration_ms)))
+            base = max(abs(params.ramp_start), abs(params.ramp_end))
+            val = self.ramp_value(params, frac) * self.envelope_factor(params, elapsed_ms, base) * gain
             return val * ux, val * uy
         if params.effect_type in (SINE, SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN):
             frac = self.periodic_u(params, elapsed_ms)
-            val = (params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac)) * env
+            env = self.envelope_factor(params, elapsed_ms, abs(params.magnitude))
+            val = (params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac) * env) * gain
             return val * ux, val * uy
         if params.effect_type in (SPRING, DAMPER, INERTIA, FRICTION):
             mx = self._condition_metric(params, 'x', kin)
             my = self._condition_metric(params, 'y', kin)
-            return self._condition_axis(params, 'x', mx), self._condition_axis(params, 'y', my)
+            return (self._condition_axis(params, 'x', mx) * gain if params.apply_x else 0.0,
+                    self._condition_axis(params, 'y', my) * gain if params.apply_y else 0.0)
         return 0.0, 0.0
 
     @staticmethod
@@ -136,15 +143,18 @@ class ForceModel:
         return 0.0
 
     @staticmethod
-    def envelope_factor(params: EffectParams, elapsed_ms: float) -> float:
+    def envelope_factor(params: EffectParams, elapsed_ms: float,
+                        base_magnitude: float = MAX_FORCE) -> float:
         t = max(0.0, elapsed_ms)
+        base = max(1.0, float(base_magnitude))
         if params.attack_time_ms > 0 and t < params.attack_time_ms:
-            a0 = params.attack_level / MAX_FORCE
+            a0 = params.attack_level / base
             return a0 + (1.0 - a0) * (t / params.attack_time_ms)
-        fade_window = params.attack_time_ms if params.attack_time_ms > 0 else 0.0
-        if params.fade_time_ms > 0 and fade_window < t <= fade_window + params.fade_time_ms:
-            tgt = params.fade_level / MAX_FORCE
-            return 1.0 + (tgt - 1.0) * ((t - fade_window) / params.fade_time_ms)
+        fade_start = max(0.0, params.duration_ms - params.fade_time_ms)
+        if params.fade_time_ms > 0 and t > fade_start:
+            tgt = params.fade_level / base
+            progress = min(1.0, (t - fade_start) / params.fade_time_ms)
+            return 1.0 + (tgt - 1.0) * progress
         return 1.0
 
     @staticmethod

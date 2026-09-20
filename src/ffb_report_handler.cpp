@@ -235,6 +235,14 @@ namespace SunFFB
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
 
+        // Condition effects use every type-specific slot as a per-axis
+        // condition block.  Slot 1 is the Y-axis block, so accepting an
+        // envelope here would overwrite it and leave only X force active.
+        const uint8_t effectType = effectBlock->effectData.effectType;
+        if(effectType == ET_SPRING || effectType == ET_DAMPER ||
+           effectType == ET_INERTIA || effectType == ET_FRICTION)
+            return;
+
         SetEnvelopeReportData* envelopData = &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData);
         memcpy((void*)envelopData, data, sizeof(SetEnvelopeReportData));
         effectBlock->envelopParameter = true;

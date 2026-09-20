@@ -280,12 +280,14 @@ class SunFFBInfo:
     interface_number: Optional[int]
     usage_page: Optional[int]
     usage: Optional[int]
+    path: Optional[object] = None
 
 
 class SunFFBDevice:
-    def __init__(self, vid: int, pid: int):
+    def __init__(self, vid: int, pid: int, path=None):
         self.vid = vid
         self.pid = pid
+        self.path = path
         self.dev: Optional[hid.device] = None
 
     @staticmethod
@@ -302,12 +304,16 @@ class SunFFBDevice:
                     interface_number=d.get("interface_number"),
                     usage_page=d.get("usage_page"),
                     usage=d.get("usage"),
+                    path=d.get("path"),
                 )
             )
         return devices
 
     def open(self) -> None:
-        self.dev = _require_hid().Device(self.vid, self.pid)
+        if self.path is None:
+            self.dev = _require_hid().Device(self.vid, self.pid)
+        else:
+            self.dev = _require_hid().Device(path=self.path)
 
     def close(self) -> None:
         if self.dev is not None:

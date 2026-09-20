@@ -3,9 +3,11 @@ from __future__ import annotations
 from PyQt6.QtCore import QThread, pyqtSignal
 
 try:
-    from sunffb_hid import SunFFBDevice, ET_SINE  # noqa: F401
+    from sunffb_hid import (SunFFBDevice, JoystickInputReportData, PIDStateReportData,
+                            REPORT_ID_JOYSTICK, REPORT_ID_PID_STATE, ET_SINE)  # noqa: F401
 except ImportError:
-    from python_apis.sunffb_hid import SunFFBDevice, ET_SINE  # noqa: F401
+    from python_apis.sunffb_hid import (SunFFBDevice, JoystickInputReportData, PIDStateReportData,
+                                        REPORT_ID_JOYSTICK, REPORT_ID_PID_STATE, ET_SINE)  # noqa: F401
 
 
 class DeviceWorker(QThread):
@@ -22,13 +24,15 @@ class DeviceWorker(QThread):
     def run(self):
         while self._running:
             try:
-                joy = self._device.read_joystick_report(timeout_ms=self._poll_ms)
-                self.joystick_ready.emit(joy)
-                try:
-                    pid = self._device.read_pid_state_report(timeout_ms=50)
+                report_id, payload = self._device.read_input_once(timeout_ms=self._poll_ms)
+                if report_id == REPORT_ID_JOYSTICK:
+                    joy = JoystickInputReportData.from_bytes(payload)
+                    self.joystick_ready.emit(joy)
+                elif report_id == REPORT_ID_PID_STATE:
+                    pid = PIDStateReportData.from_bytes(payload)
                     self.pid_ready.emit(pid.status)
-                except TimeoutError:
-                    pass
+            except TimeoutError:
+                continue
             except Exception as exc:  # noqa: BLE001
                 self.error.emit(str(exc))
                 self._running = False
@@ -45,6 +49,7 @@ class DeviceController:
         self._device = None
         self._worker = None
         self._open = False
+        self._last_error = None
 
     @property
     def is_connected(self) -> bool:
@@ -54,18 +59,43 @@ class DeviceController:
     def worker(self):
         return self._worker
 
-    def connect(self) -> bool:
+    @property
+    def last_error(self):
+        return self._last_error
+
+    def enumerate(self):
+        """Return matching HID devices for the device selector."""
+        return SunFFBDevice.enumerate(self._vid, self._pid)
+
+    def connect(self, path=None, start_worker=True) -> bool:
+        self._last_error = None
         try:
-            self._device = SunFFBDevice(self._vid, self._pid)
+            self.disconnect()
+            self._device = SunFFBDevice(self._vid, self._pid, path=path)
             self._device.open()
             self._open = True
             self._worker = DeviceWorker(self._device)
-            self._worker.start()
+            if start_worker:
+                self._worker.start()
             return True
-        except Exception:
+        except Exception as exc:
+            self._last_error = str(exc)
+            try:
+                if self._device is not None:
+                    self._device.close()
+            except Exception:
+                pass
             self._device = None
             self._open = False
             return False
+
+    def start_worker(self) -> bool:
+        """Start input polling after the GUI has connected its Qt signals."""
+        if not self.is_connected or self._worker is None:
+            return False
+        if not self._worker.isRunning():
+            self._worker.start()
+        return True
 
     def disconnect(self) -> None:
         if self._worker is not None:

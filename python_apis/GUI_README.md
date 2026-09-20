@@ -25,22 +25,30 @@ cd python_apis
 python -m sunffb_gui
 ```
 
+From the repository root, the equivalent command is:
+
+```
+python -m python_apis.sunffb_gui
+```
+
 The GUI is a Python module (`sunffb_gui`), so it must be launched as `python -m sunffb_gui` from `python_apis/`.
 
 ## Usage
 
-1. **Connect**: Plug in the joystick (USB VID `0xFFFF`, PID `0x2010`), then use the connect controls in the GUI to open the device.
-2. **Direction pad**: A direction pad selects the direction the force comes **from**:
+1. **Connect**: Plug in the joystick (USB VID `0xFFFF`, PID `0x2010`), press **Rescan**, select the device, then press **Connect**. The device view and status are on the left, with controls on the right.
+2. **Background spring**: The centring safeguard is enabled by default. Its checkbox and stiffness control are separate from the selected effect; turning it off stops only the spring block.
+3. **Effect on/off**: Select an effect and tick **effect on**. Parameter changes are sent live while it is running; there is no separate Start/Stop workflow. The legacy methods remain available to scripts.
+4. **Direction pad**: A compass-style pad selects the direction the force comes **from**:
    - `0` = pull — force from the front (nose-up/backward feel)
    - `90` = left
    - `180` = push
    - `270` = right
-3. **Effect types**: 11 effect types are supported:
+5. **Effect types**: 11 effect types are supported:
    - Constant, Ramp, Sine, Square, Triangle, Sawtooth-up, Sawtooth-down
    - Spring, Damper, Inertia, Friction
-4. **Conditions**: Spring/Damper/Inertia/Friction conditions are per-axis. Each axis has its own coefficient, saturation, deadband, and center parameters. Conditions use the axis metrics directly and ignore the direction pad.
-5. **Background spring**: The background spring effect is added on top of the main effect, so the total force is the main effect plus the background spring.
-6. **Log panel**: The log panel shows event/status messages from the GUI session (connect/disconnect, effect start/stop, worker errors). It does not log raw HID report bytes; pair it with the firmware's serial debug output to cross-check behavior end to end.
+6. **Conditions**: Spring/Damper/Inertia/Friction conditions are per-axis. Each axis has its own coefficient, saturation, deadband, and center parameters. Conditions use the axis metrics directly and ignore the direction pad.
+7. **Force view**: The left canvas shows the live device position, commanded force vector, and combined force readout. It is a prediction, not a force sensor.
+8. **Log panel**: The log panel shows event/status messages from the GUI session (connect/disconnect, effect start/stop, worker errors). It does not log raw HID report bytes; pair it with the firmware's serial debug output to cross-check behavior end to end.
 
 ## Notes
 
