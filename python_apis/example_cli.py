@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes as ct
 import time
 
 try:
@@ -96,7 +97,7 @@ def cmd_constant(args):
             duration_ms=args.duration,
             gain=args.gain,
             axis_enable=DIRECTION_ENABLE,
-            directions=(9000, 0),
+            directions=(9000,) + (0,) * (NUM_AXIS - 1),
             loop_count=args.loop_count,
             start=True,
         )
@@ -127,8 +128,8 @@ def cmd_sine(args):
                 samplePeriod=0,
                 gain=args.gain,
                 triggerButton=USB_NO_TRIGGER_BUTTON,
-                axisEnable=X_AXIS_ENABLE,
-                directions=(ct.c_uint16 * NUM_AXIS)(*[0] * NUM_AXIS),
+                axisEnable=DIRECTION_ENABLE,
+                directions=(ct.c_uint16 * NUM_AXIS)(9000, *([0] * (NUM_AXIS - 1))),
                 startDelay=0,
             )
         )

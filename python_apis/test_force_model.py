@@ -73,10 +73,10 @@ class PeriodicTests(unittest.TestCase):
             (SINE, 0.75, -1.0),
             (SQUARE, 0.0, 1.0),
             (SQUARE, 0.5, -1.0),
-            (TRIANGLE, 0.0, -1.0),
-            (TRIANGLE, 0.25, 0.0),
-            (TRIANGLE, 0.5, 1.0),
-            (TRIANGLE, 0.75, 0.0),
+            (TRIANGLE, 0.0, 0.0),
+            (TRIANGLE, 0.25, 1.0),
+            (TRIANGLE, 0.5, 0.0),
+            (TRIANGLE, 0.75, -1.0),
             (SAWTOOTH_UP, 0.0, -1.0),
             (SAWTOOTH_UP, 1.0, 1.0),
             (SAWTOOTH_UP, 0.5, 0.0),
@@ -112,11 +112,11 @@ class PeriodicTests(unittest.TestCase):
                          period_ms=100, phase=0, direction_deg=0.0)
         m = ForceModel(main=p)
         fx, fy = m.evaluate_effect(p, Kinematics(), elapsed_ms=25.0)
-        self.assertAlmostEqual(fy, 0.0, places=2)   # u=0.25 -> wave=0
+        self.assertAlmostEqual(fy, 4000.0, places=2)   # positive quarter-cycle peak
         fx2, fy2 = m.evaluate_effect(p, Kinematics(), elapsed_ms=50.0)
-        self.assertAlmostEqual(fy2, 4000.0, places=2)  # u=0.5 -> wave=+1 (peak)
+        self.assertAlmostEqual(fy2, 0.0, places=2)
         fx3, fy3 = m.evaluate_effect(p, Kinematics(), elapsed_ms=100.0)
-        self.assertAlmostEqual(fy3, -4000.0, places=2)  # u wraps to 0 -> -1 (start min)
+        self.assertAlmostEqual(fy3, 0.0, places=2)
 
     def test_periodic_sawtooth_full_amplitude(self):
         # Sawtooth spans -magnitude..+magnitude per single period (C# 2u-1 / 1-2u).

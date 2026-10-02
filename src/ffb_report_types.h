@@ -132,8 +132,8 @@ namespace SunFFB
     };
     
     // Overlay: one TypeSpecificParameterBlock stores effect data for a single axis
-    // (periodic/constant/ramp/condition) or the envelope. An EffectBlock holds
-    // NUM_AXIS such slots.
+    // (periodic/constant/ramp/condition). Envelopes have independent storage.
+    // An EffectBlock holds NUM_AXIS such slots.
     union TypeSpecificParameterBlock
     {
         SetEnvelopeReportData envelopeData;
@@ -156,7 +156,8 @@ namespace SunFFB
         uint8_t remainingLoops = 1;                     // iterations left; 0xFF repeats until explicitly stopped
     
         SetEffectReportData effectData;                                 // common effect parameters
-        TypeSpecificParameterBlock typeSpecificData[NUM_AXIS];          // per-axis type-specific data + envelope
+        SetEnvelopeReportData envelopeData;
+        TypeSpecificParameterBlock typeSpecificData[NUM_AXIS];          // per-axis type-specific data
     };
     
     // ===== Build-time validation =====

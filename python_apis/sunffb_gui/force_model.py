@@ -136,10 +136,10 @@ class ForceModel:
         d = metric - center
         if d > dead:
             f = -pc * (d - dead)
-            return max(f, -ps)
+            return max(-ps, min(ns, f))
         if d < -dead:
             f = -nc * (d + dead)
-            return min(f, ns)
+            return max(-ps, min(ns, f))
         return 0.0
 
     @staticmethod
@@ -151,7 +151,7 @@ class ForceModel:
             a0 = params.attack_level / base
             return a0 + (1.0 - a0) * (t / params.attack_time_ms)
         fade_start = max(0.0, params.duration_ms - params.fade_time_ms)
-        if params.fade_time_ms > 0 and t > fade_start:
+        if params.duration_ms != 0xFFFF and params.fade_time_ms > 0 and t > fade_start:
             tgt = params.fade_level / base
             progress = min(1.0, (t - fade_start) / params.fade_time_ms)
             return 1.0 + (tgt - 1.0) * progress
@@ -177,7 +177,8 @@ class ForceModel:
         if wave == SQUARE:
             return 1.0 if u < 0.5 else -1.0
         if wave == TRIANGLE:
-            # DI triangle: starts at min (-1), peak at u=0.5, back to min.
+            # Match firmware: zero at phase 0, positive peak at quarter cycle.
+            u = (u + 0.25) % 1.0
             return 4.0 * u - 1.0 if u < 0.5 else 3.0 - 4.0 * u
         if wave == SAWTOOTH_UP:
             return 2.0 * u01 - 1.0

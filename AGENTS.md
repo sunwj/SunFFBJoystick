@@ -37,13 +37,14 @@ src/                          — All firmware source (SunFFB namespace)
   ffb_report_handler.*        — Effect block management, PID state machine
   ffb_force_calculator.*      — Real-time force computation (effects, conditions, envelopes)
   ffb_device_input.h          — Axis filtering, speed/acceleration derivation
-  (axis filtering inlined in ffb_device_input)
+  ffb_device_input.cpp        — Axis filtering and motion derivatives
   math_utils.h                — clamp, fast math stubs
   hid_pid.h                   — HID PID usage constants
 
-lib/communication/            — Serial protocol to external motor controller
-  simple_serial_communication.h — Header(0x55) + XOR checksum framing
-  cobs.*                      — COBS encoding (present but unused in main.cpp)
+src/communication/            — Serial protocol to external motor controller
+  serial_link.h               — 0xAA + ID + length + payload + CRC8 framing
+  serial_hal_arduino.h         — HardwareSerial adapter
+  host/                       — Python protocol and serial terminal
 
 python_apis/                  — Host-side Python test client (hidapi-based)
   sunffb_hid.py               — Mirrors firmware report structs for host testing
@@ -64,28 +65,32 @@ Tasks are pinned to specific cores:
 |------|------|----------|---------|
 | `lcd_task` | App (core 1) | 1 | TFT display refresh (60ms) |
 | `joystick_task` | App (core 1) | 2 | ADC read + axis filter (2ms) |
-| `force_calculation_task` | App (core 1) | 2 | Effect computation (1ms) |
+| `force_calculation_task` | App (core 1) | 3 | Effect computation (1ms) |
 | `send_report_task` | Proto (core 0) | max-1 | USB HID report transmission |
 | `send_force_task` | Proto (core 0) | max-1 | Serial output to motor driver |
 | `receive_position_task` | Proto (core 0) | max-1 | Serial input from encoder board |
 
-Tasks communicate via FreeRTOS queues and binary semaphores. `semaphoreFFBDeviceInput` and `semaphoreFFBReportHandler` protect shared state between force calculation and input/report tasks.
+On ESP32-S2 (`esp32-s2*` environments), all tasks use core 0. Periodic USB/UART I/O uses priority 2, below force calculation (3). UART receive has a bounded batch and unconditional delay; missed force deadlines also yield. ADC reads explicitly use 12-bit resolution; third-axis ADC defaults to GPIO15 to reserve GPIO19/20 for native USB. The S2 reference board is `esp32-s2-saola-1`; LCD-enabled builds require external board-specific TFT pin setup.
+
+Tasks communicate via FreeRTOS queues and mutexes. `hid_command_task` processes copied USB commands on core 0; USB callbacks wait for completion to preserve report ordering. `semaphoreFFBDeviceInput` and `semaphoreFFBReportHandler` protect shared state between force calculation and input/report tasks.
 
 ## Serial Protocol (Motor Controller)
 
 - **Port**: `HardwareSerial(1)`, 115200 baud, GPIO4 (TX), GPIO5 (RX)
-- **Format**: `0x55` header + payload bytes + XOR checksum
+- **Format**: `0xAA` + message ID + payload length + payload + CRC-8/MAXIM-DOW (ID, length and payload)
 - **Outbound**: `int32_t forces[NUM_AXIS]` — computed force values
 - **Inbound**: `uint16_t pos[NUM_AXIS]` — encoder position feedback
-- See `lib/communication/simple_serial_communication.h` for `send_packet_buffer` / `receive_packet_buffer`
+- See `src/communication/serial_link.h`; motor output and serial position input are opt-in (`ENABLE_MOTOR_OUTPUT` / `USE_SERIAL_POSITION`, both default 0). Position 0..65535 maps around center 32768 into the signed HID range.
 
 ## TFT_eSPI Dependency
 
-The `TFT_eSPI` library (via `lib_deps`) requires a board-specific `User_Setup_Select.h` to map LCD pins. This config is **not in the repository** — it must exist in the PlatformIO library cache or be provided externally. Build will fail without it.
+LCD is disabled by default (`ENABLE_LCD=0`). Normal builds omit TFT_eSPI and all LCD code/resources. Use `esp32-s3-lcd` or `esp32-s2-lcd` for debug display. Timing diagnostics are independent.
+
+When LCD is enabled, the `TFT_eSPI` library (via `lib_deps`) requires a board-specific `User_Setup_Select.h` to map LCD pins. This config is **not in the repository** — it must exist in the PlatformIO library cache or be provided externally. LCD-enabled builds require this external setup.
 
 ## Testing
 
-No automated tests or CI. Validation is done via:
+Automated tests are available via `pio test -e native -e native-axis1 -e native-axis3` and `pio test -e native-sanitized`; Python tests use `python3 -m unittest discover -s python_apis`. Hardware validation is done via:
 - `python_apis/sunffb_hid.py` — Python host client, mirrors firmware report structs
 - `tools/*.exe` — Windows utilities (JoyTester, simFFB, etc.)
 - Serial monitor for `SERIAL_PRINT` debug output (enable in source files)
@@ -99,6 +104,15 @@ No automated tests or CI. Validation is done via:
 - Condition-effect parameters: coefficient/saturation/deadband are host-sent nominal values (−10000..10000), normalized against `USB_MAX_MAGNITUDE` (10000); axis metrics (position/speed/acceleration) are normalized against each axis's `maxX` (maxSpeed = `USB_AXIS_MAX_ABSOLUTE` × `DEFAULT_MAX_SPEED_SCALE`). Speed/accel scales default to 1.0 (1 full-scale/s = max force), matching FFBTestTool's Clamp1 model.
 - Friction is evaluated as a sign function of speed (with 2% threshold), not as a linear speed condition (see `ET_FRICTION` branch in `ffb_force_calculator.cpp`).
 - Force direction vectors are stored as `u = −D` (force *from* direction D): Cartesian components arrive as signed int16 (two's complement) in `directions[]`; polar angle in hundredths of a degree (0..36000) uses only `directions[0]`; spherical (3-axis) uses θ=`directions[0]`, φ=`directions[1]`.
-- Effects are implicitly enabled when the host starts playback (`start_effect()` promotes `DEVICE_STATE_INIT` → `DEVICE_STATE_ACTIVE`); after device reset (DeviceControl=4) no force is output until an effect starts. `DEVICE_STATE_INIT`/`PAUSED`/`DISABLED` produce zero force.
+- Effects are implicitly enabled when the host starts playback (`start_effect()` promotes `DEVICE_STATE_INIT` → `DEVICE_STATE_ACTIVE`); device reset (DeviceControl=4) frees effects, restores gain and enables actuators. Pause and actuator enable are independent; Continue never enables disabled actuators. `DEVICE_STATE_INIT`/`PAUSED`/`DISABLED` produce zero force.
 - Effect `samplePeriod` (ms, 0=default) quantizes the per-effect elapsed time, giving coarse-texture playback; it is independent of `force_calculation_task` period.
 - `c_cpp_properties.json` is auto-generated by PlatformIO — do not commit manual edits.
+
+## Real-time validation
+
+- Force calculation: `FORCE_TASK_PERIOD_MS` is 1 (1000 Hz) or 2 (500 Hz).
+- Motor UART TX is 500 Hz; serial RX polling is 1 ms and processing is arrival-driven.
+- HID IN polling is 1 ms; positions have priority over PID state on the shared endpoint.
+- `esp32-s2-timing`/`esp32-s3-timing` enable UART0 rate logs and motor output/serial input.
+- `python_apis/check_update_rate.py` measures read-only host report cadence; it does not enable motors.
+- Never claim timing compliance from compilation alone. Use `usb_done` and `fresh`, motor-side reception, and wire measurements under worst-case load.

@@ -11,9 +11,9 @@ namespace SunFFB
         explicit ArduinoSerialHal(HardwareSerial& serial)
             : mSerial(serial) {}
 
-        void write(const uint8_t* data, uint16_t len)
+        size_t write(const uint8_t* data, uint16_t len)
         {
-            mSerial.write(data, len);
+            return mSerial.write(data, len);
         }
 
         int available()

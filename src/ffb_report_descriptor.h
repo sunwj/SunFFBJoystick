@@ -310,7 +310,7 @@
         /* Parameter Block Offset */ \
         HID_USAGE(HID_USAGE_PID_EFFECT_PARAM_BLOCK_OFFSET), \
         HID_LOGICAL_MIN(0), \
-        HID_LOGICAL_MAX(1), \
+        HID_LOGICAL_MAX(NUM_AXIS - 1), \
         HID_PHYSICAL_MIN(0), \
         HID_PHYSICAL_MAX(1), \
         HID_REPORT_SIZE(8), /* 4 in SW FF2, since Specific Block Offset is also given afterward */ \

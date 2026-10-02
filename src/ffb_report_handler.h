@@ -68,6 +68,9 @@ namespace SunFFB
         void update_pid_effect_index();                         // scan for first playing, set pidStates
 
         uint8_t nextEffectIdx = 0;                              // round-robin allocator cursor
+        bool actuatorsEnabled = false;
+        bool actuatorsInitialized = false;
+        void update_device_state();
         uint32_t pauseTime;                                     // timestamp when paused (for resume adjustment)
         volatile EffectBlock effectBlocks[MAX_EFFECTS];         // effect block pool
         volatile PIDStateReportData pidStates = {0x1C, 0};      // PID state (status + playing effect index)

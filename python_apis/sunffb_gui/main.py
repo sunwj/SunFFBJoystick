@@ -14,14 +14,14 @@ try:
                             SetPeriodicReportData, SetConstantForceReportData, SetRampForceReportData,
                             EffectOperationReportData, ET_CONSTANT, ET_RAMP, ET_SINE, ET_SQUARE,
                             ET_TRIANGLE, ET_SAWTOOTH_UP, ET_SAWTOOTH_DOWN, ET_SPRING, ET_DAMPER,
-                            ET_INERTIA, ET_FRICTION, X_AXIS_ENABLE, Y_AXIS_ENABLE, DIRECTION_ENABLE,
+                            ET_INERTIA, ET_FRICTION, X_AXIS_ENABLE, DIRECTION_ENABLE,
                             USB_NO_TRIGGER_BUTTON, NUM_AXIS)
 except ImportError:
     from python_apis.sunffb_hid import (SetEffectReportData, SetEnvelopeReportData, SetConditionReportData,
                                         SetPeriodicReportData, SetConstantForceReportData, SetRampForceReportData,
                                         EffectOperationReportData, ET_CONSTANT, ET_RAMP, ET_SINE, ET_SQUARE,
                                         ET_TRIANGLE, ET_SAWTOOTH_UP, ET_SAWTOOTH_DOWN, ET_SPRING, ET_DAMPER,
-                                        ET_INERTIA, ET_FRICTION, X_AXIS_ENABLE, Y_AXIS_ENABLE, DIRECTION_ENABLE,
+                                        ET_INERTIA, ET_FRICTION, X_AXIS_ENABLE, DIRECTION_ENABLE,
                                         USB_NO_TRIGGER_BUTTON, NUM_AXIS)
 
 try:
@@ -36,6 +36,8 @@ except ImportError:
                                         INERTIA, FRICTION)
     from sunffb_gui.device import DeviceController
     from sunffb_gui.widgets import DirectionPad, ForceCanvas, direction_from_pad
+
+Y_AXIS_ENABLE = 0x02 if NUM_AXIS >= 2 else 0
 
 ET_MAP = {CONSTANT: ET_CONSTANT, RAMP: ET_RAMP, SINE: ET_SINE, SQUARE: ET_SQUARE,
           TRIANGLE: ET_TRIANGLE, SAWTOOTH_UP: ET_SAWTOOTH_UP, SAWTOOTH_DOWN: ET_SAWTOOTH_DOWN,
@@ -641,7 +643,11 @@ class MainWindow(QMainWindow):
         if self._model is None:
             fx, fy = 0.0, 0.0
         else:
-            fx, fy = self._model.evaluate_combined(self._last_kin, self._elapsed_ms())
+            elapsed = self._elapsed_ms()
+            duration = self._main_params.duration_ms
+            if 0 < duration < 0xFFFF:
+                elapsed %= duration
+            fx, fy = self._model.evaluate_combined(self._last_kin, elapsed)
         self.canvas.set_force(fx, fy)
         if hasattr(self, "lbl_debug"):
             mag = math.hypot(fx, fy)
@@ -766,7 +772,7 @@ class MainWindow(QMainWindow):
         self._run_started_at = time.monotonic()
         dur = params.duration_ms
         loop = self.spn_loop.value()
-        self._run_total_ms = dur * max(1, loop) if (0 < dur < 0xFFFF) else 0
+        self._run_total_ms = dur * max(1, loop) if (0 < dur < 0xFFFF and loop != 0xFF) else 0
         if not self._timer.isActive():
             self._timer.start()
         self._log(f"started {params.effect_type} block {self._effect_idx} "

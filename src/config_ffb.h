@@ -6,7 +6,9 @@
 // #define SERIAL_PRINT
 
 // ===== Axis Configuration =====
+#ifndef NUM_AXIS
 #define NUM_AXIS 2
+#endif
 
 #if NUM_AXIS == 1
 #define X_AXIS_ENABLE 0x01

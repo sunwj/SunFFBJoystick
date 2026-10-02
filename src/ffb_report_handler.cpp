@@ -13,7 +13,12 @@ namespace SunFFB
 
     void FFBReportHandler::init()
     {
-        devicePaused = 0;
+        devicePaused = false;
+        actuatorsEnabled = false;
+        actuatorsInitialized = false;
+        deviceState = DEVICE_STATE_INIT;
+        deviceGain = USB_MAX_DEVICE_GAIN;
+        pidStates.status = 0x1C;
         pauseTime = 0;
         free_all_effects();
     }
@@ -107,13 +112,14 @@ namespace SunFFB
         // treat starting playback as implicit actuator enable when in INIT state.
         if(deviceState == DEVICE_STATE_INIT)
         {
-            deviceState = DEVICE_STATE_ACTIVE;
-            pidStates.status |= 0x02;
+            actuatorsEnabled = true;
+            actuatorsInitialized = true;
+            update_device_state();
             pidStateDirty = true;
         }
 
         effectBlock->state |= EFFECT_STATE_PLAYING;
-        effectBlock->startTime = _millis() + effectBlock->effectData.startDelay;
+        effectBlock->startTime = (devicePaused ? pauseTime : _millis()) + effectBlock->effectData.startDelay;
         update_pid_effect_index();
         pidStateDirty = true;
         if(effectBlock->effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
@@ -235,15 +241,14 @@ namespace SunFFB
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
 
-        // Condition effects use every type-specific slot as a per-axis
-        // condition block.  Slot 1 is the Y-axis block, so accepting an
-        // envelope here would overwrite it and leave only X force active.
+        // Envelopes do not apply to condition effects. Their parameter slots
+        // remain independent from envelope storage.
         const uint8_t effectType = effectBlock->effectData.effectType;
         if(effectType == ET_SPRING || effectType == ET_DAMPER ||
            effectType == ET_INERTIA || effectType == ET_FRICTION)
             return;
 
-        SetEnvelopeReportData* envelopData = &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData);
+        SetEnvelopeReportData* envelopData = &(effectBlock->envelopeData);
         memcpy((void*)envelopData, data, sizeof(SetEnvelopeReportData));
         effectBlock->envelopParameter = true;
 
@@ -320,19 +325,30 @@ namespace SunFFB
         #endif
     }
 
+    void FFBReportHandler::update_device_state()
+    {
+        pidStates.status = (pidStates.status & ~0x03) |
+            (devicePaused ? 0x01 : 0) | (actuatorsEnabled ? 0x02 : 0);
+        deviceState = !actuatorsInitialized ? DEVICE_STATE_INIT :
+            (!actuatorsEnabled ? DEVICE_STATE_DISABLED :
+            (devicePaused ? DEVICE_STATE_PAUSED : DEVICE_STATE_ACTIVE));
+    }
+
     void FFBReportHandler::set_device_control(const DeviceControlReportData* data)
     {
         pidStateDirty = true;
         switch(data->state)
         {
             case 1:                 // enable actuators
-                pidStates.status |= 0x02;
-                deviceState = DEVICE_STATE_ACTIVE;
+                actuatorsInitialized = true;
+                actuatorsEnabled = true;
+                update_device_state();
             break;
 
             case 2:                 // disable actuators
-                pidStates.status &= ~(0x02);
-                deviceState = DEVICE_STATE_DISABLED;
+                actuatorsInitialized = true;
+                actuatorsEnabled = false;
+                update_device_state();
             break;
 
             case 3:                 // stop all effects
@@ -344,23 +360,26 @@ namespace SunFFB
                 devicePaused = false;
                 pauseTime = 0;
                 deviceGain = USB_MAX_DEVICE_GAIN;
+                actuatorsInitialized = true;
+                actuatorsEnabled = true;
                 pidStates.status = 0x1E;
                 pidStates.effectBlockIndex = 0;
                 deviceState = DEVICE_STATE_ACTIVE;
             break;
 
             case 5:                 // pause
+                if (!devicePaused) {
                 devicePaused = true;
-                pidStates.status |= 1;
                 pauseTime = _millis();
-                deviceState = DEVICE_STATE_PAUSED;
+                    update_device_state();
+                }
             break;
 
             case 6:                 // continue
             {
+                if (!devicePaused) break;
                 devicePaused = false;
-                pidStates.status &= ~(0x01);
-                deviceState = DEVICE_STATE_ACTIVE;
+                update_device_state();
 
                 const uint32_t pauseLength = _millis() - pauseTime;
                 for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
@@ -453,7 +472,7 @@ namespace SunFFB
     bool FFBReportHandler::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
     {
         if (USB_NO_TRIGGER_BUTTON == effectBlock.effectData.triggerButton) return false;
-        if (effectBlock.effectData.triggerButton == 0) return false;
+        if (effectBlock.effectData.triggerButton == 0 || effectBlock.effectData.triggerButton > 8) return false;
         const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
         const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
 
@@ -473,9 +492,10 @@ namespace SunFFB
             }
             else
             {
+                if ((int32_t)(effectBlock.startTime - currentTime) > 0) return false;
                 const uint32_t elapsedTime = currentTime - effectBlock.startTime;
 
-                if(elapsedTime < effectBlock.effectData.duration)
+                if(effectBlock.effectData.duration == USB_DURATION_INFINITE || elapsedTime < effectBlock.effectData.duration)
                     return true;
 
                 if(USB_DURATION_INFINITE == effectBlock.effectData.triggerRepeatInterval)
@@ -485,7 +505,7 @@ namespace SunFFB
                     return false;
 
                 effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
-                return true;
+                return effectBlock.effectData.startDelay == 0;
             }
         }
 

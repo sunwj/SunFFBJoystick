@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, QObject
 
-from packet import SerialLink, MSG_FORCE, MSG_POSITION, unpack_force, unpack_position
+from packet import SerialLink, MSG_FORCE, MSG_POSITION, MSG_HEARTBEAT, unpack_force, unpack_position
 
 # ========== Signal Bridge ==========
 class SerialSignalBridge(QObject):

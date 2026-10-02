@@ -95,8 +95,6 @@ namespace SunFFB
         const int16_t cpOffset = conditionData.cpOffset;
         const int16_t postiveCoeff = conditionData.positiveCoefficient;
         const int16_t negativeCoeff = conditionData.negativeCoefficient;
-        const int16_t postiveSaturation = conditionData.positiveSaturation;
-        const int16_t negativeSaturation = -conditionData.negativeSaturation;
         const uint16_t deadBand = conditionData.deadBand;
 
         float force = 0.f;
@@ -105,15 +103,17 @@ namespace SunFFB
         if(metric < (cpOffset - deadBand) * invRange)
         {
             force = (metric - (cpOffset - deadBand) * invRange) * negativeCoeff;
-            force = force < negativeSaturation ? negativeSaturation : force;
+
         }
         else if(metric > (cpOffset + deadBand) * invRange)
         {
             force = (metric - (cpOffset + deadBand) * invRange) * postiveCoeff;
-            force = force > postiveSaturation ? postiveSaturation : force;
+
         }
 
-        return -force;
+        // Preserve the restoring-force saturation mapping and also bound
+        // reversed force when either coefficient is negative.
+        return clamp(-force, float(-conditionData.positiveSaturation), float(conditionData.negativeSaturation));
     }
 
     void FFBForceCalculator::condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const float maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const
@@ -271,7 +271,7 @@ namespace SunFFB
                     {
                         if(effectBlock.envelopParameter)
                         {
-                            const SetEnvelopeReportData& envelopeData = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_2].envelopeData;
+                            const SetEnvelopeReportData& envelopeData = effectBlock.envelopeData;
                             float baseMag = get_base_magnitude(effectBlock, effectType);
                             if(baseMag < 1.f) baseMag = USB_MAX_MAGNITUDE;
                             const float envelope = get_envelope(envelopeData, elapsedTime, duration, baseMag);
@@ -327,11 +327,11 @@ namespace SunFFB
         switch (effectType)
         {
             case ET_CONSTANT:
-                return fabsf(effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData.magnitude);
+                return fabsf(float(effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData.magnitude));
             case ET_RAMP:
             {
                 const SetRampForceReportData& ramp = effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].rampData;
-                return fmaxf(fabsf(ramp.rampStart), fabsf(ramp.rampEnd));
+                return fmaxf(fabsf(float(ramp.rampStart)), fabsf(float(ramp.rampEnd)));
             }
             default:
                 return effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData.magnitude;
@@ -351,9 +351,9 @@ namespace SunFFB
             return (attackLevel + (baseMagnitude - attackLevel) * t) / baseMagnitude;
         }
 
-        if(USB_DURATION_INFINITE != duration && fadeTime > 0 && elapsedTime > (duration - fadeTime))
+        if(USB_DURATION_INFINITE != duration && fadeTime > 0 && elapsedTime > (duration > fadeTime ? duration - fadeTime : 0))
         {
-            const float t = (float)(elapsedTime - (duration - fadeTime)) / fadeTime;
+            const float t = (float)(elapsedTime - (duration > fadeTime ? duration - fadeTime : 0)) / fadeTime;
             return (baseMagnitude + (fadeLevel - baseMagnitude) * t) / baseMagnitude;
         }
 

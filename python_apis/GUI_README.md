@@ -55,3 +55,11 @@ The GUI is a Python module (`sunffb_gui`), so it must be launched as `python -m 
 - If no device is connected, the GUI still opens and is usable, but sending is disabled (`is_connected` is `False`). Connect a device to enable sending.
 - The polling period is 20 ms.
 - The on-screen force vector is a predictive model — it mirrors FFBTestTool's `ForceModel` and computes what the device should output. The device is an HID PID force-feedback device and does not report force back, so the display is a model of the firmware behavior, not a measurement.
+
+- Loop count 255 repeats indefinitely; finite loops restart the preview at each
+  effect-duration boundary.
+- Triangle phase matches firmware: phase zero starts at zero and rises to the
+  positive peak at one quarter cycle.
+- Infinite effect duration ignores fade. A fade longer than a finite effect
+  starts at time zero, preserving the requested fade slope. Attack takes
+  precedence while attack and fade overlap.

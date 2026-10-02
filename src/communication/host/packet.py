@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import struct
 import threading
+from collections import deque
 from typing import Optional, Tuple
 
 # CRC-8/MAXIM-DOW (poly 0x31, reflected poly 0x8C, init/xorout 0x00).
@@ -65,24 +66,24 @@ def decode_frame(raw: bytes) -> Optional[Tuple[int, bytes]]:
 
 def pack_force(forces: list) -> bytes:
     """Pack int32 force values."""
-    return struct.pack(f'{len(forces)}i', *forces)
+    return struct.pack(f'<{len(forces)}i', *forces)
 
 
 def unpack_force(data: bytes) -> list:
     """Unpack int32 force values."""
     n = len(data) // 4
-    return list(struct.unpack(f'{n}i', data[:n * 4]))
+    return list(struct.unpack(f'<{n}i', data[:n * 4]))
 
 
 def pack_position(positions: list) -> bytes:
     """Pack uint16 position values."""
-    return struct.pack(f'{len(positions)}H', *positions)
+    return struct.pack(f'<{len(positions)}H', *positions)
 
 
 def unpack_position(data: bytes) -> list:
     """Unpack uint16 position values."""
     n = len(data) // 2
-    return list(struct.unpack(f'{n}H', data[:n * 2]))
+    return list(struct.unpack(f'<{n}H', data[:n * 2]))
 
 
 class SerialLink:
@@ -99,6 +100,7 @@ class SerialLink:
         self._crc_errors = 0
         self._len_errors = 0
         self._frames_rx = 0
+        self._pending = deque()
 
     def send(self, msg_id: int, payload: bytes) -> int:
         frame = build_frame(msg_id, payload)
@@ -119,6 +121,8 @@ class SerialLink:
     def receive(self) -> Optional[Tuple[int, bytes]]:
         """Try to receive one frame. Returns (msg_id, payload) or None."""
         with self._lock:
+            if self._pending:
+                return self._pending.popleft()
             available = self._serial.in_waiting
             if available == 0:
                 return None
@@ -126,7 +130,6 @@ class SerialLink:
             return self._process(raw)
 
     def _process(self, data: bytes) -> Optional[Tuple[int, bytes]]:
-        last_result = None
         for b in data:
             if self._state == "IDLE":
                 if b == SYNC:
@@ -151,12 +154,12 @@ class SerialLink:
             elif self._state == "CHECK_CRC":
                 expected = calc_crc8(bytes([self._msg_id, self._payload_len]) + self._buf)
                 if b == expected:
-                    last_result = (self._msg_id, bytes(self._buf))
+                    self._pending.append((self._msg_id, bytes(self._buf)))
                     self._frames_rx += 1
                 else:
                     self._crc_errors += 1
                 self._state = "IDLE"
-        return last_result
+        return self._pending.popleft() if self._pending else None
 
     @property
     def stats(self):

@@ -72,11 +72,11 @@ namespace SunFFB
         explicit FFBSerialLink(Hal& hal)
             : mHal(hal), mState(SerialState_IDLE) {}
 
-        void sendForce(const int32_t* forces)
+        bool sendForce(const int32_t* forces)
         {
             ForcePayload p;
             memcpy(p.force, forces, sizeof(p.force));
-            sendRaw(SERIAL_MSG_FORCE, reinterpret_cast<const uint8_t*>(&p), sizeof(p));
+            return sendRaw(SERIAL_MSG_FORCE, reinterpret_cast<const uint8_t*>(&p), sizeof(p));
         }
 
         void sendPosition(const uint16_t* positions)
@@ -92,9 +92,12 @@ namespace SunFFB
             // message ID would make an idle/partial receive look like a new frame.
             mLastMsgId = 0;
             mLastPayloadLen = 0;
-            while (mHal.available() > 0) {
+            // Bound work even if the UART continuously receives corrupt bytes.
+            uint16_t budget = SERIAL_MAX_PAYLOAD + 4;
+            while (budget-- > 0 && mHal.available() > 0) {
                 uint8_t b = mHal.read();
                 processByte(b, payload);
+                if (mLastMsgId != 0) return mLastMsgId;
             }
             return mLastMsgId;
         }
@@ -121,9 +124,9 @@ namespace SunFFB
         static constexpr uint8_t SerialState_RECEIVING = 3;
         static constexpr uint8_t SerialState_CHECK_CRC = 4;
 
-        void sendRaw(uint8_t msgId, const uint8_t* payload, uint8_t len)
+        bool sendRaw(uint8_t msgId, const uint8_t* payload, uint8_t len)
         {
-            if (len > SERIAL_MAX_PAYLOAD) return;
+            if (len > SERIAL_MAX_PAYLOAD) return false;
 
             uint8_t frame[SERIAL_MAX_PAYLOAD + 4];
             frame[0] = SERIAL_SYNC;
@@ -131,7 +134,7 @@ namespace SunFFB
             frame[2] = len;
             memcpy(&frame[3], payload, len);
             frame[3 + len] = calc_frame_crc8(msgId, payload, len);
-            mHal.write(frame, 4 + len);
+            return mHal.write(frame, 4 + len) == size_t(4 + len);
         }
 
         void processByte(uint8_t b, uint8_t* payload)
