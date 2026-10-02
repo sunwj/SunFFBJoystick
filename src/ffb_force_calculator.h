@@ -27,7 +27,7 @@ namespace SunFFB
         // Condition force: per-axis spring/damper/inertia/friction computation.
         void condition_force_calculator(const EffectBlock& effectBlock, const float metrics[NUM_AXIS], const float maxMetrics[NUM_AXIS], float forces[NUM_AXIS]) const;
 
-        // Envelope multiplier: attack/fade curve relative to baseMagnitude.
+        // Absolute envelope amplitude: attack/fade levels remain meaningful at zero sustain.
         float get_envelope(const SetEnvelopeReportData& envelopeData, uint32_t elapsedTime, uint16_t duration, float baseMagnitude) const;
         // Extract the base force magnitude from type-specific data (for envelope scaling).
         float get_base_magnitude(const EffectBlock& effectBlock, uint8_t effectType) const;

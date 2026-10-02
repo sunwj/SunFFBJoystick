@@ -78,12 +78,13 @@ namespace SunFFB
     {
         EffectBlock* effectBlock = get_effect_block(idx);
         if(nullptr == effectBlock) return;
+        effectBlock->sampleValid = false;
 
         if (effectBlock->state != EFFECT_STATE_FREE)
         {
+            stop_effect(effectBlock);
             effectBlock->state = EFFECT_STATE_FREE;
             blockLoadData.ramPoolAvailable += sizeof(EffectBlock);
-            update_pid_effect_index();
         }
         nextEffectIdx = idx - 1;
         pidStateDirty = true;
@@ -92,6 +93,7 @@ namespace SunFFB
     void FFBReportHandler::free_all_effects()
     {
         nextEffectIdx = 0;
+        stop_all_effects();
         memset((void*)&effectBlocks, 0, sizeof(effectBlocks));
         blockLoadData.ramPoolAvailable = sizeof(effectBlocks);
         pidStates.effectBlockIndex = 0;
@@ -120,8 +122,11 @@ namespace SunFFB
 
         effectBlock->state |= EFFECT_STATE_PLAYING;
         effectBlock->startTime = (devicePaused ? pauseTime : _millis()) + effectBlock->effectData.startDelay;
-        update_pid_effect_index();
-        pidStateDirty = true;
+        effectBlock->sampleValid = false;
+        effectBlock->loopCount = effectBlock->remainingLoops;
+        effectBlock->triggerRunning = false;
+        effectBlock->triggerRepeatPending = false;
+        publish_effect_state(*effectBlock, effectBlock->effectData.triggerButton == USB_NO_TRIGGER_BUTTON && effectBlock->effectData.startDelay == 0);
         if(effectBlock->effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
         {
             effectBlock->startTime = 0;
@@ -129,19 +134,20 @@ namespace SunFFB
         }
     }
 
-    void FFBReportHandler::stop_effect(EffectBlock* effectBlock)
+    void FFBReportHandler::stop_effect(EffectBlock* block)
     {
-        effectBlock->state &= ~EFFECT_STATE_PLAYING;
-        update_pid_effect_index();
-        pidStateDirty = true;
+        block->state &= ~EFFECT_STATE_PLAYING;
+        block->triggerRunning = false;
+        block->triggerRepeatPending = false;
+        block->sampleValid = false;
+        publish_effect_state(*block, false);
     }
 
     void FFBReportHandler::stop_all_effects()
     {
-        for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
-            effectBlocks[i].state &= ~EFFECT_STATE_PLAYING;
-        pidStates.effectBlockIndex = 0;
-        pidStateDirty = true;
+        for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
+            if (effectBlocks[i].state != EFFECT_STATE_FREE)
+                stop_effect((EffectBlock*)&effectBlocks[i]);
     }
 
     const PoolReportData* FFBReportHandler::get_pool_report_data()
@@ -157,71 +163,44 @@ namespace SunFFB
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
+        effectBlock->sampleValid = false;
 
         SetEffectReportData* effectData = &effectBlock->effectData;
         memcpy((void*)effectData, data, sizeof(SetEffectReportData));
 
         effectBlock->originalDuration = effectData->duration;
 
-        const uint8_t enableAxis = data->axisEnable;
-        if(enableAxis & DIRECTION_ENABLE)
-        {
-            #if NUM_AXIS == 1
-            effectBlock->directionUnitVector[0] = 1.f;
-            #endif
+        // The descriptor declares angular coordinates; Direction Enable selects condition mode.
+        #if NUM_AXIS == 1
+        effectBlock->directionUnitVector[0] = 1.f;
+        #endif
 
-            #if NUM_AXIS == 2
-            const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
-            #ifndef USE_FAST_MATH
-            effectBlock->directionUnitVector[0] = -sinf(theta);
-            effectBlock->directionUnitVector[1] = cosf(theta);
-            #else
-            effectBlock->directionUnitVector[0] = -_sinf(theta);
-            effectBlock->directionUnitVector[1] = _cosf(theta);
-            #endif
-            #endif
+        #if NUM_AXIS == 2
+        const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
+        #ifndef USE_FAST_MATH
+        effectBlock->directionUnitVector[0] = -sinf(theta);
+        effectBlock->directionUnitVector[1] = cosf(theta);
+        #else
+        effectBlock->directionUnitVector[0] = -_sinf(theta);
+        effectBlock->directionUnitVector[1] = _cosf(theta);
+        #endif
+        #endif
 
-            #if NUM_AXIS == 3
-            const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
-            const float phi = data->directions[1] * USB_NORMALIZATION_RAD;
-            #ifndef USE_FAST_MATH
-            const float cosPhi = cosf(phi);
-            effectBlock->directionUnitVector[0] = -cosPhi * cosf(theta);
-            effectBlock->directionUnitVector[1] = -cosPhi * sinf(theta);
-            effectBlock->directionUnitVector[2] = -sinf(phi);
-            #else
-            const float cosPhi = _cosf(phi);
-            effectBlock->directionUnitVector[0] = -cosPhi * _cosf(theta);
-            effectBlock->directionUnitVector[1] = -cosPhi * _sinf(theta);
-            effectBlock->directionUnitVector[2] = -_sinf(phi);
-            #endif
-            #endif
-        }
-        else
-        {
-            #if NUM_AXIS == 1
-            effectBlock->directionUnitVector[0] = 1.f;
-            #endif
-
-            #if NUM_AXIS == 2
-            const float x = float((int16_t)data->directions[0]);
-            const float y = float((int16_t)data->directions[1]);
-            float invLen = 1.f / sqrtf(x * x + y * y + 1e-6f);
-            effectBlock->directionUnitVector[0] = -x * invLen;
-            effectBlock->directionUnitVector[1] = -y * invLen;
-            #endif
-
-            #if NUM_AXIS == 3
-            const float x = float((int16_t)data->directions[0]);
-            const float y = float((int16_t)data->directions[1]);
-            const float z = float((int16_t)data->directions[2]);
-            float invLen = 1.f / sqrtf(x * x + y * y + z * z + 1e-6f);
-            effectBlock->directionUnitVector[0] = -x * invLen;
-            effectBlock->directionUnitVector[1] = -y * invLen;
-            effectBlock->directionUnitVector[2] = -z * invLen;
-            #endif
-        }
-
+        #if NUM_AXIS == 3
+        const float theta = data->directions[0] * USB_NORMALIZATION_RAD;
+        const float phi = data->directions[1] * USB_NORMALIZATION_RAD;
+        #ifndef USE_FAST_MATH
+        const float cosPhi = cosf(phi);
+        effectBlock->directionUnitVector[0] = -cosPhi * cosf(theta);
+        effectBlock->directionUnitVector[1] = -cosPhi * sinf(theta);
+        effectBlock->directionUnitVector[2] = -sinf(phi);
+        #else
+        const float cosPhi = _cosf(phi);
+        effectBlock->directionUnitVector[0] = -cosPhi * _cosf(theta);
+        effectBlock->directionUnitVector[1] = -cosPhi * _sinf(theta);
+        effectBlock->directionUnitVector[2] = -_sinf(phi);
+        #endif
+        #endif
         #ifdef SERIAL_PRINT
         #if NUM_AXIS == 1
         _debug_printf("Set effect: idx=%d type=%d duration=%d repeat=%d samplePeriod=%d gain=%d trigBtn=%d axisEnable=0x%02x dir0=%d startDelay=%d\n", effectData->effectBlockIndex, effectData->effectType, effectData->duration, \
@@ -240,6 +219,7 @@ namespace SunFFB
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
+        effectBlock->sampleValid = false;
 
         // Envelopes do not apply to condition effects. Their parameter slots
         // remain independent from envelope storage.
@@ -264,6 +244,7 @@ namespace SunFFB
 
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
+        effectBlock->sampleValid = false;
 
         SetConditionReportData* conditionData = &(effectBlock->typeSpecificData[parameterBlockOffset].conditionData);
         memcpy((void*)conditionData, data, sizeof(SetConditionReportData));
@@ -280,6 +261,7 @@ namespace SunFFB
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
+        effectBlock->sampleValid = false;
 
         SetPeriodicReportData* periodicData = &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData);
         memcpy((void*)periodicData, data, sizeof(SetPeriodicReportData));
@@ -293,6 +275,7 @@ namespace SunFFB
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
+        effectBlock->sampleValid = false;
 
         SetConstantForceReportData* constantData = &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData);
         memcpy(constantData, data, sizeof(SetConstantForceReportData));
@@ -306,6 +289,7 @@ namespace SunFFB
     {
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if(nullptr == effectBlock) return;
+        effectBlock->sampleValid = false;
 
         SetRampForceReportData* rampData = &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].rampData);
         memcpy(rampData, data, sizeof(SetRampForceReportData));
@@ -387,6 +371,7 @@ namespace SunFFB
                     if(effectBlocks[i].state & EFFECT_STATE_PLAYING)
                     {
                         effectBlocks[i].startTime += pauseLength;
+                        effectBlocks[i].triggerRepeatAt += pauseLength;
                     }
                 }
             }
@@ -452,113 +437,105 @@ namespace SunFFB
         #endif
     }
 
-    void FFBReportHandler::update_pid_effect_index()
+    void FFBReportHandler::publish_effect_state(EffectBlock& block, bool playing)
     {
-        uint8_t idx = 0;
-        for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
-        {
-            if(effectBlocks[i].state & EFFECT_STATE_PLAYING)
-            {
-                idx = i + 1;
-                break;
-            }
-        }
-        if(idx)
-            pidStates.effectBlockIndex = (idx << 1) | 0x01;
-        else
-            pidStates.effectBlockIndex = 0;
+        const uint8_t i = &block - (EffectBlock*)effectBlocks;
+        block.actualPlaying = playing;
+        pendingEffects[i] = true;
+        pendingEffectStates[i] = ((i + 1) << 1) | (playing ? 1 : 0);
+        ++effectRevisions[i];
+        pidStates.effectBlockIndex = pendingEffectStates[i];
+        pidStateDirty = true;
     }
 
-    bool FFBReportHandler::is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
+    bool FFBReportHandler::peek_pid_state_report(PIDStateReportData& report, uint32_t& revision) const
     {
-        if (USB_NO_TRIGGER_BUTTON == effectBlock.effectData.triggerButton) return false;
-        if (effectBlock.effectData.triggerButton == 0 || effectBlock.effectData.triggerButton > 8) return false;
-        const uint8_t buttonIdx = effectBlock.effectData.triggerButton - 1;
-        const bool buttonPressed = ((triggerButtonState >> buttonIdx) & 0x01);
-
-        if(!buttonPressed)
-        {
-            effectBlock.triggerButtonLatch = false;
-            return false;
-        }
-        else
-        {
-            if(!effectBlock.triggerButtonLatch)
-            {
-                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
-                effectBlock.triggerButtonLatch = true;
-                if ((int32_t)(effectBlock.startTime - currentTime) > 0) return false;
+        for (uint8_t n = 0; n < MAX_EFFECTS; ++n) {
+            const uint8_t i = (reportCursor + n) % MAX_EFFECTS;
+            if (pendingEffects[i]) {
+                report = {pidStates.status, pendingEffectStates[i]};
+                revision = effectRevisions[i];
                 return true;
             }
-            else
-            {
-                if ((int32_t)(effectBlock.startTime - currentTime) > 0) return false;
-                const uint32_t elapsedTime = currentTime - effectBlock.startTime;
+        }
+        report = *get_pid_state_report_data();
+        revision = 0;
+        return pidStateDirty;
+    }
 
-                if(effectBlock.effectData.duration == USB_DURATION_INFINITE || elapsedTime < effectBlock.effectData.duration)
-                    return true;
+    void FFBReportHandler::acknowledge_pid_state_report(const PIDStateReportData& report, uint32_t revision)
+    {
+        const uint8_t id = report.effectBlockIndex >> 1;
+        if (revision && id && id <= MAX_EFFECTS && effectRevisions[id - 1] == revision) {
+            pendingEffects[id - 1] = false;
+            reportCursor = id % MAX_EFFECTS;
+        }
+        pidStateDirty = report.status != pidStates.status;
+        for (bool pending : pendingEffects) pidStateDirty = pidStateDirty || pending;
+    }
 
-                if(USB_DURATION_INFINITE == effectBlock.effectData.triggerRepeatInterval)
-                    return false;
-
-                if(elapsedTime < (effectBlock.effectData.duration + effectBlock.effectData.triggerRepeatInterval))
-                    return false;
-
-                effectBlock.startTime = currentTime + effectBlock.effectData.startDelay;
-                return effectBlock.effectData.startDelay == 0;
+    bool FFBReportHandler::advance_playback(EffectBlock& b, uint32_t now)
+    {
+        if ((int32_t)(b.startTime - now) > 0) return false;
+        const uint32_t elapsed = now - b.startTime;
+        const uint16_t duration = b.effectData.duration;
+        if (duration != USB_DURATION_INFINITE && elapsed >= duration) {
+            const uint32_t completed = duration ? elapsed / duration : 0;
+            if (duration && (b.remainingLoops == 0xFF || completed < b.remainingLoops)) {
+                if (b.remainingLoops != 0xFF) b.remainingLoops -= completed;
+                b.startTime += completed * duration;
+                b.sampleValid = false;
+            } else {
+                b.triggerRepeatAt = b.startTime + uint32_t(duration) * b.remainingLoops + b.effectData.triggerRepeatInterval;
+                b.remainingLoops = 0;
+                if (b.actualPlaying) publish_effect_state(b, false);
+                return false;
             }
         }
-
+        if (!b.actualPlaying) publish_effect_state(b, true);
         return true;
     }
 
-    bool FFBReportHandler::is_effect_playing(uint8_t effectBlockIndex, uint8_t triggerButtonState, uint32_t currentTime)
+    bool FFBReportHandler::is_trigger_playing(EffectBlock& b, uint8_t buttons, uint32_t now)
     {
-        EffectBlock* effectBlock = get_effect_block(effectBlockIndex);
-        if(nullptr == effectBlock) return false;
-        return is_effect_playing(*effectBlock, triggerButtonState, currentTime);
+        const uint8_t button = b.effectData.triggerButton;
+        if (!button || button > 8) return false;
+        const bool pressed = (buttons >> (button - 1)) & 1;
+        const bool rising = pressed && !b.triggerButtonLatch;
+        b.triggerButtonLatch = pressed;
+        if (b.triggerRunning) {
+            if (advance_playback(b, now)) return true;
+            if ((int32_t)(b.startTime - now) > 0) return false;
+            b.triggerRunning = false;
+            b.triggerRepeatPending = b.effectData.triggerRepeatInterval != USB_DURATION_INFINITE;
+        }
+        const bool repeat = pressed && b.triggerRepeatPending && (int32_t)(now - b.triggerRepeatAt) >= 0;
+        if (rising || repeat) {
+            b.startTime = now + b.effectData.startDelay;
+            b.remainingLoops = b.loopCount;
+            b.triggerRunning = true;
+            b.triggerRepeatPending = false;
+            b.sampleValid = false;
+            return advance_playback(b, now);
+        }
+        if (!pressed) b.triggerRepeatPending = false;
+        return false;
     }
 
-    bool FFBReportHandler::is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime)
+    bool FFBReportHandler::is_effect_playing(uint8_t id, uint8_t buttons, uint32_t now)
     {
-        EffectBlock& eb = effectBlock;
+        EffectBlock* b = get_effect_block(id);
+        return b && is_effect_playing(*b, buttons, now);
+    }
 
-        if(!(eb.state & EFFECT_STATE_PLAYING))
-            return false;
-
-        if(USB_NO_TRIGGER_BUTTON != eb.effectData.triggerButton)
-            return is_trigger_playing(eb, triggerButtonState, currentTime);
-
-        if ((int32_t)(eb.startTime - currentTime) > 0)
-            return false;
-
-        const uint32_t elapsedTime = currentTime - eb.startTime;
-        const uint16_t duration = eb.effectData.duration;
-        if((USB_DURATION_INFINITE != duration) && (elapsedTime >= duration))
-        {
-            if(duration > 0)
-            {
-                const uint32_t completedLoops = elapsedTime / duration;
-                if(eb.remainingLoops == 0xFF)
-                {
-                    eb.startTime += completedLoops * duration;
-                    return true;
-                }
-                if(completedLoops < eb.remainingLoops)
-                {
-                    eb.remainingLoops -= completedLoops;
-                    eb.startTime += completedLoops * duration;
-                    return true;
-                }
-            }
-
-            eb.remainingLoops = 0;
-            eb.state &= ~EFFECT_STATE_PLAYING;
-            update_pid_effect_index();
-            pidStateDirty = true;
-            return false;
-        }
-
-        return true;
+    bool FFBReportHandler::is_effect_playing(EffectBlock& b, uint8_t buttons, uint32_t now)
+    {
+        if (!(b.state & EFFECT_STATE_PLAYING)) return false;
+        if (devicePaused) return b.actualPlaying;
+        if (b.effectData.triggerButton != USB_NO_TRIGGER_BUTTON)
+            return is_trigger_playing(b, buttons, now);
+        const bool playing = advance_playback(b, now);
+        if (!playing && !(int32_t(b.startTime - now) > 0)) b.state &= ~EFFECT_STATE_PLAYING;
+        return playing;
     }
 } // namespace SunFFB

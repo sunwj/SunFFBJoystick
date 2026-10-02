@@ -198,6 +198,18 @@ class ConditionTests(unittest.TestCase):
         fx2, _ = m.evaluate_effect(p, Kinematics(roll=0.0, pitch=0.0, vel_roll=0.01))
         self.assertAlmostEqual(fx2, 0.0, places=3)
 
+    def test_negative_coefficient_saturation_uses_metric_side(self):
+        p = EffectParams(effect_type=SPRING, pos_coeff_x=-10000, neg_coeff_x=-10000,
+                         pos_sat_x=2000, neg_sat_x=3000, apply_y=False)
+        model = ForceModel(main=p)
+        self.assertEqual(model.evaluate_effect(p, Kinematics(roll=1))[0], 2000)
+        self.assertEqual(model.evaluate_effect(p, Kinematics(roll=-1))[0], -3000)
+
+    def test_zero_sustain_periodic_attack_amplitude(self):
+        p = EffectParams(effect_type=SINE, magnitude=0, phase=9000, direction_deg=90,
+                         attack_level=4000, attack_time_ms=100)
+        self.assertAlmostEqual(ForceModel(main=p).evaluate_effect(p, Kinematics())[0], -4000)
+
     def test_saturation_clamp(self):
         p = EffectParams(effect_type=SPRING, pos_coeff_x=6000, neg_coeff_x=6000,
                          pos_sat_x=2000, neg_sat_x=2000, dead_band_x=0, center_x=0,

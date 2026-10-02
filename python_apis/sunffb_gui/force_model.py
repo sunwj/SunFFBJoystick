@@ -80,19 +80,18 @@ class ForceModel:
         gain = params.gain / 255.0
         if params.effect_type == CONSTANT:
             ux, uy = u_from_angle(params.direction_deg)
-            env = self.envelope_factor(params, elapsed_ms, abs(params.magnitude))
-            scale = params.magnitude * gain * env
+            amplitude = self.envelope_amplitude(params, elapsed_ms, abs(params.magnitude))
+            scale = (-amplitude if params.magnitude < 0 else amplitude) * gain
             return scale * ux, scale * uy
         ux, uy = u_from_angle(params.direction_deg)
         if params.effect_type == RAMP:
             frac = min(1.0, max(0.0, elapsed_ms / max(1.0, params.duration_ms)))
             base = max(abs(params.ramp_start), abs(params.ramp_end))
-            val = self.ramp_value(params, frac) * self.envelope_factor(params, elapsed_ms, base) * gain
+            val = (self.ramp_value(params, frac) * self.envelope_factor(params, elapsed_ms, base) if base else self.envelope_amplitude(params, elapsed_ms, 0)) * gain
             return val * ux, val * uy
         if params.effect_type in (SINE, SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN):
             frac = self.periodic_u(params, elapsed_ms)
-            env = self.envelope_factor(params, elapsed_ms, abs(params.magnitude))
-            val = (params.offset + params.magnitude * self.periodic_wave(params.effect_type, frac) * env) * gain
+            val = (params.offset + self.envelope_amplitude(params, elapsed_ms, abs(params.magnitude)) * self.periodic_wave(params.effect_type, frac)) * gain
             return val * ux, val * uy
         if params.effect_type in (SPRING, DAMPER, INERTIA, FRICTION):
             mx = self._condition_metric(params, 'x', kin)
@@ -136,26 +135,30 @@ class ForceModel:
         d = metric - center
         if d > dead:
             f = -pc * (d - dead)
-            return max(-ps, min(ns, f))
+            return max(-ps, min(ps, f))
         if d < -dead:
             f = -nc * (d + dead)
-            return max(-ps, min(ns, f))
+            return max(-ns, min(ns, f))
         return 0.0
+
+    @staticmethod
+    def envelope_amplitude(params: EffectParams, elapsed_ms: float,
+                           base_magnitude: float = MAX_FORCE) -> float:
+        t = max(0.0, elapsed_ms)
+        base = float(base_magnitude)
+        if params.attack_time_ms > 0 and t < params.attack_time_ms:
+            return params.attack_level + (base - params.attack_level) * t / params.attack_time_ms
+        fade_start = max(0.0, params.duration_ms - params.fade_time_ms)
+        if params.duration_ms != 0xFFFF and params.fade_time_ms > 0 and t > fade_start:
+            progress = min(1.0, (t - fade_start) / params.fade_time_ms)
+            return base + (params.fade_level - base) * progress
+        return base
 
     @staticmethod
     def envelope_factor(params: EffectParams, elapsed_ms: float,
                         base_magnitude: float = MAX_FORCE) -> float:
-        t = max(0.0, elapsed_ms)
         base = max(1.0, float(base_magnitude))
-        if params.attack_time_ms > 0 and t < params.attack_time_ms:
-            a0 = params.attack_level / base
-            return a0 + (1.0 - a0) * (t / params.attack_time_ms)
-        fade_start = max(0.0, params.duration_ms - params.fade_time_ms)
-        if params.duration_ms != 0xFFFF and params.fade_time_ms > 0 and t > fade_start:
-            tgt = params.fade_level / base
-            progress = min(1.0, (t - fade_start) / params.fade_time_ms)
-            return 1.0 + (tgt - 1.0) * progress
-        return 1.0
+        return ForceModel.envelope_amplitude(params, elapsed_ms, base) / base
 
     @staticmethod
     def ramp_value(params: EffectParams, frac: float) -> float:

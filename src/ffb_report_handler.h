@@ -26,6 +26,8 @@ namespace SunFFB
 
         // PID report accessors (read by send_report_task / hid_get_report_callback).
         const PIDStateReportData* get_pid_state_report_data() const {return (const PIDStateReportData*)&pidStates;};
+        bool peek_pid_state_report(PIDStateReportData& report, uint32_t& revision) const;
+        void acknowledge_pid_state_report(const PIDStateReportData& report, uint32_t revision);
         const BlockLoadReportData* get_block_load_report_data() const {return (const BlockLoadReportData*)&blockLoadData;};
         const PoolReportData* get_pool_report_data();
 
@@ -56,7 +58,7 @@ namespace SunFFB
         volatile bool devicePaused;                     // true when host has paused the device
         volatile DeviceState deviceState = DEVICE_STATE_INIT;    // current power state
         volatile uint8_t deviceGain = USB_MAX_DEVICE_GAIN;       // master gain (scales all forces)
-        volatile bool pidStateDirty = false;            // set by state changes, cleared by send_report_task
+        volatile bool pidStateDirty = false;            // per-effect pending reports; acknowledged after USB acceptance
 
         private:
         EffectBlock* get_effect_block(uint8_t idx) const;       // 1-based → 0-based lookup
@@ -65,14 +67,20 @@ namespace SunFFB
         void stop_effect(EffectBlock* effectBlock);             // clear PLAYING + update pidStates
         void stop_all_effects();                                // stop all + clear pidStates.effectBlockIndex
         bool is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState, uint32_t currentTime);
-        void update_pid_effect_index();                         // scan for first playing, set pidStates
+        void publish_effect_state(EffectBlock& block, bool playing);
+        bool advance_playback(EffectBlock& block, uint32_t now);                         // advance duration/loops, publish actual transitions
 
+        // Bounded storage keeps the newest state for every effect, even during USB backpressure.
+        bool pendingEffects[MAX_EFFECTS] = {};
+        uint8_t pendingEffectStates[MAX_EFFECTS] = {};
+        uint32_t effectRevisions[MAX_EFFECTS] = {};
+        uint8_t reportCursor = 0;
         uint8_t nextEffectIdx = 0;                              // round-robin allocator cursor
         bool actuatorsEnabled = false;
         bool actuatorsInitialized = false;
         void update_device_state();
         uint32_t pauseTime;                                     // timestamp when paused (for resume adjustment)
-        volatile EffectBlock effectBlocks[MAX_EFFECTS];         // effect block pool
+        volatile EffectBlock effectBlocks[MAX_EFFECTS] = {};         // effect block pool
         volatile PIDStateReportData pidStates = {0x1C, 0};      // PID state (status + playing effect index)
         BlockLoadReportData blockLoadData;                      // last creation result
         PoolReportData poolData;                                // cached pool capacity info

@@ -210,7 +210,6 @@
             HID_LOGICAL_MAX_N(36000, 3), \
             HID_PHYSICAL_MIN(0), \
             HID_PHYSICAL_MAX_N(36000, 3), \
-            HID_UNIT(0), \
             HID_REPORT_SIZE(16), \
             HID_REPORT_COUNT(NUM_AXIS), \
             HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), \
@@ -319,8 +318,8 @@
         \
         /* Center-Point Offset */ \
         HID_USAGE(HID_USAGE_PID_CENTER_POINT_OFFSET), \
-        HID_LOGICAL_MIN_N(-USB_AXIS_MAX_ABSOLUTE, 2), \
-        HID_LOGICAL_MAX_N(USB_AXIS_MAX_ABSOLUTE, 2), \
+        HID_LOGICAL_MIN_N(-USB_MAX_MAGNITUDE, 2), \
+        HID_LOGICAL_MAX_N(USB_MAX_MAGNITUDE, 2), \
         HID_PHYSICAL_MIN_N(-10000, 2), \
         HID_PHYSICAL_MAX_N(10000, 2), \
         HID_REPORT_SIZE(16), \
@@ -352,7 +351,7 @@
         /* Dead Band */ \
         HID_USAGE(HID_USAGE_PID_DEAD_BAND), \
         HID_LOGICAL_MIN(0), \
-        HID_LOGICAL_MAX_N(USB_AXIS_MAX_ABSOLUTE, 2), \
+        HID_LOGICAL_MAX_N(USB_MAX_MAGNITUDE, 2), \
         HID_PHYSICAL_MIN(0), \
         HID_PHYSICAL_MAX_N(10000, 2), \
         HID_REPORT_SIZE(16), \

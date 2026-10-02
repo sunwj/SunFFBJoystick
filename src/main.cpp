@@ -439,9 +439,11 @@ void send_report_task(void* params)
             } else if (xSemaphoreTake(semaphoreFFBReportHandler, 0) == pdTRUE) {
                 // State uses spare 1 ms endpoint slots; new position always has priority.
                 if (ffbHandler.pidStateDirty) {
-                    const auto data = *ffbHandler.get_pid_state_report_data();
-                    if (usb_hid.sendReport(REPORT_ID_PID_STATE, &data, sizeof(data)))
-                        ffbHandler.pidStateDirty = false;
+                    SunFFB::PIDStateReportData data;
+                    uint32_t revision;
+                    if (ffbHandler.peek_pid_state_report(data, revision) &&
+                        usb_hid.sendReport(REPORT_ID_PID_STATE, &data, sizeof(data)))
+                        ffbHandler.acknowledge_pid_state_report(data, revision);
                 }
                 xSemaphoreGive(semaphoreFFBReportHandler);
             }

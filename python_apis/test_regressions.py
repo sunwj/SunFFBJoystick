@@ -59,8 +59,8 @@ class RegressionTests(unittest.TestCase):
         p = EffectParams(effect_type=SPRING, pos_coeff_x=-10000,
                          neg_coeff_x=-10000, pos_sat_x=2000, neg_sat_x=3000)
         m = ForceModel(p)
-        self.assertEqual(m.evaluate_effect(p, Kinematics(roll=1))[0], 3000)
-        self.assertEqual(m.evaluate_effect(p, Kinematics(roll=-1))[0], -2000)
+        self.assertEqual(m.evaluate_effect(p, Kinematics(roll=1))[0], 2000)
+        self.assertEqual(m.evaluate_effect(p, Kinematics(roll=-1))[0], -3000)
 
     def test_long_fade_and_infinite_duration(self):
         p = EffectParams(duration_ms=100, fade_time_ms=200, fade_level=0)

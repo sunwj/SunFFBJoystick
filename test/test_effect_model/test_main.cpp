@@ -406,6 +406,8 @@ static void test_button_trigger_lifecycle() {
     TEST_ASSERT_INT_WITHIN(1, 3000, force[1]);
     f.input.update_buttons(0);
     f.calculate(force);
+    TEST_ASSERT_EQUAL_INT32(3000, force[1]);
+    f.at(100); f.calculate(force);
     TEST_ASSERT_EQUAL_INT32(0, force[1]);
 }
 int main(int, char**) {

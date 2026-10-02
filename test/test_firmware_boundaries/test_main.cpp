@@ -165,9 +165,9 @@ void test_negative_coefficients_respect_asymmetric_saturation() {
     SetConditionReportData condition{id,0,0,-10000,-10000,2000,3000,0};
     f.handler.set_condition(&condition); f.start(id);
     int16_t axes[NUM_AXIS]{}; axes[0]=32767; nowUs=10000; f.input.update_axis(axes);
-    TEST_ASSERT_EQUAL_INT32(3000, f.force());
+    TEST_ASSERT_EQUAL_INT32(2000, f.force());
     axes[0]=-32767; nowUs=20000; f.input.update_axis(axes);
-    TEST_ASSERT_EQUAL_INT32(-2000, f.force());
+    TEST_ASSERT_EQUAL_INT32(-3000, f.force());
 }
 
 struct MockSerial {

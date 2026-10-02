@@ -13,12 +13,12 @@ _APP = QApplication.instance() or QApplication([])
 
 
 class BuildTests(unittest.TestCase):
-    def test_set_effect_cartesian(self):
+    def test_set_effect_polar(self):
         p = EffectParams(effect_type=CONSTANT, magnitude=5000, direction_deg=90.0,
                          duration_ms=1000, gain=255)
         r = build_set_effect(p, 3)
         self.assertEqual(r.effectBlockIndex, 3)
-        # direction_enabled=True -> polar (9000, 0)
+        # The descriptor always declares angular directions: polar (9000, 0).
         self.assertEqual(r.directions[0], 9000)
         self.assertEqual(r.directions[1], 0)
         self.assertEqual(r.gain, 255)

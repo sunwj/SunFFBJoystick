@@ -153,6 +153,14 @@ namespace SunFFB
         bool triggerButtonLatch;                        // edge-detect state for trigger-button start
         uint8_t conditionBlockFlags = 0x00;             // bitmask: which typeSpecificData slots hold condition data
         uint16_t originalDuration = 0;                  // duration of one playback iteration
+        bool actualPlaying = false;
+        bool triggerRunning = false;
+        bool triggerRepeatPending = false;
+        uint32_t triggerRepeatAt = 0;
+        uint8_t loopCount = 1;
+        bool sampleValid = false;
+        uint32_t sampleTick = 0;
+        float sampledForces[NUM_AXIS] = {0};
         uint8_t remainingLoops = 1;                     // iterations left; 0xFF repeats until explicitly stopped
     
         SetEffectReportData effectData;                                 // common effect parameters
@@ -165,8 +173,8 @@ namespace SunFFB
         "JoystickInputReportData size mismatch with HID descriptor");
     static_assert(sizeof(PIDStateReportData) == 2,
         "PIDStateReportData size mismatch");
-    static_assert(MAX_EFFECTS <= 255,
-        "MAX_EFFECTS exceeds uint8_t effectBlockIndex range");
+    static_assert(MAX_EFFECTS <= 127,
+        "MAX_EFFECTS exceeds the 7-bit PID state effect index");
     static_assert(NUM_AXIS >= 1 && NUM_AXIS <= 3,
         "NUM_AXIS must be 1, 2, or 3");
     static_assert(sizeof(SetConstantForceReportData) == 3,
@@ -181,7 +189,7 @@ namespace SunFFB
         "PoolReportData size mismatch");
 
     // Derived motion metrics for one frame update (not packed — internal use only)
-    struct __attribute__((packed)) Metrics
+    struct Metrics
     {
         float position[NUM_AXIS];                       // low-pass filtered position
         float speed[NUM_AXIS];                          // low-pass filtered speed (from position derivative)
@@ -195,6 +203,7 @@ namespace SunFFB
         float maxSpeed[NUM_AXIS] = {(float)USB_AXIS_MAX_ABSOLUTE};        // normalization ceiling for speed
         float maxAcceleration[NUM_AXIS] = {(float)USB_AXIS_MAX_ABSOLUTE}; // normalization ceiling for accel
     };
+    static_assert(alignof(Metrics) >= alignof(float), "Motion metrics must be naturally aligned");
 } // namespace SunFFB
 
 #endif
