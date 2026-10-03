@@ -28,7 +28,7 @@ the board returned to COM7 automatically. No physical reset was required.
 ## Completed functional run
 
 ```powershell
-python python_apis/validate_hardware.py --port COM8 --motors-disconnected --position-hz 50 --soak 30
+python tests/python/validate_hardware.py --port COM8 --motors-disconnected --position-hz 50 --soak 30
 ```
 
 Result: **34 of 34 checks passed**. This is a functional run with 50 Hz requested
@@ -270,7 +270,7 @@ ROM COM5 and manually reset. Firmware binary SHA256:
 `96200377d996f69f9c356b9d4db11348f19e5b5f0ad5c323b9342f403817e117`.
 LCD remains enabled, CDC disabled, serial RX48/TX45, motors disconnected.
 
-`python_apis/validate_directinput.py` imports the actual library at
+`tests/python/validate_directinput.py` imports the actual library at
 `E:/github_projects/py_directinput_ffb/directinput_ffb` and selects exactly one
 VID/PID FFFF:2010 DirectInput device, rather than opening the first controller.
 Effect creation, download/start/stop/unload, device gain, envelope and live
@@ -282,7 +282,7 @@ Its existing test suite passed 43/43.
 Run from the external project root:
 
 ```powershell
-python -B E:/github_projects/SunFFBJoystick/python_apis/validate_directinput.py --motors-disconnected --port COM8 --stress 180 --report-json E:/github_projects/SunFFBJoystick/doc/hil-directinput-500hz-final-results.json
+python -B E:/github_projects/SunFFBJoystick/tests/python/validate_directinput.py --motors-disconnected --port COM8 --stress 180 --report-json E:/github_projects/SunFFBJoystick/doc/hil-directinput-500hz-final-results.json
 ```
 
 The final capture passed 31/32 checks. All eleven effect classes, four Cartesian
@@ -349,7 +349,7 @@ the tested firmware. Native tests passed 200/200 across 1/2/3 axes and S2/S3/HIL
 builds passed. This 30-minute result is not a worst-case execution-time proof,
 wire-level timing measurement, or a multi-day endurance qualification.
 
-Run `python python_apis/validate_hardware.py --port COM8 --motors-disconnected --position-hz 500 --soak 10 --endurance 1800 --report-json doc/hil-endurance-500hz-results.json` with `esp32-s3-hil`.
+Run `python tests/python/validate_hardware.py --port COM8 --motors-disconnected --position-hz 500 --soak 10 --endurance 1800 --report-json doc/hil-endurance-500hz-results.json` with `esp32-s3-hil`.
 The test rotates fifteen sine, dual-axis inertia, and mixed effects every minute,
 with envelopes, LCD enabled and serial position feedback. Host sample batches are
 bounded to one second. Motors must remain disconnected, including after failure:

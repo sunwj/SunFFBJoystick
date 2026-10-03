@@ -98,7 +98,7 @@ TWAI `begin(txPin, rxPin, bitrate, receiveId=0xFFFF, singleShot=false)`：默认
 
 一个 RX 所有者和一个 TX 所有者可并行，HAL 必须支持对应并发。多个同方向调用者需外部锁。初始化及驱动销毁应由应用在收发任务启动前后管理。帧缓冲容量固定，不产生额外后台任务；调度周期、重试、序列号、心跳、消息类型、字节序与业务单位由应用决定。
 
-当前项目的 `src/motor_protocol/serial_link.h`、`can_protocol.h` 和 `can_link.h` 是电机协议适配层，使用 `SunFFB::MotorSerialLink` / `MotorCANLink`。原 `FFBSerialLink` / `FFBCANLink` 名称保留为兼容别名。Python 编解码、串口 GUI 和 CAN CLI 位于库的 `host/` 目录。其中电机消息编解码为 SunFFB 协议示例，通用 C++ 核心无需依赖它们。详见 [主机工具说明](host/README.md)。
+当前项目的 `firmware/src/motor_protocol/serial_link.h`、`can_protocol.h` 和 `can_link.h` 是电机协议适配层，使用 `SunFFB::MotorSerialLink` / `MotorCANLink`。原 `FFBSerialLink` / `FFBCANLink` 名称保留为兼容别名。Python 编解码、串口 GUI 和 CAN CLI 位于库的 `host/` 目录。其中电机消息编解码为 SunFFB 协议示例，通用 C++ 核心无需依赖它们。详见 [主机工具说明](host/README.md)。
 
 ## 验证
 

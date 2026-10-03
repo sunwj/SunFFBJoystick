@@ -2,6 +2,12 @@
 
 ## Overview
 
+Code is organized into `firmware/src` (production firmware), `firmware/include`
+(board setup), `firmware/diagnostics` (optional HIL telemetry), `host/python_apis`
+(reusable Python client and GUI), `tests/firmware` (C++ suites) and `tests/python`
+(Python suites and hardware runners). PlatformIO commands still run from this
+repository root. See [testing commands](tests/README.md).
+
 SunFFB Joystick Firmware is a custom USB HID PID (Physical Interface Device) compliant force feedback firmware built with the Arduino framework. It enables a microcontroller-based joystick to present itself as a full-featured force feedback device to a host system.
 
 The firmware implements:
@@ -153,8 +159,8 @@ pio run -e esp32-s3
 pio run -e esp32-s3-axis1 -e esp32-s3-axis3
 pio test -e native -e native-axis1 -e native-axis3
 pio test -e native-sanitized -e native-sanitized-axis1 -e native-sanitized-axis3
-python3 -m unittest discover -s python_apis -p 'test_*.py'
-python3 python_apis/generate_constants.py --check
+python3 -m unittest discover -s tests/python -p 'test_*.py'
+python3 host/python_apis/generate_constants.py --check
 ```
 
 The default firmware uses two axes and ADC input. `NUM_AXIS` can also be
@@ -163,7 +169,7 @@ count used by the connected firmware. Axis build environments validate
 compilation; when LCD is enabled, its pin setup must match the actual board.
 
 `ENABLE_MOTOR_OUTPUT` and `USE_SERIAL_POSITION` are independent opt-in flags
-in `src/config_board.h`. The `esp32-s3-serial` environment enables both for
+in `firmware/src/config_board.h`. The `esp32-s3-serial` environment enables both for
 build validation. It is not the default flash target.
 
 The UART protocol is `[0xAA, message ID, payload length, payload, CRC8]`.
@@ -246,7 +252,7 @@ opt-in motor-output builds. `esp32-s2-force500` validates 500 Hz calculation.
 ```
 pio run -e esp32-s2-timing -e esp32-s3-timing -e esp32-s2-force500
 pio device monitor -e esp32-s3-timing --baud 115200
-python3 python_apis/check_update_rate.py --seconds 30 --json rate.json
+python3 tests/python/check_update_rate.py --seconds 30 --json rate.json
 ```
 
 Run the HID rate probe as the sole input reader and select the board environment
@@ -277,7 +283,7 @@ if interrupts, mutex contention, the motor producer, or the USB host stall.
 
 ### LCD debug switch
 
-LCD is disabled by default (`ENABLE_LCD=0` in `src/config_board.h`). All normal,
+LCD is disabled by default (`ENABLE_LCD=0` in `firmware/src/config_board.h`). All normal,
 serial and timing environments omit TFT_eSPI. With LCD disabled, no display
 objects, sprite buffer, display initialization or refresh task are compiled in;
 LCD pin setup is unnecessary. Timing diagnostics remain independently selectable.
@@ -298,8 +304,8 @@ Condition center and deadband now use the same nominal 10000 scale as coefficien
 
 Actuator disable mutes output while playback timers continue; Pause freezes playback. A trigger release does not stop a running effect. Sample Period holds condition output as well as waveform output. LCD remains disabled by default; enable it only for debugging.
 
-Serial transport now supports backward-compatible variable frames, compact fixed frames, and mixed reception. See [serial transport APIs and performance validation](src/motor_protocol/README.md).
+Serial transport now supports backward-compatible variable frames, compact fixed frames, and mixed reception. See [serial transport APIs and performance validation](firmware/src/motor_protocol/README.md).
 
-Classic CAN communication is available through the ESP32-S2/S3 TWAI controller, with default 500kbit/s and atomic force/position vectors for up to three axes. See [CAN protocol, configuration and validation](src/motor_protocol/CAN.md). UART remains the default.
+Classic CAN communication is available through the ESP32-S2/S3 TWAI controller, with default 500kbit/s and atomic force/position vectors for up to three axes. See [CAN protocol, configuration and validation](firmware/src/motor_protocol/CAN.md). UART remains the default.
 
 Reusable communication core and UART/CAN host tools: [EmbeddedComm](lib/EmbeddedComm/README.md) and [host tools](lib/EmbeddedComm/host/README.md).
