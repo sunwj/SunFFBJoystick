@@ -21,15 +21,56 @@ extern "C" bool __real_hidd_control_xfer_cb(uint8_t rhport, uint8_t stage,
 extern void hid_set_report_callback(uint8_t id, hid_report_type_t type,
                                     const uint8_t* buffer, uint16_t length);
 extern void hid_report_complete_hook(const uint8_t* report, uint16_t length);
+
+// Match the installed TinyUSB ABI: newer releases use a wider completion length.
+template <typename Callback>
+struct HIDCompletionLength;
+
+template <typename Result, typename Instance, typename Report, typename Length>
+struct HIDCompletionLength<Result (*)(Instance, Report, Length)>
+{
+    using Type = Length;
+};
+
+using HIDCompletionLengthType = HIDCompletionLength<decltype(&tud_hid_report_complete_cb)>::Type;
 extern "C" void __real_tud_hid_report_complete_cb(uint8_t instance, const uint8_t* report,
-                                                 uint16_t length);
+                                                 HIDCompletionLengthType length);
 
 extern "C" void __wrap_tud_hid_report_complete_cb(uint8_t instance, const uint8_t* report,
-                                                 uint16_t length)
+                                                 HIDCompletionLengthType length)
 {
     __real_tud_hid_report_complete_cb(instance, report, length);
-    hid_report_complete_hook(report, length);
+    // The project hook reads the report ID only; saturate instead of narrowing to zero.
+    hid_report_complete_hook(report, length > UINT16_MAX ? UINT16_MAX : uint16_t(length));
 }
+
+#if defined(VALIDATE_USB_UPGRADE) && VALIDATE_USB_UPGRADE
+extern "C" void __real_tud_hid_set_report_cb(uint8_t instance, uint8_t id,
+    hid_report_type_t type, const uint8_t* buffer, uint16_t length);
+
+extern "C" void __wrap_tud_hid_set_report_cb(uint8_t instance, uint8_t id,
+    hid_report_type_t type, const uint8_t* buffer, uint16_t length)
+{
+    if (instance != 0)
+    {
+        __real_tud_hid_set_report_cb(instance, id, type, buffer, length);
+        return;
+    }
+
+    // Arduino 3.3.12 still classifies nonzero-ID control Output reports as Features.
+    // TinyUSB owns the buffers; preserve its actual type before Arduino discards it.
+    if (type == HID_REPORT_TYPE_OUTPUT && id == 0)
+    {
+        if (!buffer || length == 0)
+        {
+            return;
+        }
+        id = *buffer++;
+        --length;
+    }
+    hid_set_report_callback(id, type, buffer, length);
+}
+#endif
 
 #if TUSB_VERSION_MAJOR == 0 && TUSB_VERSION_MINOR == 16
 static_assert(CFG_TUD_HID == 1, "Control buffer backport requires the single HID interface");

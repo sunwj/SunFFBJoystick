@@ -25,11 +25,15 @@ No Make, npm, or other build systems — PlatformIO is the only entrypoint.
   until USB control reports, dual-axis conditions, LCD/UART and full-pool hardware
   regression tests pass. `VALIDATE_USB_UPGRADE=1` rejects TinyUSB versions below
   0.17 so an upgrade build cannot silently exercise the old buffer backport.
-  Initial installation reached the new Arduino core but failed extracting SDK
-  files due to Windows path length limits; neither upgrade environment is yet
-  compile- or hardware-verified. Use a short physical `PLATFORMIO_CORE_DIR`
-  directory; drive mappings were canonicalized and did not solve extraction.
-  See `doc/usb-upgrade-validation.md` for dependency and callback-routing findings.
+  Both upgrade environments compile with bundled TinyUSB 0.21.0. The S3 HIL
+  upgrade image passed the 3-minute and 10-minute DirectInput hardware suites;
+  see `doc/usb-upgrade-validation.md` and preserve their JSON captures. A short
+  physical `PLATFORMIO_CORE_DIR=E:/pio-upgrade`
+  resolved SDK extraction failures; drive mappings were canonicalized and did
+  not help. Upgrade environments require `lib_ldf_mode=deep` for the new USB
+  library's FS dependency and a SET_REPORT callback adapter to preserve actual
+  Output/Feature types. Completion callback length follows the installed ABI.
+  See `doc/usb-upgrade-validation.md` for findings and qualifications.
 
 - **`firmware/src/constants.h`** is a forwarding header: it only `#include`s `config_ffb.h` and `config_board.h`. Do not edit it.
 - **`firmware/src/config_ffb.h`** — `NUM_AXIS` (1/2/3) is the primary compile-time switch. It gates `#if`/`#elif` blocks across the entire codebase for axis count, HID descriptors, pin mappings, force direction formulas, and report struct sizes. Also defines `MAX_EFFECTS`, effect types (ET_*), HID PID report IDs (REPORT_ID_*, 1–18), and PID constants (`USB_MAX_MAGNITUDE` 10000, `USB_DURATION_INFINITE`, `USB_NO_TRIGGER_BUTTON`, `USB_AXIS_MAX_ABSOLUTE`, etc.). Changing `NUM_AXIS` requires a full rebuild.
@@ -188,6 +192,7 @@ Automated tests are available via `pio test -e native -e native-axis1 -e native-
 - The direct-dispatch candidate passed 36 checks and a 30-minute requested-500-Hz full-pool/LCD stress run with CDC off. Maximum observed force latency was 764 us; no completed-job misses or additional skipped releases occurred (seven lifetime skips were already present). This is bounded validation, not proof of a sole root cause, multi-day stability or wire-level compliance. An unsuccessful optional endpoint-status diagnostic was removed afterward; the cleaned source is build-verified but not the exact flashed/stress-tested binary. Preserve the capture and qualifications in `doc/hardware-validation.md`.
 - The cleaned `25cdfd1` firmware was subsequently flashed and exercised through the actual `E:/github_projects/py_directinput_ffb` library. Final DirectInput capture passed 31/32 checks, including all eleven effects and three-minute rotating full-pool stress with live updates; no new deadline misses/skips occurred. The boot-wide budget check failed because the first UART sample already contained one 7586 us miss and seven skips; their pre-capture origin remains unknown. Do not claim whole-boot timing compliance or erase this history. DirectInput state polls are not fresh USB report counts. Keep motors disconnected, preserve every capture, and read `doc/hardware-validation.md` for runner corrections and limitations.
 - The follow-up LCD row-group refresh and force-task startup gate build passed S3 HIL/LCD/production and S2 configurations, then passed all 32 actual-DirectInput hardware checks over 601 seconds of full-pool stress (`doc/hil-deadline-fixed-10min-results.json`). Boot-wide maximum release-to-completion was 488 us / 1000 us; completed-job misses stayed zero and the skipped-release count stayed at seven from the first UART sample through the end. The previously recorded 7586 us event did not recur, so the change correlates with improvement but does not prove its original root cause. The new worst-event record decomposes one 488 us active-effect cycle as release→start 34 us, lock wait 11 us, force calculation 336 us, and post-calculation→completion 107 us; LCD stage is sampled at record time and does not establish causality. Preserve the old failure capture and qualifications in `doc/hardware-validation.md`.
+- The opt-in Arduino 3.3.12 / TinyUSB 0.21.0 `esp32-s3-upgrade-hil` image was flashed and passed all 32 actual-DirectInput checks in both 3-minute and 10-minute captures (`doc/usb-upgrade-directinput-3min-results.json`, `doc/usb-upgrade-directinput-10min-results.json`). The 602-second 15-effect stress produced 300493 UART force frames, 361533 state polls and 8865 live updates; all effect, XY condition/envelope/live-Y and stop/unload zero-force checks passed. At 891 seconds boot uptime, maximum force-cycle time was 509 us / 1000 us, missed jobs zero, skipped releases eight with no increase from the initial sample, and force-task free stack 1020 bytes. No reset or USB unmount was observed. This is bounded host/UART validation, not a USB wire capture, visual LCD inspection or multi-day endurance test; DirectInput state polls are not fresh USB packet counts. Preserve prior CDC/deadline failure history and qualifications.
 
 ## CAN Transport
 

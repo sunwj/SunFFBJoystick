@@ -593,7 +593,8 @@ void joystick_task(void* params)
         sequence = sample.sequence;
 
         for (uint8_t i = 0; i < NUM_AXIS; ++i)
-            coords[i] = std::clamp(int32_t(sample.position[i]) - 32768, -32767, 32767);
+            coords[i] = std::clamp<int32_t>(int32_t(sample.position[i]) - 32768,
+                                            -32767, 32767);
 #else
         receivedUs = micros();
         ++sequence;
