@@ -42,8 +42,13 @@ class Rig:
         self.health = []
         self.usb_progress = []
         self.deadlines = []
+        self.worst_events = []
 
     def decode_health(self, frame):
+        if frame[0] == 0x7A and len(frame[1]) == 32:
+            self.worst_events.append(dict(zip(
+                ("uptime_ms", "sequence", "release_us", "start_us", "locked_us",
+                 "computed_us", "end_us", "context"), struct.unpack("<8I", frame[1]))))
         if frame[0] == 0x7C and len(frame[1]) == 36:
             self.deadlines.append(dict(zip(
                 ("uptime_ms", "count", "max_wake_us", "max_lock_us", "max_elapsed_us",
@@ -312,7 +317,9 @@ class Rig:
                     self.start(idx)
                 phase = current
                 print(json.dumps(dict(workload=phase, active_effects=capacity, elapsed=elapsed)), flush=True)
-            data, axes = self.sample(min(1, seconds - (time.perf_counter() - start)),
+            # A final slice shorter than one frame interval must not be mistaken
+            # for transport loss. Complete the last bounded one-second batch.
+            data, axes = self.sample(1,
                                      lambda t: (24000*math.sin(19*t), 22000*math.cos(23*t)))
             totals["uart_frames"] += len(data)
             totals["usb_reports"] += len(axes)
@@ -411,6 +418,7 @@ def main():
                         checks=rig.results, timing=timing, uart_health=rig.health,
                         usb_progress=rig.usb_progress,
                         endurance_seconds=args.endurance, uart_deadlines=rig.deadlines,
+                        force_worst_events=rig.worst_events,
                         execution_error=failure,
                         firmware_log=rig.console_data.decode(errors="replace")), indent=2), encoding="utf-8")
         print(json.dumps(dict(passed=sum(r["passed"] for r in rig.results), total=len(rig.results))))

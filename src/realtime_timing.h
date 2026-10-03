@@ -133,6 +133,11 @@ namespace SunFFB
         uint32_t count, maxWakeUs, maxLockUs, maxElapsedUs, missed, skipped;
     };
 
+    struct ForceDeadlineEvent
+    {
+        uint32_t sequence, releaseUs, startUs, lockedUs, computedUs, endUs, context;
+    };
+
     class ForceDeadlineStream
     {
         public:
@@ -141,6 +146,12 @@ namespace SunFFB
         }
 
         void record(uint32_t releaseUs, uint32_t startUs, uint32_t lockedUs, uint32_t endUs)
+        {
+            record_detail(releaseUs, startUs, lockedUs, endUs, endUs, 0);
+        }
+
+        void record_detail(uint32_t releaseUs, uint32_t startUs, uint32_t lockedUs,
+                           uint32_t computedUs, uint32_t endUs, uint32_t context)
         {
             TimingGuard guard(lock);
             ++stat.count;
@@ -157,6 +168,12 @@ namespace SunFFB
             const uint32_t wake = startUs - releaseUs;
             const uint32_t waiting = lockedUs - startUs;
             const uint32_t elapsed = endUs - releaseUs;
+            // Retain the exact worst event across windows, not unrelated maxima.
+            if (worst.sequence == 0 || elapsed > uint32_t(worst.endUs - worst.releaseUs))
+            {
+                worst = {total.count + stat.count, releaseUs, startUs, lockedUs,
+                         computedUs, endUs, context};
+            }
             if (wake > stat.maxWakeUs)
             {
                 stat.maxWakeUs = wake;
@@ -193,6 +210,12 @@ namespace SunFFB
             return result;
         }
 
+        ForceDeadlineEvent worst_event()
+        {
+            TimingGuard guard(lock);
+            return worst;
+        }
+
         private:
         static void accumulate(ForceDeadlineSnapshot& target, const ForceDeadlineSnapshot& value)
         {
@@ -208,6 +231,7 @@ namespace SunFFB
         TimingLock lock;
         ForceDeadlineSnapshot stat{};
         ForceDeadlineSnapshot total{};
+        ForceDeadlineEvent worst{};
         uint32_t previousReleaseUs = 0;
         bool hasPrevious = false;
     };

@@ -1,0 +1,6114 @@
+{
+  "library": "E:\\github_projects\\py_directinput_ffb\\directinput_ffb\\__init__.py",
+  "device": "Force feedback joystick",
+  "requested_position_hz": 500,
+  "requested_stress_seconds": 180.0,
+  "checks": [
+    {
+      "name": "DirectInput position roundtrip",
+      "passed": true,
+      "evidence": [
+        0.39976279999973485,
+        11999,
+        -8999
+      ]
+    },
+    {
+      "name": "DirectInput constant direction 0",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          4000
+        ],
+        "observed": [
+          0,
+          4000
+        ],
+        "uart_frames": 205
+      }
+    },
+    {
+      "name": "DirectInput constant direction 9000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -4000,
+          0
+        ],
+        "observed": [
+          -4000,
+          0
+        ],
+        "uart_frames": 205
+      }
+    },
+    {
+      "name": "DirectInput constant direction 18000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          -4000
+        ],
+        "observed": [
+          0.0,
+          -4000.0
+        ],
+        "uart_frames": 203
+      }
+    },
+    {
+      "name": "DirectInput constant direction 27000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          4000,
+          0
+        ],
+        "observed": [
+          4000,
+          0
+        ],
+        "uart_frames": 205
+      }
+    },
+    {
+      "name": "DirectInput live magnitude",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -2500,
+          0
+        ],
+        "observed": [
+          -2500,
+          0
+        ],
+        "uart_frames": 205
+      }
+    },
+    {
+      "name": "DirectInput live direction",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          2500
+        ],
+        "observed": [
+          0.0,
+          2500.0
+        ],
+        "uart_frames": 200
+      }
+    },
+    {
+      "name": "DirectInput device gain",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          1250
+        ],
+        "observed": [
+          0.0,
+          1245.0
+        ],
+        "uart_frames": 200
+      }
+    },
+    {
+      "name": "DirectInput periodic square",
+      "passed": true,
+      "evidence": {
+        "min": -2000,
+        "max": 2000,
+        "steady_max_y": 0,
+        "transition_max_y": 1245,
+        "settling_seconds": 0.05
+      }
+    },
+    {
+      "name": "DirectInput live periodic square",
+      "passed": true,
+      "evidence": {
+        "uart_frames": 203
+      }
+    },
+    {
+      "name": "DirectInput periodic sine",
+      "passed": true,
+      "evidence": {
+        "min": -1999,
+        "max": 1999,
+        "steady_max_y": 0,
+        "transition_max_y": 0,
+        "settling_seconds": 0.05
+      }
+    },
+    {
+      "name": "DirectInput live periodic sine",
+      "passed": true,
+      "evidence": {
+        "uart_frames": 200
+      }
+    },
+    {
+      "name": "DirectInput periodic triangle",
+      "passed": true,
+      "evidence": {
+        "min": -1960,
+        "max": 1960,
+        "steady_max_y": 0,
+        "transition_max_y": 0,
+        "settling_seconds": 0.05
+      }
+    },
+    {
+      "name": "DirectInput live periodic triangle",
+      "passed": true,
+      "evidence": {
+        "uart_frames": 200
+      }
+    },
+    {
+      "name": "DirectInput periodic sawtooth_up",
+      "passed": true,
+      "evidence": {
+        "min": -1960,
+        "max": 2000,
+        "steady_max_y": 0,
+        "transition_max_y": 0,
+        "settling_seconds": 0.05
+      }
+    },
+    {
+      "name": "DirectInput live periodic sawtooth_up",
+      "passed": true,
+      "evidence": {
+        "uart_frames": 200
+      }
+    },
+    {
+      "name": "DirectInput periodic sawtooth_down",
+      "passed": true,
+      "evidence": {
+        "min": -1980,
+        "max": 1980,
+        "steady_max_y": 0,
+        "transition_max_y": 0,
+        "settling_seconds": 0.05
+      }
+    },
+    {
+      "name": "DirectInput live periodic sawtooth_down",
+      "passed": true,
+      "evidence": {
+        "uart_frames": 200
+      }
+    },
+    {
+      "name": "DirectInput ramp and expiration",
+      "passed": true,
+      "evidence": {
+        "uart_frames": 429
+      }
+    },
+    {
+      "name": "DirectInput XY spring after envelope",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired": 748
+      }
+    },
+    {
+      "name": "DirectInput live Y condition spring",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          500
+        ]
+      }
+    },
+    {
+      "name": "DirectInput XY damper after envelope",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired": 727
+      }
+    },
+    {
+      "name": "DirectInput live Y condition damper",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          500
+        ]
+      }
+    },
+    {
+      "name": "DirectInput XY inertia after envelope",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired": 217
+      }
+    },
+    {
+      "name": "DirectInput live Y condition inertia",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          500
+        ]
+      }
+    },
+    {
+      "name": "DirectInput XY friction after envelope",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired": 749
+      }
+    },
+    {
+      "name": "DirectInput live Y condition friction",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          500
+        ]
+      }
+    },
+    {
+      "name": "DirectInput execution completed",
+      "passed": false,
+      "evidence": {
+        "error": "DirectInput stress lost force output or device state"
+      }
+    }
+  ],
+  "uart_health": [
+    {
+      "uptime_ms": 694089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 695089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 696089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 697089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 698089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 699089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 700089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 701089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 702089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 703089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 704089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 705089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 706089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 707089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 708089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 709089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 710089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 711089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 712089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 713089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 714089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 715089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 716089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 717089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 718089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 719089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 720089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 721089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 722089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 723089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 724089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 725089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 726089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 727089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 728089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 729089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 730089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 731089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 732089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 733089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 734089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 735089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 736089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 737089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 738089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 739089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 740089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 741089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 742089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 743089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 744089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 745089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 746089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 747089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 748089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 749089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 750089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 751089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 752089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 753089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 754089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 755089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 756089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 757089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 758089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 759089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 760089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 761089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 762089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 763089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 764089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 765089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 766089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 767089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 768089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 769089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 770089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 771089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 772089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 773089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 774089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 775089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 776089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 777089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 778089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 779089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 780089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 781089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 782089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 783089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 784089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 785089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 786089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 787089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 788089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 789089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 790089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 791089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 792089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 793089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 794089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 795089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 796089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 797089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 798089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 799089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 800089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 801089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 802089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 803089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 804089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 805089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 806089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 807089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 808089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 809089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 810089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 811089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 812089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 813089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 814089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 815089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 816089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 817089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 818089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 819089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 820089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 821089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 822089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 823089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 824089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 825089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 826089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 827089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 828089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 829089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 830089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 831089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 832089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 833089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 834089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 835089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 836089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 837089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 838089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 839089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 840089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 841089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 842089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 843089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 844089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 845089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 846089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 847089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 848089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 849089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 850089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 851089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 852089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 853089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 854089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 855089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 856089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 857089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 858089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 859089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 860089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 861089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 862089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 863089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 864089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 865089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 866089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 867089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 868089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 869089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 870089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 871089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 872089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 873089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 874089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 875089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 876089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 877089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 878089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 879089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 880089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 881089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 882089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 883089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 884089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 885089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 886089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 887089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 888089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 889089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 890089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 891089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 892089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 893089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 894089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 895089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 896089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 897089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 898089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 899089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    },
+    {
+      "uptime_ms": 900089,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 328816
+    }
+  ],
+  "uart_deadlines": [
+    {
+      "uptime_ms": 694089,
+      "count": 692993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 695089,
+      "count": 693993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 696089,
+      "count": 694993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 697089,
+      "count": 695993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 698089,
+      "count": 696993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 699089,
+      "count": 697993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 700089,
+      "count": 698993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 701089,
+      "count": 699993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 702089,
+      "count": 700993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 703089,
+      "count": 701993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 704089,
+      "count": 702993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 705089,
+      "count": 703993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 706089,
+      "count": 704993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 707089,
+      "count": 705993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 708089,
+      "count": 706993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 709089,
+      "count": 707993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 710089,
+      "count": 708993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 711089,
+      "count": 709993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 712089,
+      "count": 710993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 713089,
+      "count": 711993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 714089,
+      "count": 712993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 715089,
+      "count": 713993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 716089,
+      "count": 714993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 717089,
+      "count": 715993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 718089,
+      "count": 716993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 719089,
+      "count": 717993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 720089,
+      "count": 718993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 721089,
+      "count": 719993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 722089,
+      "count": 720993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 723089,
+      "count": 721993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 724089,
+      "count": 722993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 725089,
+      "count": 723993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 726089,
+      "count": 724993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 727089,
+      "count": 725993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 728089,
+      "count": 726993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 729089,
+      "count": 727993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 730089,
+      "count": 728993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 731089,
+      "count": 729993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 732089,
+      "count": 730993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 733089,
+      "count": 731993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 734089,
+      "count": 732993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 735089,
+      "count": 733993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 736089,
+      "count": 734993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 737089,
+      "count": 735993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 738089,
+      "count": 736993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 739089,
+      "count": 737993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 740089,
+      "count": 738993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 741089,
+      "count": 739993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 742089,
+      "count": 740993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 743089,
+      "count": 741993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 744089,
+      "count": 742993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 745089,
+      "count": 743993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 746089,
+      "count": 744993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 747089,
+      "count": 745993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 748089,
+      "count": 746993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 749089,
+      "count": 747993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 750089,
+      "count": 748993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 751089,
+      "count": 749993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 752089,
+      "count": 750993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 753089,
+      "count": 751993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 754089,
+      "count": 752993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 755089,
+      "count": 753993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 756089,
+      "count": 754993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 757089,
+      "count": 755993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 758089,
+      "count": 756993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 759089,
+      "count": 757993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 760089,
+      "count": 758993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 761089,
+      "count": 759993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 762089,
+      "count": 760993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 763089,
+      "count": 761993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 764089,
+      "count": 762993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 765089,
+      "count": 763993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 766089,
+      "count": 764993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 767089,
+      "count": 765993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 768089,
+      "count": 766993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 769089,
+      "count": 767993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 770089,
+      "count": 768993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 771089,
+      "count": 769993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 772089,
+      "count": 770993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 773089,
+      "count": 771993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 774089,
+      "count": 772993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 775089,
+      "count": 773993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 776089,
+      "count": 774993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 777089,
+      "count": 775993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 778089,
+      "count": 776993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 779089,
+      "count": 777993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 780089,
+      "count": 778993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 781089,
+      "count": 779993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 782089,
+      "count": 780993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 783089,
+      "count": 781993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 784089,
+      "count": 782993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 785089,
+      "count": 783993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 786089,
+      "count": 784993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 787089,
+      "count": 785993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 788089,
+      "count": 786993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 789089,
+      "count": 787993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 790089,
+      "count": 788993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 791089,
+      "count": 789993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 792089,
+      "count": 790993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 793089,
+      "count": 791993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 794089,
+      "count": 792993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 795089,
+      "count": 793993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 796089,
+      "count": 794993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 797089,
+      "count": 795993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 798089,
+      "count": 796993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 799089,
+      "count": 797993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 800089,
+      "count": 798993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 801089,
+      "count": 799993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 802089,
+      "count": 800993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 803089,
+      "count": 801993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 804089,
+      "count": 802993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 805089,
+      "count": 803993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 806089,
+      "count": 804993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 807089,
+      "count": 805993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 808089,
+      "count": 806993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 809089,
+      "count": 807993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 810089,
+      "count": 808993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 811089,
+      "count": 809993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 812089,
+      "count": 810993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 813089,
+      "count": 811993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 814089,
+      "count": 812993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 815089,
+      "count": 813993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 816089,
+      "count": 814993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 817089,
+      "count": 815993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 818089,
+      "count": 816993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 819089,
+      "count": 817993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 820089,
+      "count": 818993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 821089,
+      "count": 819993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 822089,
+      "count": 820993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 823089,
+      "count": 821993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 824089,
+      "count": 822993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 825089,
+      "count": 823993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 826089,
+      "count": 824993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 827089,
+      "count": 825993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 828089,
+      "count": 826993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 829089,
+      "count": 827993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 830089,
+      "count": 828993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 831089,
+      "count": 829993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 832089,
+      "count": 830993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 833089,
+      "count": 831993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 834089,
+      "count": 832993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 835089,
+      "count": 833993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 836089,
+      "count": 834993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 837089,
+      "count": 835993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 838089,
+      "count": 836993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 839089,
+      "count": 837993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 840089,
+      "count": 838993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 841089,
+      "count": 839993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 842089,
+      "count": 840993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 843089,
+      "count": 841993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 844089,
+      "count": 842993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 845089,
+      "count": 843993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 846089,
+      "count": 844993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 847089,
+      "count": 845993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 848089,
+      "count": 846993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 849089,
+      "count": 847993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 850089,
+      "count": 848993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 851089,
+      "count": 849993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 852089,
+      "count": 850993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 853089,
+      "count": 851993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 854089,
+      "count": 852993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 855089,
+      "count": 853993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 856089,
+      "count": 854993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 857089,
+      "count": 855993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 858089,
+      "count": 856993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 859089,
+      "count": 857993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 860089,
+      "count": 858993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 861089,
+      "count": 859993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 862089,
+      "count": 860993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 863089,
+      "count": 861993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 864089,
+      "count": 862993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 865089,
+      "count": 863993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 866089,
+      "count": 864993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 867089,
+      "count": 865993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 868089,
+      "count": 866993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 869089,
+      "count": 867993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 870089,
+      "count": 868993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 871089,
+      "count": 869993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 872089,
+      "count": 870993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 873089,
+      "count": 871993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 874089,
+      "count": 872993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 875089,
+      "count": 873993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 876089,
+      "count": 874993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 877089,
+      "count": 875993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 878089,
+      "count": 876993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 879089,
+      "count": 877993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 880089,
+      "count": 878993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 881089,
+      "count": 879993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 882089,
+      "count": 880993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 883089,
+      "count": 881993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 884089,
+      "count": 882993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 885089,
+      "count": 883993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 886089,
+      "count": 884993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 887089,
+      "count": 885993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 888089,
+      "count": 886993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 889089,
+      "count": 887993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 890089,
+      "count": 888993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 891089,
+      "count": 889993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 892089,
+      "count": 890993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 893089,
+      "count": 891993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 894089,
+      "count": 892993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 895089,
+      "count": 893993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 896089,
+      "count": 894993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 897089,
+      "count": 895993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 898089,
+      "count": 896993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 899089,
+      "count": 897993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    },
+    {
+      "uptime_ms": 900089,
+      "count": 898993,
+      "max_wake_us": 459,
+      "max_lock_us": 96,
+      "max_elapsed_us": 7586,
+      "missed": 1,
+      "skipped": 7,
+      "budget_us": 1000,
+      "force_stack_free": 1100
+    }
+  ],
+  "usb_progress": [
+    {
+      "uptime_ms": 694089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 88230,
+      "command_starts": 3164,
+      "command_ends": 3164,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 695089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 88729,
+      "command_starts": 3164,
+      "command_ends": 3164,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 696089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 89209,
+      "command_starts": 3175,
+      "command_ends": 3175,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 697089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 89697,
+      "command_starts": 3197,
+      "command_ends": 3197,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 698089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 90143,
+      "command_starts": 3199,
+      "command_ends": 3199,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 699089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 90602,
+      "command_starts": 3208,
+      "command_ends": 3208,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 700089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 91077,
+      "command_starts": 3215,
+      "command_ends": 3215,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 701089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 91510,
+      "command_starts": 3223,
+      "command_ends": 3223,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 702089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 91965,
+      "command_starts": 3231,
+      "command_ends": 3231,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 703089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 92433,
+      "command_starts": 3232,
+      "command_ends": 3232,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 704089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 92886,
+      "command_starts": 3239,
+      "command_ends": 3239,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 705089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 93352,
+      "command_starts": 3247,
+      "command_ends": 3247,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 706089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 93804,
+      "command_starts": 3256,
+      "command_ends": 3256,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 707089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 94230,
+      "command_starts": 3258,
+      "command_ends": 3258,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 708089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 94666,
+      "command_starts": 3267,
+      "command_ends": 3267,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 709089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 95145,
+      "command_starts": 3267,
+      "command_ends": 3267,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 710089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 95584,
+      "command_starts": 3278,
+      "command_ends": 3278,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 711089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 96036,
+      "command_starts": 3278,
+      "command_ends": 3278,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 712089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 96508,
+      "command_starts": 3280,
+      "command_ends": 3280,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 713089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 96957,
+      "command_starts": 3289,
+      "command_ends": 3289,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 714089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 97412,
+      "command_starts": 3291,
+      "command_ends": 3291,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 715089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 97868,
+      "command_starts": 3369,
+      "command_ends": 3369,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 716089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 98312,
+      "command_starts": 3384,
+      "command_ends": 3384,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 717089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 98776,
+      "command_starts": 3399,
+      "command_ends": 3399,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 718089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 99211,
+      "command_starts": 3414,
+      "command_ends": 3414,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 719089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 99665,
+      "command_starts": 3429,
+      "command_ends": 3429,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 720089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 100125,
+      "command_starts": 3444,
+      "command_ends": 3444,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 721089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 100594,
+      "command_starts": 3459,
+      "command_ends": 3459,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 722089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 101060,
+      "command_starts": 3474,
+      "command_ends": 3474,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 723089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 101520,
+      "command_starts": 3489,
+      "command_ends": 3489,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 724089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 101973,
+      "command_starts": 3504,
+      "command_ends": 3504,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 725089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 102440,
+      "command_starts": 3519,
+      "command_ends": 3519,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 726089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 102899,
+      "command_starts": 3534,
+      "command_ends": 3534,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 727089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 103366,
+      "command_starts": 3549,
+      "command_ends": 3549,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 728089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 103823,
+      "command_starts": 3564,
+      "command_ends": 3564,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 729089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 104281,
+      "command_starts": 3579,
+      "command_ends": 3579,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 730089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 104756,
+      "command_starts": 3594,
+      "command_ends": 3594,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 731089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105211,
+      "command_starts": 3609,
+      "command_ends": 3609,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 732089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105656,
+      "command_starts": 3624,
+      "command_ends": 3624,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 733089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 106127,
+      "command_starts": 3639,
+      "command_ends": 3639,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 734089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 106602,
+      "command_starts": 3654,
+      "command_ends": 3654,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 735089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 107078,
+      "command_starts": 3669,
+      "command_ends": 3669,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 736089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 107530,
+      "command_starts": 3684,
+      "command_ends": 3684,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 737089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 108010,
+      "command_starts": 3699,
+      "command_ends": 3699,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 738089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 108469,
+      "command_starts": 3714,
+      "command_ends": 3714,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 739089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 108943,
+      "command_starts": 3729,
+      "command_ends": 3729,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 740089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 109417,
+      "command_starts": 3744,
+      "command_ends": 3744,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 741089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 109874,
+      "command_starts": 3757,
+      "command_ends": 3757,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 742089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 110329,
+      "command_starts": 3759,
+      "command_ends": 3759,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 743089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 110798,
+      "command_starts": 3774,
+      "command_ends": 3774,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 744089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 111251,
+      "command_starts": 3789,
+      "command_ends": 3789,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 745089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 111703,
+      "command_starts": 3804,
+      "command_ends": 3804,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 746089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 112158,
+      "command_starts": 3819,
+      "command_ends": 3819,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 747089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 112616,
+      "command_starts": 3834,
+      "command_ends": 3834,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 748089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 113087,
+      "command_starts": 3849,
+      "command_ends": 3849,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 749089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 113545,
+      "command_starts": 3864,
+      "command_ends": 3864,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 750089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 114009,
+      "command_starts": 3879,
+      "command_ends": 3879,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 751089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 114456,
+      "command_starts": 3894,
+      "command_ends": 3894,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 752089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 114887,
+      "command_starts": 3909,
+      "command_ends": 3909,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 753089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 115309,
+      "command_starts": 3924,
+      "command_ends": 3924,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 754089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 115748,
+      "command_starts": 3939,
+      "command_ends": 3939,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 755089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 116204,
+      "command_starts": 3954,
+      "command_ends": 3954,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 756089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 116678,
+      "command_starts": 3969,
+      "command_ends": 3969,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 757089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 117141,
+      "command_starts": 3984,
+      "command_ends": 3984,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 758089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 117622,
+      "command_starts": 3999,
+      "command_ends": 3999,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 759089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 118099,
+      "command_starts": 4015,
+      "command_ends": 4015,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 760089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 118548,
+      "command_starts": 4030,
+      "command_ends": 4030,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 761089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 119025,
+      "command_starts": 4045,
+      "command_ends": 4045,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 762089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 119490,
+      "command_starts": 4060,
+      "command_ends": 4060,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 763089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 119953,
+      "command_starts": 4075,
+      "command_ends": 4075,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 764089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 120423,
+      "command_starts": 4090,
+      "command_ends": 4090,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 765089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 120872,
+      "command_starts": 4105,
+      "command_ends": 4105,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 766089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 121316,
+      "command_starts": 4120,
+      "command_ends": 4120,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 767089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 121787,
+      "command_starts": 4135,
+      "command_ends": 4135,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 768089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 122260,
+      "command_starts": 4150,
+      "command_ends": 4150,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 769089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 122694,
+      "command_starts": 4165,
+      "command_ends": 4165,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 770089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 123127,
+      "command_starts": 4180,
+      "command_ends": 4180,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 771089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 123601,
+      "command_starts": 4195,
+      "command_ends": 4195,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 772089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 124027,
+      "command_starts": 4210,
+      "command_ends": 4210,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 773089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 124501,
+      "command_starts": 4225,
+      "command_ends": 4225,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 774089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 124965,
+      "command_starts": 4240,
+      "command_ends": 4240,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 775089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 125424,
+      "command_starts": 4255,
+      "command_ends": 4255,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 776089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 125870,
+      "command_starts": 4390,
+      "command_ends": 4390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 777089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 126321,
+      "command_starts": 4405,
+      "command_ends": 4405,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 778089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 126745,
+      "command_starts": 4420,
+      "command_ends": 4420,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 779089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 127192,
+      "command_starts": 4435,
+      "command_ends": 4435,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 780089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 127643,
+      "command_starts": 4450,
+      "command_ends": 4450,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 781089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 128103,
+      "command_starts": 4465,
+      "command_ends": 4465,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 782089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 128557,
+      "command_starts": 4480,
+      "command_ends": 4480,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 783089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 128993,
+      "command_starts": 4495,
+      "command_ends": 4495,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 784089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 129426,
+      "command_starts": 4511,
+      "command_ends": 4511,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 785089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 129865,
+      "command_starts": 4526,
+      "command_ends": 4526,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 786089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 130293,
+      "command_starts": 4541,
+      "command_ends": 4541,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 787089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 130722,
+      "command_starts": 4556,
+      "command_ends": 4556,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 788089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 131162,
+      "command_starts": 4571,
+      "command_ends": 4571,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 789089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 131607,
+      "command_starts": 4586,
+      "command_ends": 4586,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 790089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 132053,
+      "command_starts": 4601,
+      "command_ends": 4601,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 791089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 132524,
+      "command_starts": 4616,
+      "command_ends": 4616,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 792089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 132979,
+      "command_starts": 4631,
+      "command_ends": 4631,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 793089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 133441,
+      "command_starts": 4646,
+      "command_ends": 4646,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 794089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 133885,
+      "command_starts": 4661,
+      "command_ends": 4661,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 795089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 134336,
+      "command_starts": 4676,
+      "command_ends": 4676,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 796089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 134777,
+      "command_starts": 4691,
+      "command_ends": 4691,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 797089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 135214,
+      "command_starts": 4706,
+      "command_ends": 4706,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 798089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 135644,
+      "command_starts": 4721,
+      "command_ends": 4721,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 799089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 136099,
+      "command_starts": 4736,
+      "command_ends": 4736,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 800089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 136544,
+      "command_starts": 4750,
+      "command_ends": 4750,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 801089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 136973,
+      "command_starts": 4751,
+      "command_ends": 4751,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 802089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 137421,
+      "command_starts": 4766,
+      "command_ends": 4766,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 803089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 137855,
+      "command_starts": 4781,
+      "command_ends": 4781,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 804089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 138274,
+      "command_starts": 4796,
+      "command_ends": 4796,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 805089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 138727,
+      "command_starts": 4811,
+      "command_ends": 4811,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 806089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 139165,
+      "command_starts": 4826,
+      "command_ends": 4826,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 807089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 139613,
+      "command_starts": 4841,
+      "command_ends": 4841,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 808089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 140066,
+      "command_starts": 4856,
+      "command_ends": 4856,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 809089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 140496,
+      "command_starts": 4871,
+      "command_ends": 4871,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 810089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 140940,
+      "command_starts": 4886,
+      "command_ends": 4886,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 811089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 141388,
+      "command_starts": 4901,
+      "command_ends": 4901,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 812089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 141843,
+      "command_starts": 4916,
+      "command_ends": 4916,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 813089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 142290,
+      "command_starts": 4931,
+      "command_ends": 4931,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 814089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 142727,
+      "command_starts": 4946,
+      "command_ends": 4946,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 815089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 143150,
+      "command_starts": 4961,
+      "command_ends": 4961,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 816089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 143599,
+      "command_starts": 4976,
+      "command_ends": 4976,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 817089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 144050,
+      "command_starts": 4991,
+      "command_ends": 4991,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 818089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 144450,
+      "command_starts": 5006,
+      "command_ends": 5006,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 819089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 144887,
+      "command_starts": 5021,
+      "command_ends": 5021,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 820089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 145349,
+      "command_starts": 5036,
+      "command_ends": 5036,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 821089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 145801,
+      "command_starts": 5051,
+      "command_ends": 5051,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 822089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 146246,
+      "command_starts": 5066,
+      "command_ends": 5066,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 823089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 146668,
+      "command_starts": 5081,
+      "command_ends": 5081,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 824089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 147094,
+      "command_starts": 5096,
+      "command_ends": 5096,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 825089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 147541,
+      "command_starts": 5111,
+      "command_ends": 5111,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 826089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 147939,
+      "command_starts": 5126,
+      "command_ends": 5126,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 827089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 148380,
+      "command_starts": 5141,
+      "command_ends": 5141,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 828089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 148823,
+      "command_starts": 5156,
+      "command_ends": 5156,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 829089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 149273,
+      "command_starts": 5171,
+      "command_ends": 5171,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 830089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 149722,
+      "command_starts": 5186,
+      "command_ends": 5186,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 831089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 150145,
+      "command_starts": 5201,
+      "command_ends": 5201,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 832089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 150574,
+      "command_starts": 5216,
+      "command_ends": 5216,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 833089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 151033,
+      "command_starts": 5231,
+      "command_ends": 5231,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 834089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 151491,
+      "command_starts": 5246,
+      "command_ends": 5246,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 835089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 151947,
+      "command_starts": 5262,
+      "command_ends": 5262,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 836089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 152400,
+      "command_starts": 5392,
+      "command_ends": 5392,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 837089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 152868,
+      "command_starts": 5407,
+      "command_ends": 5407,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 838089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 153332,
+      "command_starts": 5422,
+      "command_ends": 5422,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 839089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 153793,
+      "command_starts": 5437,
+      "command_ends": 5437,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 840089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 154254,
+      "command_starts": 5452,
+      "command_ends": 5452,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 841089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 154687,
+      "command_starts": 5467,
+      "command_ends": 5467,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 842089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 155119,
+      "command_starts": 5482,
+      "command_ends": 5482,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 843089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 155528,
+      "command_starts": 5497,
+      "command_ends": 5497,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 844089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 155976,
+      "command_starts": 5512,
+      "command_ends": 5512,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 845089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 156434,
+      "command_starts": 5527,
+      "command_ends": 5527,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 846089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 156877,
+      "command_starts": 5542,
+      "command_ends": 5542,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 847089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 157306,
+      "command_starts": 5557,
+      "command_ends": 5557,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 848089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 157747,
+      "command_starts": 5572,
+      "command_ends": 5572,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 849089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 158172,
+      "command_starts": 5587,
+      "command_ends": 5587,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 850089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 158632,
+      "command_starts": 5602,
+      "command_ends": 5602,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 851089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 159075,
+      "command_starts": 5617,
+      "command_ends": 5617,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 852089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 159508,
+      "command_starts": 5632,
+      "command_ends": 5632,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 853089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 159935,
+      "command_starts": 5647,
+      "command_ends": 5647,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 854089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 160396,
+      "command_starts": 5662,
+      "command_ends": 5662,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 855089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 160822,
+      "command_starts": 5677,
+      "command_ends": 5677,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 856089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 161240,
+      "command_starts": 5692,
+      "command_ends": 5692,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 857089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 161687,
+      "command_starts": 5707,
+      "command_ends": 5707,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 858089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 162151,
+      "command_starts": 5722,
+      "command_ends": 5722,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 859089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 162591,
+      "command_starts": 5730,
+      "command_ends": 5730,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 860089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 163043,
+      "command_starts": 5737,
+      "command_ends": 5737,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 861089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 163511,
+      "command_starts": 5752,
+      "command_ends": 5752,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 862089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 163966,
+      "command_starts": 5767,
+      "command_ends": 5767,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 863089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 164416,
+      "command_starts": 5782,
+      "command_ends": 5782,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 864089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 164876,
+      "command_starts": 5797,
+      "command_ends": 5797,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 865089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 165306,
+      "command_starts": 5812,
+      "command_ends": 5812,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 866089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 165752,
+      "command_starts": 5827,
+      "command_ends": 5827,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 867089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 166185,
+      "command_starts": 5842,
+      "command_ends": 5842,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 868089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 166643,
+      "command_starts": 5857,
+      "command_ends": 5857,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 869089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 167079,
+      "command_starts": 5872,
+      "command_ends": 5872,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 870089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 167508,
+      "command_starts": 5887,
+      "command_ends": 5887,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 871089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 167949,
+      "command_starts": 5902,
+      "command_ends": 5902,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 872089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 168404,
+      "command_starts": 5917,
+      "command_ends": 5917,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 873089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 168841,
+      "command_starts": 5932,
+      "command_ends": 5932,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 874089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 169296,
+      "command_starts": 5947,
+      "command_ends": 5947,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 875089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 169738,
+      "command_starts": 5962,
+      "command_ends": 5962,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 876089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 170196,
+      "command_starts": 5977,
+      "command_ends": 5977,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 877089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 170646,
+      "command_starts": 5992,
+      "command_ends": 5992,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 878089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 171106,
+      "command_starts": 6007,
+      "command_ends": 6007,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 879089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 171543,
+      "command_starts": 6022,
+      "command_ends": 6022,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 880089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 172006,
+      "command_starts": 6037,
+      "command_ends": 6037,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 881089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 172467,
+      "command_starts": 6052,
+      "command_ends": 6052,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 882089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 172908,
+      "command_starts": 6067,
+      "command_ends": 6067,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 883089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 173360,
+      "command_starts": 6082,
+      "command_ends": 6082,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 884089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 173794,
+      "command_starts": 6097,
+      "command_ends": 6097,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 885089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 174183,
+      "command_starts": 6112,
+      "command_ends": 6112,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 886089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 174623,
+      "command_starts": 6127,
+      "command_ends": 6127,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 887089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 175069,
+      "command_starts": 6142,
+      "command_ends": 6142,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 888089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 175521,
+      "command_starts": 6157,
+      "command_ends": 6157,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 889089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 175965,
+      "command_starts": 6172,
+      "command_ends": 6172,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 890089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 176406,
+      "command_starts": 6187,
+      "command_ends": 6187,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 891089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 176827,
+      "command_starts": 6202,
+      "command_ends": 6202,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 892089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 177264,
+      "command_starts": 6217,
+      "command_ends": 6217,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 893089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 177716,
+      "command_starts": 6232,
+      "command_ends": 6232,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 894089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 178149,
+      "command_starts": 6247,
+      "command_ends": 6247,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 895089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 178397,
+      "command_starts": 6262,
+      "command_ends": 6262,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 896089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 178397,
+      "command_starts": 6262,
+      "command_ends": 6262,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 897089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 178397,
+      "command_starts": 6262,
+      "command_ends": 6262,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 898089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 178397,
+      "command_starts": 6262,
+      "command_ends": 6262,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 899089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 178397,
+      "command_starts": 6262,
+      "command_ends": 6262,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    },
+    {
+      "uptime_ms": 900089,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 178397,
+      "command_starts": 6262,
+      "command_ends": 6262,
+      "usb_task_state": 2,
+      "usb_stack_free": 2940
+    }
+  ],
+  "execution_error": "DirectInput stress lost force output or device state",
+  "cleanup_errors": []
+}

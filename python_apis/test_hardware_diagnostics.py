@@ -12,6 +12,7 @@ class HardwareDiagnosticsTests(unittest.TestCase):
         self.rig.health = []
         self.rig.usb_progress = []
         self.rig.deadlines = []
+        self.rig.worst_events = []
 
     def test_deadlines_are_little_endian_and_keep_skipped_releases(self):
         self.rig.decode_health((0x7C, struct.pack("<9I", 5000, 3998, 80, 20, 704, 0, 2, 1000, 1100)))
@@ -22,7 +23,7 @@ class HardwareDiagnosticsTests(unittest.TestCase):
         self.assertEqual(row["budget_us"], 1000)
 
     def test_short_diagnostics_are_not_accepted(self):
-        for identifier in (0x7C, 0x7D, 0x7E):
+        for identifier in (0x7A, 0x7C, 0x7D, 0x7E):
             self.rig.decode_health((identifier, bytes(3)))
         self.assertEqual(self.rig.deadlines, [])
         self.assertEqual(self.rig.health, [])

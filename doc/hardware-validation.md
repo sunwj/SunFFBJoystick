@@ -263,6 +263,61 @@ fixed from low-rate success. Repeat default/high-rate and worst-case tests after
 a root-cause repair. Keep motors disconnected in the meantime.
 # Extended stability and full-pool deadlines
 
+## Cleaned firmware through DirectInput
+
+The cleaned `25cdfd1` source was subsequently flashed as `esp32-s3-hil` through
+ROM COM5 and manually reset. Firmware binary SHA256:
+`96200377d996f69f9c356b9d4db11348f19e5b5f0ad5c323b9342f403817e117`.
+LCD remains enabled, CDC disabled, serial RX48/TX45, motors disconnected.
+
+`python_apis/validate_directinput.py` imports the actual library at
+`E:/github_projects/py_directinput_ffb/directinput_ffb` and selects exactly one
+VID/PID FFFF:2010 DirectInput device, rather than opening the first controller.
+Effect creation, download/start/stop/unload, device gain, envelope and live
+updates all use its native DirectInput APIs. UART supplies simulated positions
+and independently reads real force/timing records. DirectInput state polls are
+not fresh USB-report counts. No source in the external library was modified.
+Its existing test suite passed 43/43.
+
+Run from the external project root:
+
+```powershell
+python -B E:/github_projects/SunFFBJoystick/python_apis/validate_directinput.py --motors-disconnected --port COM8 --stress 180 --report-json E:/github_projects/SunFFBJoystick/doc/hil-directinput-500hz-final-results.json
+```
+
+The final capture passed 31/32 checks. All eleven effect classes, four Cartesian
+constant directions, live magnitude/direction/gain, periodic updates, finite ramp,
+XY conditions followed by envelope updates, and independent Y condition updates
+passed. The requested-three-minute full pool rotated sine, dual-axis inertia and
+mixed effects with 2670 live gain updates. Total stress plus final drain lasted
+182.210 s; 90484 UART force frames and 109391 DirectInput state polls were observed.
+No new deadline misses or skipped releases occurred during this stress phase.
+
+The sole failed check is the **boot-wide** deadline budget: the first UART record
+already contained one completed-job miss, maximum latency 7586 us, and seven
+skipped releases. These values did not increase during the captured test. Their
+origin before UART capture is not established; do not attribute them specifically
+to startup or DirectInput initialization. The strict 1 ms whole-boot claim remains
+unproven even though the stress-period delta passed.
+
+Preserve the first two captures as well. The first included prior-effect Y force
+in the immediate square-wave transition and attempted duplicate cleanup of
+already-unloaded handles. The repeat retained transition amplitude 1245 and found
+steady Y force zero after a documented 50 ms settling window. This is a
+steady-state isolation test, not a switching-latency guarantee. The second runner
+also required data in a final slice potentially shorter than one 2 ms force frame,
+causing an end-boundary exception; stop/unload nevertheless succeeded. The final
+runner always completes its last one-second batch, preserves historical deadline
+evidence, and cleans up only active handles. The same batching correction is
+applied to the raw HID endurance runner. Failure captures were not overwritten.
+
+Evidence: `doc/hil-directinput-500hz-results.json`,
+`doc/hil-directinput-500hz-retest-results.json`, and
+`doc/hil-directinput-500hz-final-results.json`.
+Final cleanup reported no errors. An independent post-exit check observed 298
+UART force frames, all zero, and 298 USB input reports. The final capture's heap
+remained 328816 bytes throughout.
+
 ## Direct-dispatch repair candidate
 
 USB callbacks now execute bounded report dispatch directly under the handler
@@ -285,10 +340,11 @@ After cleanup, 497 additional UART force frames were all zero.
 
 An experimental read-only endpoint-status record did not fit the diagnostic UART
 burst and produced no host records. Its transmitter/decoder were removed after
-this run; it is not evidence of controller state. The currently flashed candidate
-still contains that unsuccessful best-effort diagnostic attempt. The cleaned
-source removes it without changing USB command dispatch, but that cleaned binary
-has not been flashed and stress-tested. Preserve this distinction when reporting
+this run; it is not evidence of controller state. At the time of this capture,
+the flashed candidate contained that unsuccessful best-effort diagnostic attempt.
+The cleaned source removed it without changing USB command dispatch, but that
+cleaned binary had not yet been flashed. The subsequent DirectInput validation
+above records its later upload. Preserve this distinction when reporting
 the tested firmware. Native tests passed 200/200 across 1/2/3 axes and S2/S3/HIL
 builds passed. This 30-minute result is not a worst-case execution-time proof,
 wire-level timing measurement, or a multi-day endurance qualification.
@@ -326,4 +382,45 @@ skipped cycles). UART uptime continued and heap remained stable. The planned 30-
 did not complete; repeated allocation/control traffic remains an unresolved USB
 stability blocker. See `doc/hil-endurance-500hz-retest-results.json`. Neither
 capture establishes a worst-case execution-time bound or timing compliance.
+
+## Follow-up deadline investigation and verification
+
+The original `25cdfd1` DirectInput run recorded a boot-wide 7586 us completion
+latency and seven skipped releases. The original worst event did not have a
+per-stage timestamp, so its cause could not be assigned to LCD SPI, force
+calculation, or scheduling. A diagnostic firmware first added event timestamps
+and LCD-stage sampling; its three-minute and ten-minute DirectInput runs did not
+reproduce the miss (maximum 983 us, zero completed-job misses, six skips).
+
+The subsequent change gates the force timer until peer tasks are created and
+updates the LCD in bounded row groups with yields between SPI transfers. These
+changes were tested together, so this run cannot isolate which change mattered.
+The LCD stage is sampled when the event is recorded; it is not a continuous trace
+and cannot prove that LCD activity caused a latency event.
+
+The flashed `esp32-s3-hil` build passed all 32 checks through the actual
+`E:/github_projects/py_directinput_ffb` library. The LCD remained enabled, CDC
+disabled, UART position simulation requested at 500 Hz, and motors disconnected.
+The rotating full-pool workload ran for 601.264 seconds with 300011 received
+force frames, 359011 DirectInput state polls and 8850 live updates. All fifteen
+effect slots were stressed through sine, inertia and mixed phases. No reset,
+USB unmount, cleanup error or functional check failure occurred. State polls are
+not a count of fresh USB reports.
+
+Across boot and test, the maximum release-to-completion duration was 488 us
+against the 1000 us budget; completed-job misses remained zero. Seven skipped
+releases were present by the first UART sample at 38 seconds and did not increase
+through the 659-second final sample. Thus the run demonstrates no skips during
+the observed test interval, but cannot locate when those seven startup skips
+occurred. The captured worst event was sequence 378111 at uptime 660091 ms:
+release→start 34 us, lock wait 11 us, force calculation 336 us, and
+post-calculation→completion 107 us. Its context was an active effect, with LCD
+stage idle at the record instant; this is not evidence that LCD activity caused
+or did not cause the historical 7586 us event. The old event remains unexplained
+and was not reproduced in the diagnostic or fixed runs.
+
+The capture is `doc/hil-deadline-fixed-10min-results.json`. This is substantial
+hardware evidence for the combined change, not a formal WCET bound, wire-level
+timing measurement, or proof of the original root cause. Motors must remain
+disconnected for these HIL builds.
 

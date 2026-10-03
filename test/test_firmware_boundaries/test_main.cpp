@@ -532,6 +532,11 @@ void test_force_deadlines_measure_release_to_completion()
     TEST_ASSERT_EQUAL_UINT32(1050, lifetime.maxElapsedUs);
     TEST_ASSERT_EQUAL_UINT32(3, deadlines.snapshot().count);
     TEST_ASSERT_EQUAL_UINT32(0, deadlines.take_window().count);
+    const auto event = deadlines.worst_event();
+    TEST_ASSERT_EQUAL_UINT32(2, event.sequence);
+    TEST_ASSERT_EQUAL_UINT32(1000, event.releaseUs);
+    TEST_ASSERT_EQUAL_UINT32(2050, event.endUs);
+    TEST_ASSERT_EQUAL_UINT32(2050, event.computedUs);
 }
 
 void test_control_report_storage_is_independent_of_interrupt_reports()

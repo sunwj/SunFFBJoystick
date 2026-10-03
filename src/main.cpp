@@ -24,6 +24,7 @@
 static std::atomic<uint32_t> consoleStage{0}, consoleCalls{0};
 static std::atomic<uint32_t> hidCalls{0}, commandStarts{0}, commandEnds{0};
 static std::atomic<TaskHandle_t> usbServiceHandle{nullptr};
+static std::atomic<uint32_t> lcdStage{0};
 #endif
 
 #if ENABLE_USB_CDC
@@ -377,6 +378,7 @@ static bool submitReport(uint8_t id, const void* payload, uint16_t length,
 }
 
 TaskHandle_t forceCalculationTaskHandle;
+SemaphoreHandle_t forceStartGate;
 static uint32_t forceReleaseUs;
 
 static void force_timer_callback(void*)
@@ -475,6 +477,30 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 }
 
 #if ENABLE_LCD
+static void push_lcd_sprite_bounded()
+{
+    // Split LCD updates into bounded row groups so the force task can run between transfers.
+    constexpr int16_t rowsPerTransfer = 4;
+    auto* pixels = static_cast<uint16_t*>(sprite.getPointer());
+    configASSERT(pixels != nullptr);
+    const bool oldSwapBytes = lcd.getSwapBytes();
+    lcd.setSwapBytes(false);
+
+    for (int16_t row = 0; row < TFT_H; row += rowsPerTransfer)
+    {
+        const int16_t rows = std::min<int16_t>(rowsPerTransfer, TFT_H - row);
+#if ENABLE_HIL_DIAGNOSTICS
+        lcdStage.store(2, std::memory_order_relaxed);
+#endif
+        lcd.pushImage(TFT_X, TFT_Y + row, TFT_W, rows, pixels + row * TFT_W);
+#if ENABLE_HIL_DIAGNOSTICS
+        lcdStage.store(1, std::memory_order_relaxed);
+#endif
+        taskYIELD();
+    }
+    lcd.setSwapBytes(oldSwapBytes);
+}
+
 void lcd_task(void* params)
 {
     // Hold shared locks only for snapshots; release them before rendering and SPI display transfers.
@@ -488,6 +514,9 @@ void lcd_task(void* params)
     {
         int32_t forces[NUM_AXIS] = {0};
         xQueuePeek(gForces, forces, 0);
+#if ENABLE_HIL_DIAGNOSTICS
+        lcdStage.store(1, std::memory_order_relaxed);
+#endif
 
         sprite.fillSprite(TFT_BLACK);
         sprite.drawRect(0, 0, 40, 40, TFT_RED);
@@ -605,7 +634,13 @@ void lcd_task(void* params)
             sprite.fillSmoothCircle(44 + i % 14 * 8, 48 + 8 * int(i / 14), 4, color, TFT_BLACK);
         }
 
-        sprite.pushSprite(TFT_X, TFT_Y);
+#if ENABLE_HIL_DIAGNOSTICS
+        lcdStage.store(2, std::memory_order_relaxed);
+#endif
+        push_lcd_sprite_bounded();
+#if ENABLE_HIL_DIAGNOSTICS
+        lcdStage.store(0, std::memory_order_relaxed);
+#endif
 
         vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(LCD_TASK_PERIOD_MS));
     }
@@ -671,6 +706,8 @@ void force_calculation_task(void* params)
     // Lock order is input -> effect pool; other paths holding both locks must preserve that order.
     // Publish only the latest computed force so slow consumers do not accumulate stale control output.
     forceCalculationTaskHandle = xTaskGetCurrentTaskHandle();
+    // Start deadlines only after setup has created every peer task and queue.
+    xSemaphoreTake(forceStartGate, portMAX_DELAY);
     esp_timer_handle_t forceTimer;
     esp_timer_create_args_t timerArgs{};
     timerArgs.callback = force_timer_callback;
@@ -691,7 +728,9 @@ void force_calculation_task(void* params)
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
         xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
         const uint32_t lockedUs = micros();
+        const uint32_t context = uint32_t(ffbHandler.deviceState);
         ffbForceCalculator.force_calculator(ffbHandler, ffbDeviceInput, (int32_t*)forces);
+        const uint32_t computedUs = micros();
         xSemaphoreGive(semaphoreFFBReportHandler);
         xSemaphoreGive(semaphoreFFBDeviceInput);
 
@@ -700,7 +739,12 @@ void force_calculation_task(void* params)
         uint32_t endTime = micros();
         effectProcessTime = endTime - startTime;
         forceTiming.record(endTime, effectProcessTime);
-        forceDeadlines.record(releaseUs, startTime, lockedUs, endTime);
+        forceDeadlines.record_detail(releaseUs, startTime, lockedUs, computedUs, endTime,
+                                    context
+#if ENABLE_HIL_DIAGNOSTICS
+                                    | (lcdStage.load(std::memory_order_relaxed) << 8)
+#endif
+                                    );
 
         // A missed deadline must not turn the highest periodic task into a
         // busy loop, especially when all firmware tasks share one CPU.
@@ -823,8 +867,20 @@ void send_force_task(void* params)
                 commandEnds.load(std::memory_order_relaxed),
                 service ? uint32_t(eTaskGetState(service)) : UINT32_MAX,
                 service ? uint32_t(uxTaskGetStackHighWaterMark(service)) : 0};
-            motorLink.sendRaw(0x7D, reinterpret_cast<const uint8_t*>(progress), sizeof(progress),
-                              SunFFB::SerialFrameFormat::Variable);
+            if ((lastHealthMs / 1000) % 2)
+            {
+                motorLink.sendRaw(0x7D, reinterpret_cast<const uint8_t*>(progress), sizeof(progress),
+                                  SunFFB::SerialFrameFormat::Variable);
+            }
+            else
+            {
+                // Alternate equal-sized records to stay within the UART burst budget.
+                const auto event = forceDeadlines.worst_event();
+                const uint32_t detail[] = {lastHealthMs, event.sequence, event.releaseUs,
+                    event.startUs, event.lockedUs, event.computedUs, event.endUs, event.context};
+                motorLink.sendRaw(0x7A, reinterpret_cast<const uint8_t*>(detail), sizeof(detail),
+                                  SunFFB::SerialFrameFormat::Variable);
+            }
             // Lifetime counters preserve evidence even if a UART record is lost.
             const auto deadline = forceDeadlines.snapshot();
             const uint32_t deadlines[] = {lastHealthMs, deadline.count, deadline.maxWakeUs,
@@ -1015,9 +1071,10 @@ void setup()
     // Single-slot overwrite queues are latest-value mailboxes, not full sample-history buffers.
     gForces = xQueueCreate(1, sizeof(int32_t) * NUM_AXIS);
     gJoystickReportData = xQueueCreate(1, sizeof(JoystickSample));
+    forceStartGate = xSemaphoreCreateBinary();
     semaphoreFFBDeviceInput = xSemaphoreCreateMutex();
     semaphoreFFBReportHandler = xSemaphoreCreateMutex();
-    configASSERT(gPositions && gForces && gJoystickReportData &&
+    configASSERT(gPositions && gForces && gJoystickReportData && forceStartGate &&
                  semaphoreFFBDeviceInput && semaphoreFFBReportHandler);
     ffbDeviceInput.reset();
 
@@ -1066,6 +1123,8 @@ void setup()
     createFirmwareTask(receive_position_task, "ReceivePos", TASK_STACK_SIZE, periodicIOPriority,
                        protoCore);
 #endif
+    // The force task may now establish its periodic release phase.
+    xSemaphoreGive(forceStartGate);
 }
 
 void loop()
