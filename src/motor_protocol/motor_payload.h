@@ -1,3 +1,9 @@
+/**
+ * Application payloads: one int32 force or uint16 position value per configured axis.
+ * UART transmits these layouts; CAN uses its own compact codec, not the raw force structure.
+ * Peers must agree on axis count and little-endian layout; input tasks map the position center.
+ */
+
 #ifndef SUNFFB_MOTOR_PAYLOAD_H
 #define SUNFFB_MOTOR_PAYLOAD_H
 

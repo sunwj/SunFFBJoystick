@@ -1,3 +1,6 @@
+# HID client boundary tests using fake hidapi for serialization, error handling and allocation.
+# No board required; OS driver behavior and physical USB transport remain outside this suite.
+
 import unittest
 from unittest.mock import patch
 

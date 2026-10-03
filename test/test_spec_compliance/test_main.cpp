@@ -1,3 +1,9 @@
+/**
+ * Protocol semantics and compatibility regression tests named for behavior to preserve.
+ * Includes specification interpretations and the multi-axis condition exception documented in AGENTS.md.
+ * Distinguish independent axis blocks from single-block projection; native success is not hardware validation.
+ */
+
 #include <unity.h>
 #include <cmath>
 #include "ffb_force_calculator.h"
@@ -29,6 +35,7 @@ void tearDown()
 
 struct Fixture
 {
+    // Zero filter time constants isolate protocol/model semantics from transient filter behavior.
     FFBReportHandler h;
     FFBDeviceInput input;
     FFBForceCalculator calc;
@@ -215,19 +222,36 @@ void direction_enable_is_not_a_coordinate_format_selector()
     TEST_ASSERT_EQUAL_INT32(4000, f.force(1));
 }
 
-void directed_condition_must_ignore_stale_second_axis_block()
+void directed_condition_with_axis_blocks_must_preserve_both_axes()
 {
+    // Compatibility regression from 0825262: X-aligned direction must not discard independent Y data.
+    // Different saturation limits identify each axis; an envelope must not replace either condition.
+    const uint8_t types[] = {ET_SPRING, ET_DAMPER, ET_INERTIA, ET_FRICTION};
+    for (const uint8_t type : types)
+    {
+        Fixture f;
+        auto id = f.effect(type, 1000, DIRECTION_ENABLE, 9000);
+        f.condition(id, 0, 0, 10000, 1000, 1000);
+        f.condition(id, 0, 0, 10000, 2000, 2000, 1);
+        SetEnvelopeReportData envelope{id, 0, 0, 100, 100};
+        f.h.set_envelope(&envelope);
+        f.position(32767, 32767);
+        f.start(id);
+        TEST_ASSERT_EQUAL_INT32(-1000, f.force());
+        TEST_ASSERT_EQUAL_INT32(-2000, f.force(1));
+    }
+}
+
+void directed_condition_with_only_first_block_must_keep_projection()
+{
+    // The compatibility branch must not turn a genuine one-block directed spring into an XY spring.
     Fixture f;
-    auto id = f.effect(ET_SPRING, 1000, X_AXIS_ENABLE | Y_AXIS_ENABLE);
+    auto id = f.effect(ET_SPRING, 1000, DIRECTION_ENABLE, 9000);
     f.condition(id, 0, 0, 1000);
-    f.condition(id, 0, 0, 7000, 10000, 10000, 1);
-    auto e = f.h.get_all_effect_blocks()[id - 1].effectData;
-    e.axisEnable = DIRECTION_ENABLE;
-    e.directions[0] = 9000;
-    f.h.set_effect(&e);
     f.position(32767, 32767);
     f.start(id);
-    TEST_ASSERT_EQUAL_INT32(0, f.force(1));
+    TEST_ASSERT_INT_WITHIN(1, -1000, f.force());
+    TEST_ASSERT_INT_WITHIN(1, 0, f.force(1));
 }
 
 void directed_friction_must_not_resist_perpendicular_motion()
@@ -444,7 +468,8 @@ int main()
     RUN_TEST(condition_sample_period_must_hold_output_between_samples);
     RUN_TEST(zero_sustain_periodic_effect_must_apply_attack_amplitude);
     RUN_TEST(direction_enable_is_not_a_coordinate_format_selector);
-    RUN_TEST(directed_condition_must_ignore_stale_second_axis_block);
+    RUN_TEST(directed_condition_with_axis_blocks_must_preserve_both_axes);
+    RUN_TEST(directed_condition_with_only_first_block_must_keep_projection);
     RUN_TEST(directed_friction_must_not_resist_perpendicular_motion);
     RUN_TEST(infinite_periodic_effect_must_preserve_phase_after_hours);
 #endif

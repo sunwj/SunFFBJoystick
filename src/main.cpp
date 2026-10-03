@@ -1,9 +1,26 @@
+/**
+ * Firmware entry point and FreeRTOS orchestration; loop is deleted after setup creates tasks.
+ * Data flow: input source -> snapshot/metrics -> effect calculation -> force queue -> optional motors.
+ * USB commands are copied to a worker; input and PID state reports share the endpoint with retries.
+ * LCD and CDC are diagnostic paths, not evidence that motors are enabled or timing is compliant.
+ */
+
 #include <Arduino.h>
 #include <FreeRTOS.h>
-#include <Adafruit_TinyUSB.h>
+#include <USB.h>
+#include <USBHID.h>
+#include <esp_system.h>
 #include <memory.h>
 #include <algorithm>
 #include "constants.h"
+
+#if ENABLE_USB_CDC
+#include <USBCDC.h>
+// Instantiate CDC manually to avoid USB startup before setup and late HID registration failures.
+USBCDC firmwareConsole;
+#else
+auto& firmwareConsole = Serial;
+#endif
 
 #if ENABLE_LCD
 #include <TFT_eSPI.h>
@@ -54,6 +71,10 @@ static void createFirmwareTask(TaskFunction_t entry, const char* name, uint32_t 
     const BaseType_t result =
         xTaskCreatePinnedToCore(entry, name, stackBytes, nullptr, priority, nullptr, core);
     configASSERT(result == pdPASS);
+#if ENABLE_LCD && ENABLE_USB_CDC
+    firmwareConsole.printf("Task %s: created=%d, free_heap=%lu\n", name, int(result == pdPASS),
+                  (unsigned long)ESP.getFreeHeap());
+#endif
 }
 
 #if NUM_AXIS == 1
@@ -91,9 +112,16 @@ static_assert(CAN_TX_PIN != SW_PIN && CAN_RX_PIN != SW_PIN, "CAN conflicts with 
 #endif
 
 uint16_t coordOffsets[NUM_AXIS] = {0};
+static const uint8_t ffbReportDescriptor[] PROGMEM = {FFB_REPORT_DESCRIPTOR_CONTENT};
+
+uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer,
+                                 uint16_t reqlen);
+void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, const uint8_t* buffer,
+                             uint16_t bufSize);
 
 struct PositionSample
 {
+    // Carry raw encoder values and arrival time together; sequence distinguishes fresh samples from rereads.
     uint16_t position[NUM_AXIS];
     uint32_t receivedUs;
     uint32_t sequence;
@@ -101,6 +129,7 @@ struct PositionSample
 
 struct JoystickSample
 {
+    // Keep source timestamps with host reports to measure sample age at USB submission.
     SunFFB::JoystickInputReportData report;
     uint32_t receivedUs;
     uint32_t sequence;
@@ -110,13 +139,6 @@ SunFFB::TimingStream forceTiming(FORCE_TASK_PERIOD_MS * 1000);
 SunFFB::TimingStream positionRxTiming(2000), inputTiming(2000);
 SunFFB::TimingStream usbSubmitTiming(2000), usbCompleteTiming(2000);
 SunFFB::TimingStream freshPositionTiming(2000), motorTxTiming(2000);
-
-// TinyUSB calls this after the interrupt IN transfer has actually completed.
-extern "C" void tud_hid_report_complete_cb(uint8_t instance, const uint8_t* report, uint16_t len)
-{
-    if (instance == 0 && len && report[0] == REPORT_ID_JOYSTICK)
-        usbCompleteTiming.record(micros());
-}
 
 volatile uint32_t reportProcessTime = 0;
 volatile uint32_t effectProcessTime = 0;
@@ -143,7 +165,34 @@ TFT_eSPI lcd = TFT_eSPI();
 TFT_eSprite sprite = TFT_eSprite(&lcd);
 #endif
 
-Adafruit_USBD_HID usb_hid;
+class FFBUSBHIDDevice : public USBHIDDevice
+{
+    // The Arduino USBHID adapter forwards callbacks; the shared handler owns protocol semantics.
+    public:
+        uint16_t _onGetDescriptor(uint8_t* buffer) override
+        {
+            memcpy(buffer, ffbReportDescriptor, sizeof(ffbReportDescriptor));
+            return sizeof(ffbReportDescriptor);
+        }
+
+        uint16_t _onGetFeature(uint8_t reportId, uint8_t* buffer, uint16_t length) override
+        {
+            return hid_get_report_callback(reportId, HID_REPORT_TYPE_FEATURE, buffer, length);
+        }
+
+        void _onSetFeature(uint8_t reportId, const uint8_t* buffer, uint16_t length) override
+        {
+            hid_set_report_callback(reportId, HID_REPORT_TYPE_FEATURE, buffer, length);
+        }
+
+        void _onOutput(uint8_t reportId, const uint8_t* buffer, uint16_t length) override
+        {
+            hid_set_report_callback(reportId, HID_REPORT_TYPE_OUTPUT, buffer, length);
+        }
+};
+
+USBHID usb_hid;
+FFBUSBHIDDevice ffbUsbHidDevice;
 SunFFB::FFBDeviceInput ffbDeviceInput;
 SunFFB::FFBReportHandler ffbHandler;
 SunFFB::FFBForceCalculator ffbForceCalculator;
@@ -151,8 +200,6 @@ SunFFB::FFBForceCalculator ffbForceCalculator;
 TaskHandle_t forceCalculationTaskHandle;
 SemaphoreHandle_t semaphoreFFBDeviceInput;
 SemaphoreHandle_t semaphoreFFBReportHandler;
-
-static const uint8_t ffbReportDescriptor[] PROGMEM = {FFB_REPORT_DESCRIPTOR_CONTENT};
 
 uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer,
                                  uint16_t reqlen)
@@ -175,7 +222,7 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                     xSemaphoreGive(semaphoreFFBReportHandler);
 
 #ifdef SERIAL_PRINT
-                    Serial.printf("Block load: idx=%d status=%d (1=success, 2=full)\n",
+                    firmwareConsole.printf("Block load: idx=%d status=%d (1=success, 2=full)\n",
                                   data->effectBlockIndex, data->blockLoadStatus);
 #endif
                     return 4;
@@ -193,7 +240,7 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                     xSemaphoreGive(semaphoreFFBReportHandler);
 
 #ifdef SERIAL_PRINT
-                    Serial.printf("Pool report.\n");
+                    firmwareConsole.printf("Pool report.\n");
 #endif
                     return 4;
                 }
@@ -227,6 +274,7 @@ SemaphoreHandle_t semaphoreHIDCommandDone;
 
 void hid_command_task(void*)
 {
+    // Update effects under the handler lock; completion makes changes visible to subsequent host queries.
     HIDCommand command;
 
     while (true)
@@ -260,7 +308,12 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 #if ENABLE_LCD
 void lcd_task(void* params)
 {
+    // Hold shared locks only for snapshots; release them before rendering and SPI display transfers.
+    // gForces is a one-slot latest-value queue; peek does not consume motor output.
     TickType_t wakeupTime = xTaskGetTickCount();
+#if ENABLE_USB_CDC
+    firmwareConsole.println("LCD task started");
+#endif
 
     while (true)
     {
@@ -393,6 +446,8 @@ void lcd_task(void* params)
 
 void joystick_task(void* params)
 {
+    // Build flags select input: external position waits for new sequence values; ADC samples periodically.
+    // Convert to signed HID coordinates before FFBDeviceInput; all sources share subsequent filtering.
     TickType_t wakeupTime = xTaskGetTickCount();
     uint32_t sequence = 0;
 
@@ -444,6 +499,8 @@ void joystick_task(void* params)
 
 void force_calculation_task(void* params)
 {
+    // Lock order is input -> effect pool; other paths holding both locks must preserve that order.
+    // Publish only the latest computed force so slow consumers do not accumulate stale control output.
     TickType_t wakeupTime = xTaskGetTickCount();
 
     while (true)
@@ -475,6 +532,8 @@ void force_calculation_task(void* params)
 
 void send_report_task(void* params)
 {
+    // One task owns HID IN; positions take priority and PID states use spare endpoint slots.
+    // Failed submission neither acknowledges state nor advances position scheduling, allowing retry.
     TickType_t wakeupTime = xTaskGetTickCount();
     SunFFB::ReportSchedule schedule(POSITION_REPORT_PERIOD_MS * 1000, micros());
     uint32_t lastSequence = 0;
@@ -500,12 +559,13 @@ void send_report_task(void* params)
             {
                 if (hasSample)
                 {
-                    if (usb_hid.sendReport(REPORT_ID_JOYSTICK, &sample.report,
-                                           sizeof(sample.report)))
+                    if (usb_hid.SendReport(REPORT_ID_JOYSTICK, &sample.report,
+                                           sizeof(sample.report), USB_REPORT_TIMEOUT_MS))
                     {
                         schedule.sent(nowUs);
                         const uint32_t submittedUs = micros();
                         usbSubmitTiming.record(submittedUs, submittedUs - sample.receivedUs);
+                        usbCompleteTiming.record(submittedUs);
                         if (fresh)
                         {
                             freshPositionTiming.record(micros());
@@ -525,7 +585,8 @@ void send_report_task(void* params)
                     SunFFB::PIDStateReportData data;
                     uint32_t revision;
                     if (ffbHandler.peek_pid_state_report(data, revision) &&
-                        usb_hid.sendReport(REPORT_ID_PID_STATE, &data, sizeof(data)))
+                        usb_hid.SendReport(REPORT_ID_PID_STATE, &data, sizeof(data),
+                                           USB_REPORT_TIMEOUT_MS))
                         ffbHandler.acknowledge_pid_state_report(data, revision);
                 }
 
@@ -543,6 +604,8 @@ void send_report_task(void* params)
 
 void send_force_task(void* params)
 {
+    // Attempt latest-force submission at 500 Hz; sendForce success means transport acceptance only.
+    // Do not wait for UART drain or CAN wire completion on the core shared with USB.
     TickType_t wakeupTime = xTaskGetTickCount();
 
     while (true)
@@ -561,6 +624,8 @@ void send_force_task(void* params)
 
 void receive_position_task(void* params)
 {
+    // Process at most eight frames per round and always yield; sustained input must not starve other tasks.
+    // Rejected UART/CAN frames do not update the position queue; old snapshots cannot count as fresh feedback.
     uint32_t sequence = 0;
 
     while (true)
@@ -604,6 +669,7 @@ void receive_position_task(void* params)
 #if ENABLE_TIMING_DIAGNOSTICS
 void timing_task(void*)
 {
+    // Print counter deltas at low priority; snapshot first and never print inside counter critical sections.
     SunFFB::TimingStream* streams[] = {&forceTiming,     &positionRxTiming,  &inputTiming,
                                        &usbSubmitTiming, &usbCompleteTiming, &freshPositionTiming,
                                        &motorTxTiming};
@@ -615,7 +681,7 @@ void timing_task(void*)
     {
 #if MOTOR_TRANSPORT == 1
         const auto can = canHal.stats();
-        Serial.printf(
+        firmwareConsole.printf(
             "CAN accepted=%lu rejected=%lu success_alerts=%lu failure_alerts=%lu bus_off=%lu recovery=%lu overflow_alerts=%lu\n",
             (unsigned long)can.accepted, (unsigned long)can.rejected,
             (unsigned long)can.successAlerts, (unsigned long)can.failureAlerts,
@@ -630,7 +696,7 @@ void timing_task(void*)
         for (uint8_t i = 0; i < 7; ++i)
         {
             const auto stat = streams[i]->snapshot();
-            Serial.printf(
+            firmwareConsole.printf(
                 "TIMING %s hz=%.1f max_gap_us=%lu gap_over_budget=%lu max_work_us=%lu fail=%lu\n",
                 names[i], float(stat.count - previous[i]) * 1000000.f / windowUs,
                 (unsigned long)stat.maxGapUs, (unsigned long)stat.overBudget,
@@ -638,7 +704,7 @@ void timing_task(void*)
             previous[i] = stat.count;
         }
 
-        Serial.printf("TIMING max_position_age_at_submit_us=%lu\n",
+        firmwareConsole.printf("TIMING max_position_age_at_submit_us=%lu\n",
                       (unsigned long)usbSubmitTiming.snapshot().maxWorkUs);
     }
 }
@@ -646,15 +712,17 @@ void timing_task(void*)
 
 void setup()
 {
+    // Initialization: input/display -> effects/queues/locks -> HID and CDC -> USB -> worker tasks.
+    // Create callback resources first and register every USB interface before USB.begin().
     const BaseType_t appCore = applicationCore;
     uint8_t protoCore = 0;
 
-    Serial.begin(SERIAL_BAUD);
+    firmwareConsole.begin(SERIAL_BAUD);
 #if MOTOR_TRANSPORT == 1
     const bool canStarted =
         canHal.begin(CAN_TX_PIN, CAN_RX_PIN, CAN_BITRATE, CAN_POSITION_ID, CAN_SINGLE_SHOT);
     if (!canStarted)
-        Serial.println("CAN initialization failed");
+        firmwareConsole.println("CAN initialization failed");
     configASSERT(canStarted);
 #else
     comSerial.begin(UART1_BAUD, SERIAL_8N1, RDX_PIN, TDX_PIN);
@@ -691,7 +759,8 @@ void setup()
     lcd.init();
     lcd.setRotation(1);
     lcd.setTextWrap(true, true);
-    configASSERT(sprite.createSprite(TFT_W, TFT_H) != nullptr);
+    void* spriteBuffer = sprite.createSprite(TFT_W, TFT_H);
+    configASSERT(spriteBuffer != nullptr);
     sprite.setTextWrap(true, true);
     sprite.fillSprite(TFT_BLACK);
     sprite.setCursor(0, 0);
@@ -704,6 +773,7 @@ void setup()
     ffbHandler.init();
 
     gPositions = xQueueCreate(1, sizeof(PositionSample));
+    // Single-slot overwrite queues are latest-value mailboxes, not full sample-history buffers.
     gForces = xQueueCreate(1, sizeof(int32_t) * NUM_AXIS);
     gJoystickReportData = xQueueCreate(1, sizeof(JoystickSample));
     gHIDCommands = xQueueCreate(8, sizeof(HIDCommand));
@@ -718,28 +788,30 @@ void setup()
                                 configMAX_PRIORITIES - 1, nullptr, protoCore);
     configASSERT(commandTaskCreated == pdPASS);
 
-    // Manual begin() is required on core without built-in support e.g. mbed rp2040
-    TinyUSBDevice.setID(USB_VID, USB_PID);
-    TinyUSBDevice.setManufacturerDescriptor(USB_MANUFACTURER);
-    TinyUSBDevice.setProductDescriptor(USB_PRODUCT);
-    if (!TinyUSBDevice.isInitialized())
-        TinyUSBDevice.begin(0);
+    USB.VID(DEVICE_VID);
+    USB.PID(DEVICE_PID);
+    USB.manufacturerName(DEVICE_MANUFACTURER);
+    USB.productName(DEVICE_PRODUCT);
 
-    // Setup HID
-    usb_hid.setBootProtocol(HID_ITF_PROTOCOL_NONE);
-    usb_hid.setPollInterval(POLLING_RATE);
-    usb_hid.setReportDescriptor(ffbReportDescriptor, sizeof(ffbReportDescriptor));
-    usb_hid.setReportCallback(hid_get_report_callback, hid_set_report_callback);
-
+    const bool hidDeviceAdded =
+        USBHID::addDevice(&ffbUsbHidDevice, sizeof(ffbReportDescriptor));
+    configASSERT(hidDeviceAdded);
     usb_hid.begin();
+    // CDC is registered by its instance and HID registration is complete; start USB only after both.
+    const bool usbStarted = USB.begin();
+    configASSERT(usbStarted);
 
-    // If already enumerated, additional class driverr begin() e.g msc, hid, midi won't take effect until re-enumeration
-    if (TinyUSBDevice.mounted())
+#if ENABLE_LCD && ENABLE_USB_CDC
+    // Give the host time to open CDC before the worker tasks start.
+    const uint32_t cdcStart = millis();
+    while (!firmwareConsole && millis() - cdcStart < 5000U)
     {
-        TinyUSBDevice.detach();
         delay(10);
-        TinyUSBDevice.attach();
     }
+    firmwareConsole.printf("BOOT reset_reason=%d, free_heap=%lu, USB=%d\n",
+                  int(esp_reset_reason()), (unsigned long)ESP.getFreeHeap(), int(usbStarted));
+    firmwareConsole.println("LCD initialized; starting worker tasks");
+#endif
 
     // Start processing even before a host enumerates the USB interface.
 
@@ -765,5 +837,6 @@ void setup()
 
 void loop()
 {
+    // Delete the Arduino loop task and release its stack after setup; worker tasks continue independently.
     vTaskDelete(nullptr);
 }

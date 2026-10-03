@@ -1,3 +1,9 @@
+/**
+ * Native tests for motor CAN codecs and TWAI adaptation using in-memory frames and a fake driver.
+ * Cover endianness, axis count, sequence wrap/duplicates, backpressure, alerts and bus-off recovery.
+ * Simulated acceptance does not validate arbitration or physical bus timing.
+ */
+
 #include <unity.h>
 #include <deque>
 #include <cstring>
@@ -30,6 +36,7 @@ void tearDown()
 
 struct Hal
 {
+    // In-memory CAN loopback; busy rejects submission so tests can check sequence ownership.
     std::deque<CANFrame> frames;
     bool busy = false;
     bool send(const CANFrame& f)

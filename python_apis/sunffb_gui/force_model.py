@@ -1,3 +1,7 @@
+# Two-axis software prediction for the GUI, not force telemetry read back from firmware.
+# Kinematics uses normalized position/derivatives; nominal forces use the +/-10000 range.
+# Preview formulas cover effects and envelopes; device state, filtering and scheduling can differ.
+
 from __future__ import annotations
 
 import math
@@ -61,11 +65,13 @@ class EffectParams:
     apply_y: bool = True
 
 
+# Convert HID force-source angle to the applied XY unit vector: u=(-sin(theta), cos(theta)).
 def u_from_angle(deg: float) -> Tuple[float, float]:
     rad = math.radians(deg)
     return (-math.sin(rad), math.cos(rad))
 
 
+# Invert the force-vector mapping for display; wrap the resulting angle into [0, 360).
 def direction_degrees(fx: float, fy: float) -> float:
     deg = math.degrees(math.atan2(-fx, fy))
     return deg % 360.0
@@ -76,6 +82,7 @@ class ForceModel:
         self.main = main
         self.spring = spring
 
+    # Return predicted Fx/Fy after effect gain, without applying device master gain or final firmware clipping.
     def evaluate_effect(self, params: EffectParams, kin: Kinematics, elapsed_ms: float = 0.0) -> Tuple[float, float]:
         gain = params.gain / 255.0
         if params.effect_type == CONSTANT:
@@ -105,6 +112,7 @@ class ForceModel:
         return max(-1.0, min(1.0, v))
 
     @staticmethod
+    # Spring uses position, damper velocity, inertia acceleration; friction is speed sign above a 2% threshold.
     def _condition_metric(params: EffectParams, axis: str, kin: Kinematics) -> float:
         if axis == 'x':
             pos, vel, acc = kin.roll, kin.vel_roll, kin.acc_roll
@@ -121,6 +129,7 @@ class ForceModel:
         return 0.0
 
     @staticmethod
+    # Use side-specific coefficient/saturation around center +/- deadband; positive coefficients oppose displacement.
     def _condition_axis(params: EffectParams, axis: str, metric: float) -> float:
         if axis == 'x':
             pc, nc, ps, ns, db, ce = (params.pos_coeff_x, params.neg_coeff_x,
@@ -142,6 +151,7 @@ class ForceModel:
         return 0.0
 
     @staticmethod
+    # Interpolate absolute attack/fade amplitude around sustain; indefinite duration has no terminal fade.
     def envelope_amplitude(params: EffectParams, elapsed_ms: float,
                            base_magnitude: float = MAX_FORCE) -> float:
         t = max(0.0, elapsed_ms)
@@ -155,6 +165,7 @@ class ForceModel:
         return base
 
     @staticmethod
+    # Convert absolute amplitude to a ramp scaling factor with a nonzero denominator.
     def envelope_factor(params: EffectParams, elapsed_ms: float,
                         base_magnitude: float = MAX_FORCE) -> float:
         base = max(1.0, float(base_magnitude))
@@ -165,6 +176,7 @@ class ForceModel:
         return params.ramp_start + (params.ramp_end - params.ramp_start) * frac
 
     @staticmethod
+    # Convert millisecond time and HID phase to a cycle fraction, then wrap to [0, 1).
     def periodic_u(params: EffectParams, elapsed_ms: float) -> float:
         # Mirrors FFBTestTool ForceModel.Periodic: u = t/period + PhaseDeg/360.
         # Phase arrives in HID hundredths of a degree, so /100 converts to degrees,
@@ -173,6 +185,7 @@ class ForceModel:
         return (elapsed_ms / period_ms + params.phase / 36000.0) % 1.0
 
     @staticmethod
+    # Unit-amplitude waveforms are scaled later; triangle phase is chosen to match the firmware convention.
     def periodic_wave(wave: str, u01: float) -> float:
         u = u01 % 1.0
         if wave == SINE:
@@ -189,6 +202,7 @@ class ForceModel:
             return 1.0 - 2.0 * u01
         return 0.0
 
+    # Add background spring and main prediction without final saturation; this is not physical force telemetry.
     def evaluate_combined(self, kin: Kinematics, elapsed_ms: float = 0.0) -> Tuple[float, float]:
         fx, fy = 0.0, 0.0
         if self.spring is not None:

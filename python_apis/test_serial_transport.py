@@ -1,3 +1,6 @@
+# Python UART tests use an in-memory serial port for CRC, fragmented input and framing compatibility.
+# Shared wire vectors detect host/firmware disagreements that isolated round-trip tests may miss.
+
 import importlib.util
 from pathlib import Path
 import unittest

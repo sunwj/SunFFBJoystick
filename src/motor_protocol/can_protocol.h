@@ -1,3 +1,9 @@
+/**
+ * Project-specific classic CAN codec, not CANopen; standard IDs, data frames and axis counts must match.
+ * Vector payload: one version/axis byte, one sequence byte, then little-endian 16-bit axis values.
+ * CAN forces use int16 while runtime/UART forces use int32; validate nominal range before encoding.
+ */
+
 #ifndef SUNFFB_CAN_PROTOCOL_H
 #define SUNFFB_CAN_PROTOCOL_H
 
@@ -24,6 +30,7 @@ namespace SunFFB
 
     constexpr uint8_t CAN_VECTOR_LENGTH = 2 + NUM_AXIS * 2;
     constexpr uint8_t CAN_VERSION_AXES = 0x10 | NUM_AXIS;
+    // High nibble is protocol version 1, low nibble axis count; mismatches are not local position data.
 
     static_assert(CAN_VECTOR_LENGTH <= 8, "CAN vector exceeds classic CAN payload");
     static_assert(USB_MAX_MAGNITUDE <= 32767, "CAN force magnitude must fit int16");
@@ -68,6 +75,7 @@ namespace SunFFB
 
     inline bool decode_can_force(const CANFrame& frame, ForcePayload& out, uint16_t id = 0x201)
     {
+        // Decode locally and reject the entire frame if any axis is out of range; avoid partial output updates.
         if (!can_vector_valid(frame, id))
             return false;
 
@@ -76,6 +84,7 @@ namespace SunFFB
         {
             const uint16_t raw = can_load_u16(&frame.data[2 + 2 * i]);
             const int32_t value = raw < 0x8000 ? int32_t(raw) : int32_t(raw) - 65536;
+            // Decode two's complement explicitly instead of relying on implementation-defined uint16-to-int16 conversion.
             if (value < -USB_MAX_MAGNITUDE || value > USB_MAX_MAGNITUDE)
                 return false;
 

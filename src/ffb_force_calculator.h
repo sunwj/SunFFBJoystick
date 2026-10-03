@@ -1,3 +1,9 @@
+/**
+ * Hardware-independent calculator: effect pool and motion metrics in, nominal axis forces out.
+ * Calls update playback state and sample caches in the handler; callers must hold the required locks.
+ * USB_MAX_MAGNITUDE defines nominal force units, not calibrated torque, current or physical force.
+ */
+
 #ifndef _FFB_FORCE_CALCULATOR_H_
 #define _FFB_FORCE_CALCULATOR_H_
 
@@ -7,13 +13,13 @@
 
 namespace SunFFB
 {
-    // Pure computation: iterates effect blocks, computes output forces per axis.
-    // Stateless — all mutable state lives in FFBReportHandler and FFBDeviceInput.
+    // The calculator has no mutable members, but calls advance playback and update handler caches.
+    // It performs no transport I/O; callers synchronize the shared handler and input objects.
     class FFBForceCalculator
     {
         public:
         // Compute summed forces for all axes from active effects.
-        // Reads handler (effect config + PID state) and device input (axis metrics).
+        // Reads axis metrics and updates handler playback, pending PID state and sample caches.
         // Writes forces[NUM_AXIS] clamped to [-USB_MAX_MAGNITUDE, +USB_MAX_MAGNITUDE].
         void force_calculator(FFBReportHandler& ffbReportHandler,
                               const FFBDeviceInput& ffbDeviceInput, int32_t forces[NUM_AXIS]) const;
@@ -43,7 +49,8 @@ namespace SunFFB
         float get_base_magnitude(const EffectBlock& effectBlock, uint8_t effectType) const;
 
         // Apply a single axis of condition: deadband → offset → coeff → saturation.
-        // metric is pre-normalized to [-1, 1]; params are in 0..USB_MAX_MAGNITUDE units.
+        // metric is normalized by its axis maximum. Coefficients/center may be signed;
+        // deadband and saturation are unsigned nominal USB_MAX_MAGNITUDE-scale values.
         float apply_condition(const SetConditionReportData& conditionData, float metric) const;
     };
 

@@ -1,3 +1,9 @@
+/**
+ * Bounded timing counters and report scheduling, retaining maxima rather than complete event history.
+ * Short critical sections or native mutexes protect counters; never perform I/O while holding them.
+ * Application-observed events do not automatically measure USB or motor-side wire completion.
+ */
+
 #pragma once
 #if defined(ARDUINO_ARCH_ESP32)
 #include <freertos/FreeRTOS.h>
@@ -73,6 +79,8 @@ namespace SunFFB
 
         void record(uint32_t nowUs, uint32_t workUs = 0)
         {
+            // The first event establishes the baseline; later unsigned gaps handle a natural micros wraparound.
+            // workUs may be zero when measuring event cadence without per-event processing duration.
             TimingGuard guard(lock);
             if (started)
             {
@@ -126,6 +134,7 @@ namespace SunFFB
 
         void sent(uint32_t nowUs)
         {
+            // Skip missed periods while preserving phase; assigning previous=nowUs would accumulate drift.
             const uint32_t elapsed = nowUs - previous;
             previous += (elapsed / period) * period;
         }

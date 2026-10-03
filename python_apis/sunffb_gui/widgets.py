@@ -1,3 +1,7 @@
+# Direction selector and two-axis force/position drawing widgets; no HID transmission here.
+# Physical Y points upward while Qt Y points downward; invert Y when drawing force vectors.
+# Direction labels follow the force-source convention used by ForceModel and firmware.
+
 from __future__ import annotations
 
 import math
@@ -9,10 +13,12 @@ PAD_LABEL_ANGLE = {'pull': 0.0, 'pull-left': 45.0, 'left': 90.0, 'left-push': 13
                    'push': 180.0, 'push-right': 225.0, 'right': 270.0, 'right-pull': 315.0}
 
 
+# Unknown labels fall back to the pull/source angle rather than raising during UI updates.
 def direction_from_pad(label: str) -> float:
     return PAD_LABEL_ANGLE.get(label, 0.0)
 
 
+# Round a wrapped angle to the nearest of eight direction labels.
 def pad_label_from_deg(deg: float) -> str:
     idx = int(round((deg % 360.0) / 45.0)) % 8
     return list(PAD_LABEL_ANGLE.keys())[idx]
@@ -42,6 +48,7 @@ class DirectionPad(QWidget):
         layout.addWidget(self._center, 1, 1)
         self._active_button = None
 
+    # Update selection styling, then emit the source angle once for the main window to handle.
     def _activate(self, label: str) -> None:
         if self._active_button is not None:
             self._active_button.setStyleSheet("")
@@ -65,16 +72,19 @@ class ForceCanvas(QWidget):
         self._px = 0.0
         self._py = 0.0
 
+    # Store nominal force for the next paint event; repaint is scheduled, not performed synchronously.
     def set_force(self, fx: float, fy: float) -> None:
         self._fx = float(fx)
         self._fy = float(fy)
         self.update()
 
+    # Clamp normalized position to the viewport; this is display clipping, not device input calibration.
     def set_position(self, px: float, py: float) -> None:
         self._px = max(-1.0, min(1.0, float(px)))
         self._py = max(-1.0, min(1.0, float(py)))
         self.update()
 
+    # Render axes, joystick position and force vectors; screen Y inversion is applied only at drawing time.
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -136,6 +146,7 @@ class ForceCanvas(QWidget):
                          f"Fx {self._fx:+.0f}   Fy {self._fy:+.0f}   |F| {mag:.0f}")
 
     @staticmethod
+    # Construct the triangle in screen coordinates using the direction perpendicular to the vector.
     def _draw_arrow_head(painter, cx, cy, ux, uy, length):
         dirx = ux
         diry = -uy

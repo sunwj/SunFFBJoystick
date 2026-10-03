@@ -1,3 +1,9 @@
+/**
+ * Generic classic CAN link validating frame capacity and ID range before forwarding to the HAL.
+ * Motor messages and sequences belong to the application; hardware retransmission belongs to the driver.
+ * HAL send/receive must be nonblocking. The caller owns the HAL and its lifetime.
+ */
+
 #ifndef EMBEDDED_COMM_CAN_LINK_H
 #define EMBEDDED_COMM_CAN_LINK_H
 
@@ -23,6 +29,7 @@ namespace EmbeddedComm
 
         bool receive(CANFrame& frame)
         {
+            // Validate a local received frame first; rejected input leaves the caller's output unchanged.
             CANFrame received;
             if (!mHal.receive(received) || !valid(received))
                 return false;

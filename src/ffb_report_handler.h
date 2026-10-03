@@ -1,3 +1,9 @@
+/**
+ * Device state machine and bounded effect pool; host effect identifiers are one-based.
+ * Allocation, configuration, playback and release are distinct stages; allocation does not start force.
+ * Callers synchronize cross-task access. Returned report and effect pointers remain handler-owned.
+ */
+
 #ifndef _FFB_REPORT_HANDLER_H_
 #define _FFB_REPORT_HANDLER_H_
 
@@ -36,6 +42,7 @@ namespace SunFFB
         };
 
         bool peek_pid_state_report(PIDStateReportData& report, uint32_t& revision) const;
+        // Acknowledge only after USB accepts the peeked report; matching revision preserves newer state.
         void acknowledge_pid_state_report(const PIDStateReportData& report, uint32_t revision);
         const BlockLoadReportData* get_block_load_report_data() const
         {
@@ -53,7 +60,8 @@ namespace SunFFB
             return (EffectBlock*)effectBlocks;
         };
 
-        // HID output report handlers (called from hid_set_report_callback).
+        // HID output handlers dispatched by hid_command_task after copying and validating USB bytes.
+        // None of these methods supplies its own mutex; direct callers must preserve the lock contract.
         void set_effect(const SetEffectReportData* data);                 // Report 3
         void set_envelope(const SetEnvelopeReportData* data);             // Report 4
         void set_condition(const SetConditionReportData* data);           // Report 5
@@ -67,7 +75,8 @@ namespace SunFFB
         void set_device_gain(const DeviceGainReportData* data);       // Report 14
         void set_device_control(const DeviceControlReportData* data); // Report 13
 
-        // Play-state check (1-based effectBlockIndex). May auto-stop expired effects.
+        // Play-state check (one-based effect ID). Advances loops/triggers and publishes actual transitions.
+        // DEVICE_STATE_DISABLED can still advance timelines; the calculator gates force separately.
         bool is_effect_playing(uint8_t effectBlockIndex, uint8_t triggerButtonState,
                                uint32_t currentTime);
         bool is_effect_playing(EffectBlock& effectBlock, uint8_t triggerButtonState,

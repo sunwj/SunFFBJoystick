@@ -1,3 +1,9 @@
+/**
+ * Single source of effect and HID protocol constants; NUM_AXIS determines report layouts.
+ * Changing axis count requires a full rebuild and matching generated host constants.
+ * Effect types, report IDs and force units must agree with descriptors and host structures.
+ */
+
 #ifndef _CONFIG_FFB_H_
 #define _CONFIG_FFB_H_
 
@@ -6,6 +12,8 @@
 // #define SERIAL_PRINT
 
 // ===== Axis Configuration =====
+// Enable bits occupy the low NUM_AXIS bits; the next bit requests direction-based behavior.
+// For conditions, received axis blocks also select the compatibility mode documented in AGENTS.md.
 #ifndef NUM_AXIS
 #define NUM_AXIS 2
 #endif
@@ -25,6 +33,7 @@
 #endif
 
 // ===== Effect Pool =====
+// Bounded static storage avoids per-effect heap allocation during real-time operation.
 #define MAX_EFFECTS 15
 #define NUM_SUPPORTED_EFFECTS 11
 
@@ -42,6 +51,7 @@
 #define ET_FRICTION 0x0B
 
 // ===== Effect States =====
+// Allocation/playback-request bits are internal state; actual playback also checks delay and triggers.
 #define EFFECT_STATE_FREE 0x00
 #define EFFECT_STATE_ALLOCATED 0x01
 #define EFFECT_STATE_PLAYING 0x02

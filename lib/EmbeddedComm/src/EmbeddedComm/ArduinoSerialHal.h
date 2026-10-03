@@ -1,3 +1,9 @@
+/**
+ * Adapter from an initialized Arduino serial object to the framing core's HAL contract.
+ * TX checks available space and returns zero on backpressure; RX respects the requested capacity.
+ * Multiple owners in one direction need locking around space checks and actual reads/writes.
+ */
+
 #ifndef EMBEDDED_COMM_ARDUINO_SERIAL_HAL_H
 #define EMBEDDED_COMM_ARDUINO_SERIAL_HAL_H
 
@@ -48,6 +54,7 @@ namespace EmbeddedComm
 
         uint8_t read()
         {
+            // The legacy byte-read contract requires available>0; a negative read result is not a valid byte.
             return mSerial.read();
         }
 

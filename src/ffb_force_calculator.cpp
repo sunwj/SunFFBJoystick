@@ -1,3 +1,9 @@
+/**
+ * Real-time effect model: advance playback, generate per-effect forces, apply gains and clamp sums.
+ * Spring uses position, damper uses speed, inertia uses acceleration and friction uses speed sign.
+ * Preserve the multi-axis condition compatibility exception in AGENTS.md; do not discard axis blocks.
+ */
+
 #include "ffb_force_calculator.h"
 #include "math_utils.h"
 #include "ffb_hal.h"
@@ -78,6 +84,8 @@ namespace SunFFB
         float force = 0.f;
 
         const float invRange = 1.f / USB_MAX_MAGNITUDE;
+        // Normalize cpOffset/deadBand to metric units; coefficients remain in nominal force units.
+        // Negation makes positive coefficients restorative/resistive; negative coefficients reverse the force.
         if (metric < (cpOffset - deadBand) * invRange)
         {
             force = (metric - (cpOffset - deadBand) * invRange) * negativeCoeff;
@@ -106,12 +114,21 @@ namespace SunFFB
             return value;
         };
 
-        if (block.effectData.axisEnable & DIRECTION_ENABLE)
+        const bool directed = (block.effectData.axisEnable & DIRECTION_ENABLE) != 0;
+        // Hosts may set Direction Enable while supplying independent axis conditions.
+        // A condition slot beyond slot zero selects the per-axis model (0825262).
+        const bool axisSpecific = block.conditionBlockFlags > 1;
+        // flags is a received-slot bitmap, not a count: 0b10 also selects per-axis conditions.
+        // A Y-only block must not read an unconfigured X block; the loop skips absent slots by bitmap.
+
+        if (directed && !axisSpecific)
         {
             if (!(block.conditionBlockFlags & 1))
                 return;
 
             float projected = 0.f;
+            // Normalize each axis by its own maximum before projecting onto the common unit direction.
+            // A single directed condition acts along that direction, not on perpendicular motion.
 
             for (uint8_t i = 0; i < NUM_AXIS; ++i)
                 projected += metrics[i] / maxima[i] * block.directionUnitVector[i];
@@ -124,7 +141,7 @@ namespace SunFFB
         else
         {
             for (uint8_t i = 0; i < NUM_AXIS; ++i)
-                if ((block.effectData.axisEnable & (1 << i)) &&
+                if ((directed || (block.effectData.axisEnable & (1 << i))) &&
                     (block.conditionBlockFlags & (1 << i)))
                     forces[i] = apply_condition(block.typeSpecificData[i].conditionData,
                                                 metric_for(metrics[i] / maxima[i]));
@@ -147,6 +164,7 @@ namespace SunFFB
         EffectBlock* effectBlocks = ffbReportHandler.get_all_effect_blocks();
 
         float forcesSum[NUM_AXIS] = {0};
+        // Accumulate in float, then apply device gain and clamp once to avoid per-effect rounding loss.
         const uint32_t currentTime = _millis();
 
         for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
@@ -169,6 +187,7 @@ namespace SunFFB
                 if (samplePeriod > 1 && effectBlock.sampleValid &&
                     effectBlock.sampleTick == elapsedTime)
                 {
+                    // Within the same sample boundary, reuse cached axis forces without resampling condition metrics.
                     for (uint8_t axis = 0; axis < NUM_AXIS; ++axis)
                         forcesSum[axis] += effectBlock.sampledForces[axis] * effectGain /
                                            float(USB_MAX_EFFECT_GAIN);
@@ -271,6 +290,7 @@ namespace SunFFB
                 }
 
                 effectBlock.sampleTick = elapsedTime;
+                // Cache forces before effect gain; reuse still applies the current gain when accumulating.
                 effectBlock.sampleValid = true;
 
                 for (uint8_t axis = 0; axis < NUM_AXIS; ++axis)
@@ -325,6 +345,7 @@ namespace SunFFB
 
         if (attackTime > 0 && elapsedTime < attackTime)
         {
+            // Attack/fade levels are absolute amplitudes, not percentages; zero sustain can still have attack.
             const float t = (float)elapsedTime / attackTime;
             return attackLevel + (baseMagnitude - attackLevel) * t;
         }
@@ -332,6 +353,7 @@ namespace SunFFB
         if (USB_DURATION_INFINITE != duration && fadeTime > 0 &&
             elapsedTime > (duration > fadeTime ? duration - fadeTime : 0))
         {
+            // Infinite effects have no terminal fade; a fade longer than duration starts at time zero.
             const float t =
                 (float)(elapsedTime - (duration > fadeTime ? duration - fadeTime : 0)) / fadeTime;
             return baseMagnitude + (fadeLevel - baseMagnitude) * t;

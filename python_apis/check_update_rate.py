@@ -1,3 +1,7 @@
+# Read-only HID cadence probe that separates report IDs without creating effects or enabling motors.
+# Warm up before collecting host receive intervals; OS scheduling and buffering affect results.
+# Unchanged coordinates can still be fresh samples; this probe alone cannot certify real-time deadlines.
+
 """Read-only host HID rate probe; does not create effects or enable motors."""
 from __future__ import annotations
 
@@ -9,6 +13,7 @@ from pathlib import Path
 from sunffb_hid import REPORT_ID_JOYSTICK, SunFFBDevice
 
 
+# Nearest-rank-style index on sorted gaps; empty measurements have no percentile rather than zero.
 def percentile(values: list[float], fraction: float) -> float | None:
     if not values:
         return None
@@ -16,6 +21,7 @@ def percentile(values: list[float], fraction: float) -> float | None:
     return ordered[round((len(ordered) - 1) * fraction)]
 
 
+# Drain startup backlog, then timestamp joystick reports during a bounded read-only measurement window.
 def measure(device: SunFFBDevice, seconds: float) -> dict:
     # Drain startup backlog for a short warmup before timing the read window.
     warmup_end = time.perf_counter() + 1.0
@@ -56,6 +62,7 @@ def measure(device: SunFFBDevice, seconds: float) -> dict:
     }
 
 
+# Validate the duration before opening HID; optional JSON output saves results, not device state.
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seconds", type=float, default=30)

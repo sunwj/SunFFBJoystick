@@ -1,3 +1,7 @@
+# HID command examples distinguish read-only enumeration/query from state-changing effect operations.
+# Constant/periodic commands can produce real force; verify hardware safety before invoking them.
+# Effect IDs are allocated by the device. Context managers release HID handles, not actuator power.
+
 from __future__ import annotations
 
 import argparse
@@ -17,6 +21,7 @@ except ImportError:
         SetPeriodicReportData, EffectOperationReportData,
     )
 
+# List candidates and warn about VID/PID ambiguity; this helper does not itself select a HID path.
 def auto_select_device(vid: int, pid: int):
     devices = SunFFBDevice.enumerate(vid, pid)
     if not devices:
@@ -32,6 +37,7 @@ def auto_select_device(vid: int, pid: int):
     return devices[0]
 
 
+# Enumerate matching interfaces without opening a handle or changing device state.
 def cmd_list(args):
     devices = SunFFBDevice.enumerate(args.vid, args.pid)
     if not devices:
@@ -45,6 +51,7 @@ def cmd_list(args):
         )
 
 
+# Read allocation capacity through a feature report; no effect is created.
 def cmd_pool(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -54,6 +61,7 @@ def cmd_pool(args):
         print(f"managedPool={pool.managedPool}")
 
 
+# Device-wide enable is state-changing and can allow already-playing effects to produce force.
 def cmd_enable(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -61,6 +69,7 @@ def cmd_enable(args):
         print("Actuators enabled.")
 
 
+# Disable actuator output without treating effect allocation or pause state as equivalent.
 def cmd_disable(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -68,6 +77,7 @@ def cmd_disable(args):
         print("Actuators disabled.")
 
 
+# Stop every effect on the device, not just blocks created by this CLI invocation.
 def cmd_stop_all(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -75,6 +85,7 @@ def cmd_stop_all(args):
         print("Stopped all effects.")
 
 
+# Reset frees all effects and restores gain/actuator enable according to firmware semantics.
 def cmd_reset(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -82,6 +93,7 @@ def cmd_reset(args):
         print("Device reset command sent.")
 
 
+# Change the device-wide gain; this is separate from individual effect gain.
 def cmd_gain(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -89,6 +101,7 @@ def cmd_gain(args):
         print(f"Device gain set to {args.gain}.")
 
 
+# Configure and start a real constant-force effect; --wait controls optional later release.
 def cmd_constant(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -109,6 +122,7 @@ def cmd_constant(args):
             print("Freed effect.")
 
 
+# Allocate, configure the angular direction and periodic payload, then explicitly start playback.
 def cmd_sine(args):
     auto_select_device(args.vid, args.pid)
     with SunFFBDevice(args.vid, args.pid) as dev:
@@ -157,6 +171,7 @@ def cmd_sine(args):
             print("Freed effect.")
 
 
+# Expose separate query/control/effect commands; numeric VID/PID arguments accept decimal or hexadecimal.
 def build_parser():
     parser = argparse.ArgumentParser(description="SunFFB HID CLI")
     parser.add_argument("--vid", type=lambda x: int(x, 0), required=True, help="USB vendor ID")

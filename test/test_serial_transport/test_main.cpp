@@ -1,3 +1,9 @@
+/**
+ * Motor UART tests for variable/fixed/mixed framing and bounded receive work.
+ * Fake UARTs exercise fragmentation, noise, CRC errors, short writes and insufficient capacity.
+ * Optional host benchmarks do not establish ESP32 wire throughput or real-time compliance.
+ */
+
 #include <unity.h>
 #include <vector>
 #include <cstring>
@@ -34,6 +40,7 @@ void tearDown()
 
 struct BulkHal
 {
+    // Loop back written bytes and count bulk calls; full simulates nonblocking TX backpressure.
     std::vector<uint8_t> bytes;
     size_t cursor = 0, reads = 0, writes = 0;
     bool full = false;
@@ -64,6 +71,7 @@ struct BulkHal
 
 void test_legacy_wire_bytes_and_crc_vector()
 {
+    // A known CRC vector plus exact frame bytes catches bugs that encoder/decoder round trips can hide.
     const uint8_t check[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
     TEST_ASSERT_EQUAL_HEX8(0xA1, calc_crc8(check, 9));
     BulkHal hal;

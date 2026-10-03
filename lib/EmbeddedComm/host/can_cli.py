@@ -1,3 +1,7 @@
+# Optional python-can CLI supporting receive-only monitoring and explicit one-shot transmission.
+# monitor sends no application frames; send writes the bus, so verify IDs and payloads first.
+# Driver acceptance is not motor execution. The bus context manager releases transport resources.
+
 """Classic CAN monitor and one-shot transmitter using optional python-can."""
 import argparse
 import math
@@ -7,6 +11,7 @@ import time
 from can_packet import decode
 
 
+# Parse base-prefixed IDs and reject values outside the extended CAN identifier range.
 def identifier(text):
     value = int(text, 0)
     if not 0 <= value <= 0x1FFFFFFF:
@@ -14,6 +19,7 @@ def identifier(text):
     return value
 
 
+# Reject zero, negative and non-finite timeouts so deadline loops remain bounded.
 def positive_seconds(text):
     value = float(text)
     if not math.isfinite(value) or value <= 0:
@@ -21,6 +27,7 @@ def positive_seconds(text):
     return value
 
 
+# Parse hex bytes with an eight-byte classic CAN limit; CAN FD is not supported.
 def payload(text):
     try:
         data = bytes.fromhex(text)
@@ -31,6 +38,7 @@ def payload(text):
     return data
 
 
+# monitor is receive-only; send is an explicit one-frame operation with separate RTR/DLC options.
 def parser():
     result = argparse.ArgumentParser(description=__doc__)
     result.add_argument('--interface', required=True, help='python-can backend, e.g. socketcan, slcan, pcan')
@@ -56,6 +64,7 @@ def parser():
     return result
 
 
+# Apply cross-argument constraints before opening a bus, including standard IDs and RTR payload rules.
 def validate(args):
     if args.bitrate <= 0:
         raise ValueError('Bitrate must be positive')
@@ -72,6 +81,7 @@ def validate(args):
             raise ValueError('Motor protocol requires three distinct standard IDs')
 
 
+# Inject clock/output and CAN module for hardware-free tests; always close the bus context on exit.
 def run(args, can_module, *, clock=time.monotonic, output=print):
     validate(args)
     with can_module.Bus(interface=args.interface, channel=args.channel, bitrate=args.bitrate) as bus:
@@ -106,6 +116,7 @@ def run(args, can_module, *, clock=time.monotonic, output=print):
                     output(f'  motor={decoded}')
 
 
+# Report argument/dependency errors at the CLI boundary rather than hiding transport exceptions.
 def main(argv=None):
     argument_parser = parser()
     args = argument_parser.parse_args(argv)

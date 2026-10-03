@@ -1,3 +1,8 @@
+/**
+ * Portable clock and debug-output contract, isolating model code from direct Arduino dependencies.
+ * Native tests inject virtual clocks through these symbols to exercise delays, cycles and wraparound.
+ */
+
 #ifndef FFB_HAL_H
 #define FFB_HAL_H
 

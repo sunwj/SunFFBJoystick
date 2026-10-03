@@ -1,3 +1,9 @@
+/**
+ * Motor protocol adapter mapping force, position and heartbeat messages to the reusable framing core.
+ * Fixed-frame lengths derive from message ID and NUM_AXIS; both peers must share that policy.
+ * The core validates frames; this adapter additionally checks position message ID and payload size.
+ */
+
 #ifndef SUNFFB_MOTOR_SERIAL_LINK_H
 #define SUNFFB_MOTOR_SERIAL_LINK_H
 
@@ -20,6 +26,7 @@ namespace SunFFB
     {
         static constexpr uint16_t length(uint8_t id)
         {
+            // 0xFFFF rejects unknown fixed IDs; zero-length heartbeat is valid, not an error sentinel.
             return id == SERIAL_MSG_FORCE       ? sizeof(ForcePayload)
                    : id == SERIAL_MSG_POSITION  ? sizeof(PositionPayload)
                    : id == SERIAL_MSG_HEARTBEAT ? 0
@@ -58,6 +65,7 @@ namespace SunFFB
 
         bool receivePosition(PositionPayload& out)
         {
+            // receiveFrame borrows payload storage; copy immediately into the application-owned output.
             SerialFrameView frame;
             if (!this->receiveFrame(frame) || frame.messageId != SERIAL_MSG_POSITION ||
                 frame.length != sizeof(out))

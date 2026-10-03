@@ -1,3 +1,9 @@
+/**
+ * Axis samples and derived motion metrics, with per-axis filter history and a sample timestamp.
+ * Metric pointers borrow internal storage; synchronize access rather than retaining unlocked snapshots.
+ * volatile on inputData is not a substitute for inter-task synchronization.
+ */
+
 #ifndef _FFB_DEVICE_INPUT_H_
 #define _FFB_DEVICE_INPUT_H_
 
@@ -7,7 +13,7 @@
 
 namespace SunFFB
 {
-    // Reads raw ADC, applies LPF, derives speed/acceleration.
+    // Consumes normalized signed samples from ADC or external feedback, filters and derives motion.
     // Owned by joystick_task; shared state guarded by semaphoreFFBDeviceInput.
     class FFBDeviceInput
     {
@@ -21,7 +27,8 @@ namespace SunFFB
         // Sample new raw axis values, apply LPF, derive speed/acceleration.
         void update_axis(const int16_t axis[NUM_AXIS]);
 
-        // Set deadband thresholds for condition effects.
+        // Input deadbands use position units, position units/s and position units/s^2 respectively.
+        // These affect shared metrics, unlike a host condition's per-effect deadBand parameter.
         void update_position_deadband(const int32_t posDeadBand[NUM_AXIS])
         {
             memcpy((void*)metrics.positionDeadBand, posDeadBand, sizeof(metrics.positionDeadBand));
@@ -43,6 +50,7 @@ namespace SunFFB
             return (const float*)metrics.position;
         };
 
+        // All metric getters borrow arrays of NUM_AXIS floats; keep the input lock while reading.
         const float* get_speed() const
         {
             return (const float*)metrics.speed;
@@ -68,13 +76,13 @@ namespace SunFFB
             return (const float*)metrics.maxAcceleration;
         };
 
-        // Set low-pass time constant for position LPF (shared by all axes).
+        // Set position low-pass time constant in seconds (shared by all axes); zero bypasses LPF.
         void set_tf_position(float tf)
         {
             tF_position = tf;
         }
 
-        // Set low-pass time constant for speed and acceleration LPFs (shared).
+        // Speed and acceleration share this low-pass time constant in seconds.
         void set_tf_speed(float tf)
         {
             tF_speed = tf;

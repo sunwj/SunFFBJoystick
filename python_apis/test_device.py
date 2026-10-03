@@ -1,3 +1,6 @@
+# GUI device-layer tests use a fake HID input source without opening a real board.
+# Exercise report-ID demultiplexing and rejecting worker startup when the controller is disconnected.
+
 import unittest
 from sunffb_hid import (JoystickInputReportData, PIDStateReportData,
                         REPORT_ID_JOYSTICK, REPORT_ID_PID_STATE)

@@ -1,3 +1,9 @@
+/**
+ * Input pipeline: signed axis samples -> low-pass filters -> motion derivatives -> HID snapshot.
+ * Timestamps are microseconds; derivative time intervals and filter time constants use seconds.
+ * Tasks select and normalize the input source and provide synchronization; this module does no I/O.
+ */
+
 #include "ffb_device_input.h"
 #include "ffb_hal.h"
 
@@ -7,6 +13,7 @@ namespace SunFFB
     {
         const uint32_t currentTime = _micros();
         const float dt = (currentTime - tPrev) * 1e-6f;
+        // A repeated timestamp provides no derivative interval; avoid division by zero and artificial motion.
         if (dt <= 0.f)
         {
             tPrev = currentTime;
@@ -17,6 +24,7 @@ namespace SunFFB
         const float dtClamped = dt < 0.01f ? dt : 0.01f;
 
         const float alphaPos = dtClamped / (tF_position + dtClamped);
+        // First-order low-pass coefficient: alpha=dt/(tau+dt). Zero tau passes the current sample through.
         const float alphaSpeed = dtClamped / (tF_speed + dtClamped);
 
 #pragma unroll
@@ -25,6 +33,7 @@ namespace SunFFB
             const float position = lpfPosition[i] += alphaPos * (axis[i] - lpfPosition[i]);
 
             float newSpeed = (position - metrics.position[i]) / dt;
+            // Clamp speed and acceleration to each axis maximum to keep condition normalization bounded.
             newSpeed = lpfSpeed[i] += alphaSpeed * (newSpeed - lpfSpeed[i]);
             if (newSpeed > metrics.maxSpeed[i])
                 newSpeed = metrics.maxSpeed[i];
@@ -39,6 +48,8 @@ namespace SunFFB
                 newAccel = -metrics.maxAcceleration[i];
 
             inputData.axis[i] = position;
+            // Input deadbands change motion metrics; they are distinct from a host condition's deadBand,
+            // which the calculator applies around that effect's cpOffset.
             if (position > -metrics.positionDeadBand[i] && position < metrics.positionDeadBand[i])
                 inputData.axis[i] = 0;
 
@@ -59,6 +70,7 @@ namespace SunFFB
 
     void FFBDeviceInput::reset()
     {
+        // Reset metrics and filter history together; clearing only the report leaves stale derivative state.
         memset((void*)&inputData, 0, sizeof(JoystickInputReportData));
         memset((void*)&metrics, 0, sizeof(Metrics));
 

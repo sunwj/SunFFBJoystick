@@ -1,3 +1,9 @@
+/**
+ * HID PID commands: effect lifecycle, triggers, pause, gain and pending state reports.
+ * Playback timestamps track effect time; report revisions protect acknowledgment under USB backpressure.
+ * Envelope storage is separate; condition blocks retain independent per-axis parameters.
+ */
+
 #include "ffb_report_handler.h"
 #include <cstring>
 #include "math_utils.h"
@@ -12,6 +18,7 @@ namespace SunFFB
 
     void FFBReportHandler::init()
     {
+        // Power-on starts in INIT, unlike host DeviceControl=Reset, which restores actuator enable.
         devicePaused = false;
         actuatorsEnabled = false;
         actuatorsInitialized = false;
@@ -24,6 +31,8 @@ namespace SunFFB
 
     void FFBReportHandler::create_new_effect(const CreateNewEffectReportData* data)
     {
+        // ID zero indicates a full pool; successful allocation clears runtime state before marking the slot allocated.
+        // Pool capacity includes internal state and caches, not just wire parameter bytes.
         blockLoadData.effectBlockIndex = get_next_free_effect_block_index();
 
         if (0 == blockLoadData.effectBlockIndex)
@@ -51,6 +60,7 @@ namespace SunFFB
 
     uint8_t FFBReportHandler::get_next_free_effect_block_index()
     {
+        // Round-robin allocation checks at most MAX_EFFECTS slots and returns a one-based host ID.
         // for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
         // {
         //     if(EFFECT_STATE_FREE == effectBlocks[i].state)
@@ -78,6 +88,7 @@ namespace SunFFB
 
     void FFBReportHandler::free_effect(uint8_t idx)
     {
+        // Repeated release must not increase capacity twice; publish stopped state before freeing the slot.
         EffectBlock* effectBlock = get_effect_block(idx);
         if (nullptr == effectBlock)
             return;
@@ -115,6 +126,7 @@ namespace SunFFB
 
     void FFBReportHandler::start_effect(EffectBlock* effectBlock)
     {
+        // PLAYING records a playback request; actualPlaying also accounts for start delay and triggers.
         // Some hosts (e.g. DirectInput-based) never send DeviceControl=Enable Actuators;
         // treat starting playback as implicit actuator enable when in INIT state.
         if (deviceState == DEVICE_STATE_INIT)
@@ -169,6 +181,7 @@ namespace SunFFB
 
     void FFBReportHandler::set_effect(const SetEffectReportData* data)
     {
+        // Common-parameter updates retain received axis conditions; set_effect is not reallocation.
         EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
@@ -266,6 +279,7 @@ namespace SunFFB
 
     void FFBReportHandler::set_condition(const SetConditionReportData* data)
     {
+        // Use the low nibble for the axis slot; upper bits are not additional array indices.
         const uint8_t parameterBlockOffset = data->parameterBlockOffset & 0x0F;
         if (parameterBlockOffset > (NUM_AXIS - 1))
             return;
@@ -281,6 +295,7 @@ namespace SunFFB
         memcpy((void*)conditionData, data, sizeof(SetConditionReportData));
 
         effectBlock->conditionBlockFlags |= (0x01 << parameterBlockOffset);
+        // The bitmap tracks received parameters and selects compatibility mode; preserve other axis bits.
 
 #ifdef SERIAL_PRINT
         _debug_printf(
@@ -359,6 +374,7 @@ namespace SunFFB
 
     void FFBReportHandler::update_device_state()
     {
+        // Pause and actuator enable are independent; Continue must not re-enable disabled actuators.
         pidStates.status =
             (pidStates.status & ~0x03) | (devicePaused ? 0x01 : 0) | (actuatorsEnabled ? 0x02 : 0);
         deviceState =
@@ -420,6 +436,7 @@ namespace SunFFB
                 update_device_state();
 
                 const uint32_t pauseLength = _millis() - pauseTime;
+                // Shift playback and repeat deadlines so pause time consumes neither start delay nor effect duration.
 
                 for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
                 {
@@ -503,6 +520,8 @@ namespace SunFFB
 
     void FFBReportHandler::publish_effect_state(EffectBlock& block, bool playing)
     {
+        // Retain pending state per effect so endpoint backpressure cannot overwrite other effects' changes.
+        // The low bit is actual playback status; the upper seven bits encode the one-based effect ID.
         const uint8_t i = &block - (EffectBlock*)effectBlocks;
         block.actualPlaying = playing;
         pendingEffects[i] = true;
@@ -515,6 +534,7 @@ namespace SunFFB
     bool FFBReportHandler::peek_pid_state_report(PIDStateReportData& report,
                                                  uint32_t& revision) const
     {
+        // peek does not consume state; failed USB submission can retry and revision prevents stale acknowledgment.
         for (uint8_t n = 0; n < MAX_EFFECTS; ++n)
         {
             const uint8_t i = (reportCursor + n) % MAX_EFFECTS;
@@ -534,6 +554,7 @@ namespace SunFFB
     void FFBReportHandler::acknowledge_pid_state_report(const PIDStateReportData& report,
                                                         uint32_t revision)
     {
+        // Acknowledge only a matching revision; changes made since the snapshot remain pending.
         const uint8_t id = report.effectBlockIndex >> 1;
         if (revision && id && id <= MAX_EFFECTS && effectRevisions[id - 1] == revision)
         {
@@ -549,6 +570,7 @@ namespace SunFFB
 
     bool FFBReportHandler::advance_playback(EffectBlock& b, uint32_t now)
     {
+        // Signed time differences detect future starts; unsigned elapsed tracks duration across wraparound.
         if ((int32_t)(b.startTime - now) > 0)
             return false;
 
@@ -557,6 +579,7 @@ namespace SunFFB
         if (duration != USB_DURATION_INFINITE && elapsed >= duration)
         {
             const uint32_t completed = duration ? elapsed / duration : 0;
+            // Scheduling delay can span several loops; skip completed iterations instead of replaying missed output.
             if (duration && (b.remainingLoops == 0xFF || completed < b.remainingLoops))
             {
                 if (b.remainingLoops != 0xFF)
@@ -582,6 +605,8 @@ namespace SunFFB
 
     bool FFBReportHandler::is_trigger_playing(EffectBlock& b, uint8_t buttons, uint32_t now)
     {
+        // Buttons are one-based; rising edges start playback and holding permits repeatInterval retriggers.
+        // Button release cancels pending repeats without interrupting an already-started iteration.
         const uint8_t button = b.effectData.triggerButton;
         if (!button || button > 8)
             return false;

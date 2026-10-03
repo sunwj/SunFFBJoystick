@@ -1,3 +1,6 @@
+# Hardware-free CAN CLI tests inject a fake bus, clock and output sink.
+# Monitoring must not transmit; validate one-shot ID/DLC/RTR handling separately from driver submission.
+
 import importlib.util
 from pathlib import Path
 import sys

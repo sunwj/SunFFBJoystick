@@ -1,3 +1,7 @@
+# Window regressions observe generated reports, effect IDs and start/stop operations through a fake device.
+# Cover two-axis conditions, main-effect replacement, independent background spring and control states.
+# Run Qt offscreen without accessing HID hardware or activating motors.
+
 import os
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 import unittest

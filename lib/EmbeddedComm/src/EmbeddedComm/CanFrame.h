@@ -1,3 +1,8 @@
+/**
+ * Hardware-independent classic CAN frame container without motor protocol fields.
+ * length is a 0..8-byte DLC; extended and remote select extended identifiers and RTR frames.
+ */
+
 #ifndef EMBEDDED_COMM_CAN_FRAME_H
 #define EMBEDDED_COMM_CAN_FRAME_H
 

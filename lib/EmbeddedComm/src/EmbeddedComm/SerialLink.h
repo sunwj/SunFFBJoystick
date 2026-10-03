@@ -1,3 +1,10 @@
+/**
+ * Reusable C++17 serial framing, independent of firmware axis count, FreeRTOS and motor messages.
+ * Variable: AA ID LEN PAYLOAD CRC. Fixed: AB ID PAYLOAD CRC, with application-defined lengths.
+ * CRC excludes sync bytes. Incremental parsing retains partial frames and bounds per-call work.
+ * The HAL must outlive the link; received payload views expire at the next receive call.
+ */
+
 #ifndef EMBEDDED_COMM_SERIAL_LINK_H
 #define EMBEDDED_COMM_SERIAL_LINK_H
 
@@ -32,6 +39,7 @@ namespace EmbeddedComm
 
     static inline uint8_t calc_crc8(const uint8_t* data, uint8_t len)
     {
+        // Checksum an arbitrary byte range; the caller decides which framing fields to include.
         uint8_t crc = 0;
 
         for (uint8_t i = 0; i < len; ++i)
@@ -41,6 +49,7 @@ namespace EmbeddedComm
 
     static inline uint8_t calc_frame_crc8(uint8_t msgId, const uint8_t* payload, uint8_t len)
     {
+        // Variable-frame helper: include ID and LEN in CRC, but exclude the AA sync byte.
         uint8_t crc = CRC8_TABLE[msgId];
         crc = CRC8_TABLE[crc ^ len];
 
@@ -74,6 +83,7 @@ namespace EmbeddedComm
 
     struct SerialFrameView
     {
+        // payload borrows receiver storage; copy the bytes before retaining them asynchronously.
         uint8_t messageId = 0;
         uint8_t length = 0;
         const uint8_t* payload = nullptr;
@@ -82,6 +92,7 @@ namespace EmbeddedComm
 
     template <typename T, typename = void> struct SerialHasBulkRead : std::false_type
     {
+        // Compile-time capability detection retains byte-read HAL compatibility without virtual dispatch.
     };
 
     template <typename T>
@@ -113,6 +124,8 @@ namespace EmbeddedComm
         bool sendRaw(uint8_t id, const uint8_t* payload, size_t length,
                      SerialFrameFormat format = DEFAULT_FORMAT)
         {
+            // Validate format, capacity and pointers before framing; zero-length messages allow nullptr payloads.
+            // One write is not wire completion; a short write returns false and leaves retry policy to the caller.
             if (length > MaxPayload || (length && !payload))
                 return false;
 
@@ -152,6 +165,8 @@ namespace EmbeddedComm
 
         bool receiveFrame(SerialFrameView& out, size_t byteBudget = MaxPayload + 4)
         {
+            // Each call invalidates the previous view while retaining partial-frame state for the next call.
+            // byteBudget bounds parsing work; unconsumed prefetched bytes remain in mRx.
             out = {};
             mLastPayloadLen = 0;
 
@@ -200,6 +215,8 @@ namespace EmbeddedComm
 
         uint8_t receive(uint8_t* out, size_t capacity = MaxPayload)
         {
+            // Legacy copying API: an oversized output frame is consumed and counted, never copied out of bounds.
+            // Zero also means no result here; protocols using message ID zero should use receiveFrame.
             SerialFrameView frame;
             if (!receiveFrame(frame))
                 return 0;
@@ -217,6 +234,7 @@ namespace EmbeddedComm
 
         bool hasPendingInput()
         {
+            // Check prefetched bytes as well as the hardware FIFO; one HAL read can contain several frames.
             return mRxBegin < mRxEnd || mHal.available() > 0;
         }
 
@@ -286,6 +304,8 @@ namespace EmbeddedComm
 
         void acceptLength(uint16_t length, uint8_t byte)
         {
+            // A wide length accepts the policy's 0xFFFF unknown-ID sentinel before rejecting oversized values.
+            // An invalid byte may also be the next frame's sync marker; try resynchronizing immediately.
             if (length > MaxPayload)
             {
                 ++mLenErrors;
@@ -301,6 +321,8 @@ namespace EmbeddedComm
 
         bool processByte(uint8_t byte)
         {
+            // Idle -> Id -> [Length] -> Payload -> Crc; fixed frames skip the Length state.
+            // Return true only after CRC succeeds; corrupted payloads never reach the application.
             switch (mState)
             {
                 case State::Idle:
@@ -348,6 +370,7 @@ namespace EmbeddedComm
         Hal& mHal;
 
         uint8_t mPayload[MaxPayload] = {};
+        // Separate TX, RX and payload arrays allow one sender and one receiver to operate concurrently.
         uint8_t mTx[MaxPayload + 4];
         uint8_t mRx[32];
 

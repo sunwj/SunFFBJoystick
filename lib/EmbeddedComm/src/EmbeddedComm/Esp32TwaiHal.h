@@ -1,3 +1,9 @@
+/**
+ * ESP-IDF 4.x TWAI adapter requiring an external CAN transceiver, not direct bus wiring.
+ * Zero-wait TX with no software backlog; success means driver acceptance, not wire completion.
+ * The RX owner services bus-off recovery. Coalesced alerts are not exact transmitted-frame counts.
+ */
+
 #ifndef EMBEDDED_COMM_ESP32_TWAI_HAL_H
 #define EMBEDDED_COMM_ESP32_TWAI_HAL_H
 
@@ -21,6 +27,7 @@ namespace EmbeddedComm
         bool begin(int txPin, int rxPin, uint32_t bitrate, uint16_t receiveId = 0xFFFF,
                    bool singleShot = false)
         {
+            // Accept supported bitrates only; undo installation after a failed start so later retries remain possible.
             if (mInstalled || (receiveId > 0x7FF && receiveId != 0xFFFF) || txPin == rxPin)
                 return false;
 
@@ -76,6 +83,7 @@ namespace EmbeddedComm
 
         bool send(const CANFrame& frame)
         {
+            // TX and recovery may run in different tasks; the atomic running flag publishes availability.
             if (!mRunning.load(std::memory_order_relaxed) || frame.length > 8 ||
                 frame.id > (frame.extended ? 0x1FFFFFFFu : 0x7FFu))
             {
@@ -123,6 +131,8 @@ namespace EmbeddedComm
         // RX task owns recovery. Returns true on restart so application sequence history can reset.
         bool service()
         {
+            // On bus-off, reject new application TX and wait for STOPPED before restarting the driver.
+            // Return true after recovery so the application resets sequence history; deduplication is not HAL policy.
             if (!mInstalled)
                 return false;
 
@@ -171,6 +181,7 @@ namespace EmbeddedComm
 
         CANDriverStats stats() const
         {
+            // Atomic counters are not a transactional snapshot; use them for diagnostics, not exact reconciliation.
             return {mAccepted.load(), mRejected.load(),   mSuccess.load(), mFailure.load(),
                     mBusOff.load(),   mRecoveries.load(), mOverflow.load()};
         }

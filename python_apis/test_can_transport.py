@@ -1,3 +1,6 @@
+# Python motor CAN codec tests comparing exact bytes and rejecting mismatched formats/axis counts.
+# No bus access or physical cadence measurement.
+
 import importlib.util
 from pathlib import Path
 import unittest

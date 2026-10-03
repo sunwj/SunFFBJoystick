@@ -1,3 +1,9 @@
+/**
+ * Application CAN link: generic frames plus motor codecs, sequence tracking and duplicate rejection.
+ * One TX owner and one RX owner; advance the TX sequence only after the HAL accepts a frame.
+ * Recovery or a long receive gap permits resynchronization after a peer reset.
+ */
+
 #ifndef SUNFFB_CAN_LINK_H
 #define SUNFFB_CAN_LINK_H
 
@@ -68,6 +74,8 @@ namespace SunFFB
 
         CANReceiveResult pollPosition(PositionPayload& out, uint32_t nowUs)
         {
+            // Empty means no valid generic frame; Ignored means a non-position or duplicate application frame.
+            // Reject equal recent sequences only; gaps and uint8 sequence wraparound are allowed.
             CANFrame frame;
             if (!mHal.receive(frame))
                 return CANReceiveResult::Empty;
@@ -82,6 +90,7 @@ namespace SunFFB
             if (mHasSequence && frame.data[1] == mRxSequence &&
                 uint32_t(nowUs - mLastRxUs) < mResyncUs)
             {
+                // Reject duplicates within the resync window without refreshing the last valid receive timestamp.
                 ++mDuplicates;
                 return CANReceiveResult::Ignored;
             }

@@ -1,3 +1,7 @@
+# Python UART codecs and streaming parser shared by serial tools and tests.
+# Variable/fixed CRC coverage matches C++ SerialLink; mixed framing selects format by sync byte.
+# send returns the serial write result, not peer acknowledgment; receive retains partial-frame state.
+
 from __future__ import annotations
 
 import struct
@@ -35,6 +39,7 @@ MSG_POSITION = 0x02
 MSG_HEARTBEAT = 0x03
 
 
+# CRC-8/MAXIM-DOW over the supplied bytes; sync-byte exclusion is handled by the frame builder.
 def calc_crc8(data: bytes) -> int:
     crc = 0
     for b in data:
@@ -42,12 +47,14 @@ def calc_crc8(data: bytes) -> int:
     return crc
 
 
+# Motor fixed lengths use int32 forces and uint16 positions; heartbeat has no payload.
 def fixed_layout(num_axes: int = 2) -> dict[int, int]:
     if num_axes not in (1, 2, 3):
         raise ValueError("num_axes must be 1, 2 or 3")
     return {MSG_FORCE: 4 * num_axes, MSG_POSITION: 2 * num_axes, MSG_HEARTBEAT: 0}
 
 
+# Validate capacity/ID/fixed layout before adding sync and CRC; the sync byte is not checksummed.
 def build_frame(msg_id: int, payload: bytes, *, fixed: bool = False,
                 fixed_lengths=None, max_payload=MAX_PAYLOAD) -> bytes:
     """Variable: AA ID LEN PAYLOAD CRC; fixed: AB ID PAYLOAD CRC."""
@@ -60,6 +67,7 @@ def build_frame(msg_id: int, payload: bytes, *, fixed: bool = False,
     return bytes([FIXED_SYNC if fixed else SYNC]) + body + bytes([calc_crc8(body)])
 
 
+# Accept exactly one frame, not a stream; invalid sync, size, policy or checksum yields None.
 def decode_frame(raw: bytes, *, fixed_lengths=None, max_payload=MAX_PAYLOAD) -> Optional[Tuple[int, bytes]]:
     """Decode exactly one complete frame of either format, validating sync and size."""
     if len(raw) < 3 or raw[0] not in (SYNC, FIXED_SYNC):
@@ -76,6 +84,7 @@ def decode_frame(raw: bytes, *, fixed_lengths=None, max_payload=MAX_PAYLOAD) -> 
     return raw[1], raw[offset:-1]
 
 
+# UART force fields are signed 32-bit little-endian, unlike CAN's compact signed 16-bit fields.
 def pack_force(forces: list) -> bytes:
     """Pack int32 force values."""
     return struct.pack(f'<{len(forces)}i', *forces)
@@ -87,6 +96,7 @@ def unpack_force(data: bytes) -> list:
     return list(struct.unpack(f'<{n}i', data[:n * 4]))
 
 
+# Encoder fields are unsigned 16-bit little-endian; center conversion belongs to the input task.
 def pack_position(positions: list) -> bytes:
     """Pack uint16 position values."""
     return struct.pack(f'<{len(positions)}H', *positions)
@@ -123,6 +133,7 @@ class SerialLink:
         self._frames_rx = 0
         self._pending = deque()
 
+    # Serialize the enabled format and lock a whole write so concurrent GUI commands cannot interleave bytes.
     def send(self, msg_id: int, payload: bytes, *, fixed=None) -> int:
         fixed = self._framing == "fixed" if fixed is None else fixed
         if (fixed and self._framing == "variable") or (not fixed and self._framing == "fixed"):
@@ -142,6 +153,7 @@ class SerialLink:
     def send_heartbeat(self) -> int:
         return self.send(MSG_HEARTBEAT, b'')
 
+    # Consume queued decoded frames before another serial read; parsing can produce several frames per batch.
     def receive(self) -> Optional[Tuple[int, bytes]]:
         """Try to receive one frame. Returns (msg_id, payload) or None."""
         with self._lock:
@@ -153,6 +165,7 @@ class SerialLink:
             raw = self._serial.read(min(available, 4096))
             return self._process(raw)
 
+    # Only accept sync markers belonging to the configured framing mode.
     def _seek_sync(self, byte):
         if byte == SYNC and self._framing != "fixed":
             self._fixed = False
@@ -161,6 +174,7 @@ class SerialLink:
             self._fixed = True
             self._state = "HAVE_SYNC"
 
+    # Reject unknown fixed IDs or oversized lengths, then reuse a possible sync byte for recovery.
     def _accept_length(self, length, byte):
         if length is None or not 0 <= length <= self._max_payload:
             self._len_errors += 1
@@ -171,6 +185,8 @@ class SerialLink:
             self._buf.clear()
             self._state = "CHECK_CRC" if length == 0 else "RECEIVING"
 
+    # Keep parser state across calls and queue every valid frame in a coalesced read.
+    # CRC failure rejects one frame and attempts resynchronization without clearing later bytes.
     def _process(self, data: bytes) -> Optional[Tuple[int, bytes]]:
         for byte in data:
             if self._state == "IDLE":
@@ -201,6 +217,7 @@ class SerialLink:
         return self._pending.popleft() if self._pending else None
 
     @property
+    # Expose parser error/frame counters; they are not acknowledgments of transmitted data.
     def stats(self):
         return {
             "crc_errors": self._crc_errors,

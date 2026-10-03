@@ -1,3 +1,8 @@
+# GUI coordination: controls -> EffectParams -> HID reports, alongside local force prediction.
+# Main effects and background spring use separate allocated blocks; do not stop one when replacing the other.
+# Predicted force is not measured motor force; positions come from the device polling worker.
+# Condition effects send separate axis 0/1 blocks; direction fields cannot replace the second condition.
+
 from __future__ import annotations
 
 import ctypes as ct
@@ -46,6 +51,8 @@ CONDITION_TYPES = {SPRING, DAMPER, INERTIA, FRICTION}
 PERIODIC_TYPES = {SINE, SQUARE, TRIANGLE, SAWTOOTH_UP, SAWTOOTH_DOWN}
 
 
+# Translate GUI units to the packed common report. Conditions select axis bits without direction projection;
+# other effects use a hundredths-of-degree angle and a directed force vector.
 def build_set_effect(params: EffectParams, idx: int) -> SetEffectReportData:
     if params.effect_type in CONDITION_TYPES:
         axis_enable = (X_AXIS_ENABLE if params.apply_x else 0)
@@ -71,12 +78,14 @@ def build_set_effect(params: EffectParams, idx: int) -> SetEffectReportData:
     )
 
 
+# Clamp magnitude nonnegative and wrap phase to one cycle; offset remains signed.
 def build_periodic(params, idx):  # -> SetPeriodicReportData
     return SetPeriodicReportData(effectBlockIndex=idx, magnitude=max(0, params.magnitude),
                                  offset=params.offset, phase=params.phase % 36000,
                                  period=max(1, params.period_ms))
 
 
+# Each axis gets its own offset, coefficients, saturations and deadband in nominal 10000-unit scale.
 def build_condition(params, idx, axis):  # axis 'x'|'y'
     if axis == 'x':
         return SetConditionReportData(effectBlockIndex=idx, parameterBlockOffset=0,
@@ -94,14 +103,17 @@ def build_condition(params, idx, axis):  # axis 'x'|'y'
     return y
 
 
+# Build type-specific magnitude only; common duration, gain and direction are in Set Effect.
 def build_constant(params, idx):
     return SetConstantForceReportData(effectBlockIndex=idx, magnitude=max(-10000, min(10000, params.magnitude)))
 
 
+# Use ramp endpoints, not the generic magnitude control, for the type-specific payload.
 def build_ramp(params, idx):
     return SetRampForceReportData(effectBlockIndex=idx, rampStart=params.ramp_start, rampEnd=params.ramp_end)
 
 
+# Attack/fade levels are absolute amplitudes; time fields use milliseconds.
 def build_envelope(params, idx):
     return SetEnvelopeReportData(effectBlockIndex=idx, attackLevel=params.attack_level,
                                  fadeLevel=params.fade_level, attackTime=params.attack_time_ms,
@@ -289,6 +301,7 @@ class MainWindow(QMainWindow):
             self.toggle_connect()
         self._log("ready")
 
+    # Link spin box and slider values with Qt signals while retaining a reusable labeled layout.
     def _slider_row(self, label: str, spin: QSpinBox, parent=None) -> QWidget:
         row = QWidget(parent)
         layout = QHBoxLayout(row)
@@ -314,6 +327,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(spin)
         return row
 
+    # Group shared controls and effect-specific panels; signal wiring drives later report updates.
     def _build_reference_layout(self):
         """Build the visible UI following FFBTestTool's MainForm layout."""
         central = QWidget(self)
@@ -481,6 +495,7 @@ class MainWindow(QMainWindow):
         self.cmb_type.currentIndexChanged.connect(self._update_effect_panels)
         self._update_effect_panels()
 
+    # Disable irrelevant controls so the UI does not imply they affect the selected model.
     def _update_effect_panels(self, *_args):
         effect_type = str(self.cmb_type.currentData())
         self.grp_periodic.setEnabled(effect_type in PERIODIC_TYPES)
@@ -496,6 +511,7 @@ class MainWindow(QMainWindow):
             self.chk_infinite.setChecked(True)
         self.chk_infinite.setEnabled(not is_condition and not is_ramp)
 
+    # Enumeration updates the selector only; it neither opens a device nor starts effects.
     def rescan_devices(self):
         self.cmb_devices.clear()
         try:
@@ -509,12 +525,14 @@ class MainWindow(QMainWindow):
         except Exception as exc:  # noqa: BLE001
             self._log(f"rescan failed: {exc}")
 
+    # Toggle only the main block; background spring retains independent ownership and lifecycle.
     def _on_effect_toggle(self, state: int):
         if state and self.controller.is_connected:
             self.start_effect()
         elif not state:
             self._stop_main_effect()
 
+    # Stop/free only the spring block on deselection, preserving a running main effect.
     def _on_spring_toggle(self, state: int):
         if state and self.controller.is_connected:
             self.apply_spring()
@@ -533,6 +551,7 @@ class MainWindow(QMainWindow):
             self._model = ForceModel(self._main_params) if self._effect_idx else None
             self._update_canvas()
 
+    # Parameter edits update an existing block; type or timing edits need allocation/restart to stay synchronized.
     def _on_live_change(self, *_args):
         if self.sender() in (self.spn_bg_spring, self.spn_spring_x, self.spn_spring_y):
             if self.chk_spring_on.isChecked():
@@ -550,6 +569,8 @@ class MainWindow(QMainWindow):
             else:
                 self.apply_main_effect()
 
+    # Connect signals before starting polling to avoid missing early reports or errors.
+    # Disconnect remembers requested toggles but stops/releases current effects before closing the handle.
     def toggle_connect(self):
         if self.controller.is_connected:
             restore_effect = self.chk_effect_on.isChecked()
@@ -587,6 +608,8 @@ class MainWindow(QMainWindow):
             detail = self.controller.last_error
             self._log(f"connect failed{': ' + detail if detail else ''}")
 
+    # Estimate normalized motion from host arrival times for preview, not firmware's internal filter state.
+    # Discard derivative history after a long gap to avoid a spurious velocity/acceleration spike.
     def _on_joystick(self, joy):
         ax = joy.axis
         now = time.monotonic()
@@ -615,9 +638,11 @@ class MainWindow(QMainWindow):
         self.canvas.set_position(self._last_kin.roll, self._last_kin.pitch)
         self._update_canvas()
 
+    # Display device status bits; this signal does not carry measured output force.
     def _on_pid(self, status: int):
         self.lbl_status.setText(f"connected \u2014 pid {status}")
 
+    # Stop the local session and clear desired playback after an input-worker failure.
     def _on_error(self, msg: str):
         self._log(f"worker error: {msg}")
         self.stop_effect()
@@ -627,6 +652,7 @@ class MainWindow(QMainWindow):
         self.btn_connect.setText("Connect")
         self.lbl_status.setText("not connected")
 
+    # Expire finite main playback while preserving background spring, then refresh local prediction.
     def _on_tick(self):
         if self._run_total_ms > 0:
             elapsed_ms = self._elapsed_ms()
@@ -634,11 +660,13 @@ class MainWindow(QMainWindow):
                 self._stop_main_effect()
         self._update_canvas()
 
+    # Use monotonic time for playback duration; wall-clock adjustments must not affect phase.
     def _elapsed_ms(self) -> float:
         if self._run_started_at == 0.0:
             return 0.0
         return (time.monotonic() - self._run_started_at) * 1000.0
 
+    # Predict each iteration using wrapped main-effect time; this is commanded/model force, not motor telemetry.
     def _update_canvas(self):
         if self._model is None:
             fx, fy = 0.0, 0.0
@@ -662,6 +690,7 @@ class MainWindow(QMainWindow):
                 f"COMMANDED FORCE   Fx {fx:+.0f}   Fy {fy:+.0f}\n"
                 f"                  |F| {mag:.0f}   dir {direction:.1f}°")
 
+    # Snapshot controls into EffectParams; conditions are indefinite, and ramps use their dedicated duration.
     def _gather_params(self) -> EffectParams:
         cond = self.spn_cond_coeff.value()
         effect_type = str(self.cmb_type.currentData())
@@ -696,6 +725,7 @@ class MainWindow(QMainWindow):
             apply_y=self.chk_axis_y.isChecked(),
         )
 
+    # Reuse only a matching main-effect type; stop/free a replaced block before requesting another ID.
     def _ensure_effect(self, effect_type: str) -> bool:
         if not self.controller.is_connected:
             self._log("device not connected")
@@ -722,6 +752,7 @@ class MainWindow(QMainWindow):
             self._effect_type = effect_type
         return True
 
+    # Allocate the background spring independently and retain its ID across main-effect changes.
     def _ensure_spring(self) -> bool:
         if not self.controller.is_connected:
             self._log("device not connected")
@@ -735,6 +766,8 @@ class MainWindow(QMainWindow):
         return True
 
     @staticmethod
+    # Send enabled condition axes individually, or the appropriate scalar type-specific report.
+    # Do not send an envelope here: it is separate and does not apply to conditions.
     def _send_payload(dev, params, idx):
         if params.effect_type in CONDITION_TYPES:
             if params.apply_x:
@@ -748,6 +781,7 @@ class MainWindow(QMainWindow):
         elif params.effect_type == RAMP:
             dev.set_ramp_force(build_ramp(params, idx))
 
+    # Send common and type-specific parameters before Effect Operation; update local timing only after success.
     def _apply_and_start(self):
         params = self._gather_params()
         if not self._ensure_effect(params.effect_type):
@@ -778,6 +812,7 @@ class MainWindow(QMainWindow):
         self._log(f"started {params.effect_type} block {self._effect_idx} "
                   f"loop {self.spn_loop.value()}")
 
+    # Reconfigure the current main block without restarting its timeline; start paths are handled separately.
     def apply_main_effect(self) -> bool:
         params = self._gather_params()
         if not self._ensure_effect(params.effect_type):
@@ -798,6 +833,7 @@ class MainWindow(QMainWindow):
         self._log(f"applied {params.effect_type} block {self._effect_idx}")
         return True
 
+    # Configure/start an independent XY spring block; never use a main-effect envelope to store Y conditions.
     def apply_spring(self) -> bool:
         if not self.controller.is_connected:
             self._log("device not connected")
@@ -838,6 +874,7 @@ class MainWindow(QMainWindow):
     def start_effect(self):
         self._apply_and_start()
 
+    # Stop all GUI-owned effects and clear local prediction/history, but do not disable device-wide actuators.
     def stop_effect(self):
         idxs = [i for i in (self._effect_idx, self._spring_idx) if i]
         dev = self.controller._device
@@ -869,11 +906,13 @@ class MainWindow(QMainWindow):
         self._log("stopped")
 
     @staticmethod
+    # Restore the previous signal-blocking state to avoid recursive start/stop commands during UI updates.
     def _set_toggle_silent(control, checked: bool):
         blocked = control.blockSignals(True)
         control.setChecked(checked)
         control.blockSignals(blocked)
 
+    # Release only the main block; keep the spring preview active if its separate block remains allocated.
     def _stop_main_effect(self):
         if not self._effect_idx:
             return
@@ -900,6 +939,7 @@ class MainWindow(QMainWindow):
         stamp = time.strftime("%H:%M:%S")
         self.log.appendPlainText(f"[{stamp}] {msg}")
 
+    # Stop timers and GUI-owned effects, then stop polling/close the handle before accepting window closure.
     def closeEvent(self, event):
         self._timer.stop()
         self.stop_effect()

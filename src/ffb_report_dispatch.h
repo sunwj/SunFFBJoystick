@@ -1,3 +1,9 @@
+/**
+ * Hardware-independent validation and dispatch for incoming HID commands, exercised by native tests.
+ * length excludes the report ID; report type, ID and exact payload size must all match.
+ * Copy bytes into local report structures instead of dereferencing unaligned USB buffers.
+ */
+
 #pragma once
 #include <cstring>
 #include "ffb_report_handler.h"
@@ -43,6 +49,7 @@ namespace SunFFB
 
     inline bool valid_output_report(uint8_t id, uint8_t type, const uint8_t* data, uint16_t length)
     {
+        // Require exact length: short reports risk overreads, while oversized reports hide layout mismatches.
         const uint16_t expected = output_report_size(id, type);
         return data && expected && length == expected;
     }
@@ -50,6 +57,7 @@ namespace SunFFB
     inline bool dispatch_output_report(FFBReportHandler& handler, uint8_t id, uint8_t type,
                                        const uint8_t* data, uint16_t length)
     {
+        // No locking here: the firmware worker synchronizes access; native tests call this directly.
         if (!valid_output_report(id, type, data, length))
             return false;
 

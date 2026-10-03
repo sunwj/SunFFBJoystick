@@ -1,3 +1,9 @@
+/**
+ * Select millisecond/microsecond clocks and formatted debug output for the compiled platform.
+ * Unknown platforms use weak stubs; provide real clocks when porting or effect time will not advance.
+ * Debug output can affect real-time behavior; repeat timing measurements when enabling logging.
+ */
+
 #include "ffb_hal.h"
 
 // ============================================================================

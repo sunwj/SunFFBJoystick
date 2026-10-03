@@ -1,3 +1,7 @@
+# Serial protocol debugging UI for connection settings, test payloads and received-frame display.
+# A background reader emits Qt signals; widgets must be updated in the GUI thread.
+# Test force/position messages are real transmissions; match port, axis count and framing to the peer.
+
 import sys
 import serial
 import threading
@@ -31,6 +35,7 @@ class SerialGUI(QWidget):
 
         self.init_ui()
 
+    # Build controls only; the port and reader are opened later by the explicit connect action.
     def init_ui(self):
         layout = QVBoxLayout()
 
@@ -87,12 +92,14 @@ class SerialGUI(QWidget):
         layout.addLayout(button_layout)
         self.setLayout(layout)
 
+    # Dispatch connect/disconnect based on current serial state; do not spawn duplicate readers.
     def toggle_connection(self):
         if self.serial and self.serial.is_open:
             self.disconnect_serial()
         else:
             self.connect_serial()
 
+    # Create the configured link and background reader after serial open succeeds.
     def connect_serial(self):
         port = self.port_box.currentText()
         baud = int(self.baud_box.currentText())
@@ -112,6 +119,7 @@ class SerialGUI(QWidget):
         except serial.SerialException as e:
             QMessageBox.critical(self, "Error", f"Could not open port:\n{e}")
 
+    # Request reader exit before closing the port; UI state is reset for the next connection.
     def disconnect_serial(self):
         self.running = False
         if self.serial and self.serial.is_open:
@@ -122,6 +130,7 @@ class SerialGUI(QWidget):
         self.framing_box.setEnabled(True)
         self.axes_box.setEnabled(True)
 
+    # Parse messages in the reader thread and emit text through the Qt bridge, never mutate widgets directly.
     def read_serial(self):
         while self.running:
             try:
@@ -147,6 +156,7 @@ class SerialGUI(QWidget):
                 self.signals.data_received.emit(f"[ERROR] {e}")
                 self.running = False
 
+    # Parse explicit force/position/heartbeat commands; these transmit real messages to the selected port.
     def send_data(self):
         if not self.serial or not self.serial.is_open:
             QMessageBox.warning(self, "Not Connected", "Connect first.")
@@ -179,12 +189,14 @@ class SerialGUI(QWidget):
         except Exception as e:
             self.log(f"[ERROR] Send failed: {e}")
 
+    # Qt delivers the bridge signal to the GUI thread before appending received text.
     def update_display(self, message):
         self.text_display.append(message)
 
     def log(self, message):
         self.text_display.append(message)
 
+    # Request background exit and close the serial port when the window closes.
     def closeEvent(self, event):
         self.running = False
         if self.serial and self.serial.is_open:

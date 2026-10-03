@@ -1,3 +1,7 @@
+# Connection layer between the GUI and HID client: worker reads input, controller owns the handle.
+# One read loop demultiplexes position/PID reports and emits signals to the GUI thread.
+# Stop polling before closing the handle; expose connection failures rather than marking them successful.
+
 from __future__ import annotations
 
 from PyQt6.QtCore import QThread, pyqtSignal
@@ -21,6 +25,7 @@ class DeviceWorker(QThread):
         self._poll_ms = poll_ms
         self._running = True
 
+    # A single worker reads both input report types; timeout is normal polling, other failures terminate the loop.
     def run(self):
         while self._running:
             try:
@@ -37,6 +42,7 @@ class DeviceWorker(QThread):
                 self.error.emit(str(exc))
                 self._running = False
 
+    # Request cooperative exit and wait up to 500 ms; the worker's bounded read timeout normally permits exit.
     def stop(self):
         self._running = False
         self.wait(500)
@@ -67,6 +73,7 @@ class DeviceController:
         """Return matching HID devices for the device selector."""
         return SunFFBDevice.enumerate(self._vid, self._pid)
 
+    # Replace the previous session; defer worker startup when the GUI still needs to connect signal handlers.
     def connect(self, path=None, start_worker=True) -> bool:
         self._last_error = None
         try:
@@ -89,6 +96,7 @@ class DeviceController:
             self._open = False
             return False
 
+    # Start polling only after signals are connected; repeated calls do not create competing readers.
     def start_worker(self) -> bool:
         """Start input polling after the GUI has connected its Qt signals."""
         if not self.is_connected or self._worker is None:
@@ -97,6 +105,7 @@ class DeviceController:
             self._worker.start()
         return True
 
+    # Stop the worker before closing its HID handle, then clear the connection state.
     def disconnect(self) -> None:
         if self._worker is not None:
             self._worker.stop()
@@ -117,6 +126,7 @@ class DeviceController:
         if self._device:
             self._device.set_device_gain(gain)
 
+    # Return zero for no connection or failed allocation; a nonzero ID is allocated, not yet playing.
     def create_effect(self, effect_type: int) -> int:
         if not self._device:
             return 0

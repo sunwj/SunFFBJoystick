@@ -1,3 +1,9 @@
+/**
+ * Deterministic effect formula tests using virtual time, synthetic input and allocated effects.
+ * Cover phase, gain, summation, conditions, envelopes, loops and trigger behavior.
+ * Derive expectations from formulas or validated behavior, not by copying the implementation.
+ */
+
 #include <unity.h>
 #include <cstdarg>
 #include <cstdint>
@@ -24,6 +30,7 @@ extern "C" void _debug_printf(const char*, ...)
 
 struct Fixture
 {
+    // Own a fresh model/handler/input trio; virtual timestamps make waveform boundaries deterministic.
     FFBReportHandler handler;
     FFBDeviceInput input;
     FFBForceCalculator calculator;
@@ -67,6 +74,7 @@ struct Fixture
 
     void at(uint32_t ms)
     {
+        // Advance both clocks consistently; input derivative tests may also advance fakeMicros directly.
         fakeMillis = ms;
         fakeMicros = ms * 1000;
     }

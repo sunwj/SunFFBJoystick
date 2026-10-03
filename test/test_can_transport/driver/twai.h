@@ -1,3 +1,9 @@
+/**
+ * Native-test ESP-IDF TWAI substitute exposing only the API surface needed by the adapter.
+ * Configurable results and captured arguments exercise initialization, filtering and recovery.
+ * The fake driver does not validate actual ESP32 peripherals or CAN transceivers.
+ */
+
 #pragma once
 #include <stdint.h>
 #include <deque>

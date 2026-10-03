@@ -1,3 +1,9 @@
+/**
+ * Packed wire reports and internal runtime structures; only wire reports require packed layouts.
+ * Internal effects include caches and state and must not be sent directly as USB reports.
+ * Protocol field changes require matching descriptors, host structures and size assertions.
+ */
+
 #ifndef _FFB_REPORT_TYPES_H_
 #define _FFB_REPORT_TYPES_H_
 
@@ -33,7 +39,7 @@ namespace SunFFB
         uint8_t triggerButton;          // min 1, max N
         uint8_t axisEnable;             // Bits: X, Y (optional), Z (optional), Direction enable
         uint16_t directions
-            [NUM_AXIS]; // polar: 0..36000 (hundredths of degree); cartesian: signed values (two's complement, -32768..32767)
+            [NUM_AXIS]; // angular fields in hundredths of a degree; polar uses element 0, spherical uses 0/1
         uint16_t startDelay; // min 0, max 0xFFFE
     };
 
@@ -52,12 +58,12 @@ namespace SunFFB
     {
         uint8_t effectBlockIndex;     // min 1, max MAX_EFFECTS
         uint8_t parameterBlockOffset; // Bits: 0, min 0, max 1
-        int16_t cpOffset;             // min -USB_AXIS_MAX_ABSOLUTE, max USB_AXIS_MAX_ABSOLUTE
+        int16_t cpOffset;             // nominal center in -USB_MAX_MAGNITUDE..USB_MAX_MAGNITUDE
         int16_t positiveCoefficient;  // min -10000, max 10000
         int16_t negativeCoefficient;  // min -10000, max 10000
         uint16_t positiveSaturation;  // min 0, max 10000
         uint16_t negativeSaturation;  // min 0, max 10000
-        uint16_t deadBand;            // min 0, max USB_AXIS_MAX_ABSOLUTE
+        uint16_t deadBand;            // nominal half-width in 0..USB_MAX_MAGNITUDE, not raw ADC units
     };
 
     // HID output report 6: periodic effect waveform (magnitude, offset, phase, period)
@@ -139,6 +145,7 @@ namespace SunFFB
     // An EffectBlock holds NUM_AXIS such slots.
     union TypeSpecificParameterBlock
     {
+        // Legacy envelope union member is not the live envelope storage; EffectBlock has a separate field.
         SetEnvelopeReportData envelopeData;
         SetConditionReportData conditionData;
         SetPeriodicReportData periodicData;

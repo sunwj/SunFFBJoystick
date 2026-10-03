@@ -1,3 +1,9 @@
+/**
+ * Firmware boundary/failure tests for malformed reports, state transitions and corrupted transport input.
+ * Invalid input must leave valid state intact; envelopes must not corrupt neighboring effects or axes.
+ * Virtual clocks exercise deadlines and wraparound without connecting or driving physical motors.
+ */
+
 #include "realtime_timing.h"
 #include <unity.h>
 #include <cstring>
@@ -33,6 +39,7 @@ void tearDown()
 
 struct Fixture
 {
+    // Shared setup for state-machine edge cases; no USB callback or physical I/O is required.
     FFBReportHandler handler;
     FFBDeviceInput input;
     FFBForceCalculator calculator;
@@ -198,6 +205,7 @@ void test_effect_started_during_pause_preserves_full_delay()
 
 void test_envelope_does_not_change_condition_blocks()
 {
+    // Compare the entire effect block, not just X force: envelope must leave every axis slot intact.
     Fixture f;
     uint8_t id = f.effect(ET_SPRING);
 

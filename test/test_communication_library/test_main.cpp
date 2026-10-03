@@ -1,3 +1,9 @@
+/**
+ * Standalone EmbeddedComm C++17 tests excluding firmware sources and NUM_AXIS dependencies.
+ * Fake HALs exercise generic serial/CAN framing and Arduino adapter contracts.
+ * Keep this suite independent to detect accidental USB, FreeRTOS or motor-protocol coupling.
+ */
+
 #include <unity.h>
 #include <vector>
 #include <EmbeddedComm/SerialLink.h>
@@ -15,6 +21,7 @@ void tearDown()
 
 struct ByteHal
 {
+    // Minimal byte-only HAL exercises the fallback path without Arduino or bulk-read APIs.
     std::vector<uint8_t> bytes;
     size_t cursor = 0;
 
@@ -37,6 +44,7 @@ struct ByteHal
 
 struct SensorLayout
 {
+    // Non-motor fixed-layout example demonstrates that the framing core has no axis-count dependency.
     static constexpr uint16_t length(uint8_t id)
     {
         return id == 0x42 ? 3 : 0xFFFF;

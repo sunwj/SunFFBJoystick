@@ -1,3 +1,6 @@
+# Host-side historical regressions protecting report generation and predicted effect behavior.
+# Assert protocol values and model results, not merely that function calls complete without exceptions.
+
 import importlib.util
 import os
 from pathlib import Path

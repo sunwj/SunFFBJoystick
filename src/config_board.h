@@ -1,3 +1,9 @@
+/**
+ * Board configuration: display, GPIO, USB identity, task periods and transport switches.
+ * Options guarded by #ifndef accept build-time overrides; other values are maintained here.
+ * Axis count comes from config_ffb.h. Motor output is opt-in; verify wiring and protocol first.
+ */
+
 #ifndef _CONFIG_BOARD_H_
 #define _CONFIG_BOARD_H_
 
@@ -10,6 +16,7 @@
 #if ENABLE_LCD != 0 && ENABLE_LCD != 1
 #error "ENABLE_LCD must be 0 or 1"
 #endif
+// The ST7735 setup is 80x160 portrait; the application rotates it to landscape.
 #define TFT_X 0
 #define TFT_Y 0
 #define TFT_W 160
@@ -29,10 +36,11 @@
 #endif
 
 // ===== USB Device Descriptor =====
-#define USB_VID 0xFFFF
-#define USB_PID 0x2010
-#define USB_MANUFACTURER "SunFFB"
-#define USB_PRODUCT "Force feedback joystick"
+#define DEVICE_VID 0xFFFF
+#define DEVICE_PID 0x2010
+#define DEVICE_MANUFACTURER "SunFFB"
+#define DEVICE_PRODUCT "Force feedback joystick"
+#define USB_REPORT_TIMEOUT_MS 2
 
 // Motor transmission and encoder input are opt-in.
 #ifndef ENABLE_MOTOR_OUTPUT
@@ -58,11 +66,13 @@
 #define RECV_POSITION_TASK_PERIOD_MS 1
 
 // ===== Task Stack Sizes =====
+// ESP-IDF task creation takes stack size in bytes, not the word count used by some FreeRTOS ports.
 #define LCD_TASK_STACK_SIZE 4096
 #define TIMING_TASK_STACK_SIZE 4096
 #define TASK_STACK_SIZE 2048
 
 // ===== ADC Calibration =====
+// Average startup samples establish each axis center; subsequent 12-bit ADC displacement maps to HID range.
 #define ADC_CALIBRATION_SAMPLES 1000
 #define ADC_CLAMP 2048
 #define ADC_SCALE 2048.f

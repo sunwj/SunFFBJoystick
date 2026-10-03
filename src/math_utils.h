@@ -1,3 +1,8 @@
+/**
+ * Math helpers: clamping, angle normalization and optional approximate square-root/trig functions.
+ * Approximation is a performance option, not a general libm replacement; check widths when porting.
+ */
+
 #ifndef _MATH_UTILS_H_
 #define _MATH_UTILS_H_
 
@@ -6,6 +11,8 @@
 
 __attribute__((weak)) float _sqrt(float number)
 {
+    // Legacy approximation: inverse-square-root bit trick times the input, not an exact sqrt.
+    // Pointer reinterpretation depends on target widths and aliasing; do not assume portable correctness.
     long i;
     float y;
     
@@ -19,6 +26,8 @@ __attribute__((weak)) float _sqrt(float number)
 
 __attribute__((weak)) float _sinf(float a)
 {
+    // Mirror a quarter-cycle table across four quadrants and interpolate with eight fractional bits.
+    // Table entries use a 32768 full scale; convert back to floating-point sine amplitude on return.
     static uint16_t sine_array[65] = {0, 804, 1608, 2411, 3212, 4011, 4808, 5602, 6393,
                                       7180, 7962, 8740, 9512, 10279, 11039, 11793, 12540, 13279,
                                       14010, 14733, 15447, 16151, 16846, 17531, 18205, 18868, 19520,
