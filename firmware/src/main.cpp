@@ -3,6 +3,20 @@
  * Data flow: input source -> snapshot/metrics -> effect calculation -> force queue -> optional motors.
  * USB commands execute in the serialized service callback; input and PID state share an endpoint.
  * LCD and UART logs are diagnostic paths; motor enablement and timing require separate validation.
+ *
+ * Reading guide:
+ * - setup() allocates shared resources before USB callbacks or worker tasks can use them.
+ * - receive_position_task()/joystick_task() publish the latest input and motion metrics.
+ * - force_calculation_task() combines those metrics with the host-owned effect pool.
+ * - send_report_task()/send_force_task() deliver snapshots to USB and the motor transport.
+ * - lcd_task()/timing_task()/console_task() observe the pipeline at lower priority.
+ *
+ * Synchronization has two distinct roles: mutexes protect mutable model state,
+ * while one-slot queues copy complete snapshots between producers and consumers.
+ * Queue overwrites intentionally discard intermediate samples when a consumer lags.
+ * All micros() timestamps are uint32_t; unsigned subtraction handles timer wrap
+ * for the short intervals measured here. Timing maxima are observations, not a
+ * guarantee that an arbitrary future workload will meet its deadline.
  */
 
 #include <Arduino.h>
@@ -30,6 +44,7 @@ auto& firmwareConsole = Serial;
 #include "diagnostic_output.h"
 struct ConsoleLine
 {
+    // Queue items own their bytes; callers may return immediately after formatting.
     uint16_t length;
     uint8_t bytes[256];
 };
@@ -37,6 +52,8 @@ static QueueHandle_t consoleLines;
 
 static void consolePrintf(const char* format, ...)
 {
+    // Format into a fixed-size local record, then enqueue with zero wait. This path
+    // can be called by USB or timing code without waiting for UART transmission.
     ConsoleLine line{};
     va_list args;
     va_start(args, format);
@@ -55,6 +72,8 @@ static void consolePrintf(const char* format, ...)
 
 static void console_task(void*)
 {
+    // The sole hardware UART0 writer drains queued diagnostics at low priority.
+    // UART1 belongs to the motor link and is independent of this console.
     ConsoleLine line;
     while (true)
     {
@@ -108,6 +127,7 @@ static_assert(FORCE_TASK_PERIOD_MS == 1 || FORCE_TASK_PERIOD_MS == 2,
 static_assert((4 + sizeof(SunFFB::ForcePayload)) * 10 * 500 < UART1_BAUD,
               "Motor UART cannot carry 500 Hz force frames");
 #endif
+// S2 has one core; S3 keeps model computation on core 1 and protocol I/O on core 0.
 #if CONFIG_FREERTOS_UNICORE
 constexpr BaseType_t applicationCore = 0;
 
@@ -120,6 +140,8 @@ constexpr UBaseType_t periodicIOPriority = 2;
 static void createFirmwareTask(TaskFunction_t entry, const char* name, uint32_t stackBytes,
                                UBaseType_t priority, BaseType_t core)
 {
+    // ESP-IDF's pinned-task API takes stack size in bytes. Fail at initialization
+    // if a task cannot be created rather than running an incomplete control pipeline.
     const BaseType_t result =
         xTaskCreatePinnedToCore(entry, name, stackBytes, nullptr, priority, nullptr, core);
     configASSERT(result == pdPASS);
@@ -160,6 +182,8 @@ static_assert(CAN_TX_PIN != SW_PIN && CAN_RX_PIN != SW_PIN, "CAN conflicts with 
 #endif
 
 uint16_t coordOffsets[NUM_AXIS] = {0};
+// Descriptor bytes are selected at compile time with NUM_AXIS. The descriptor,
+// packed report types and host client must agree on IDs and payload sizes.
 static const uint8_t ffbReportDescriptor[] PROGMEM = {FFB_REPORT_DESCRIPTOR_CONTENT};
 
 uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer,
@@ -171,7 +195,7 @@ struct PositionSample
 {
     // Carry raw encoder values and arrival time together; sequence distinguishes fresh samples from rereads.
     uint16_t position[NUM_AXIS];
-    uint32_t receivedUs;
+    uint32_t receivedUs; // Timestamp after decoding a valid transport payload, not a wire timestamp.
     uint32_t sequence;
 };
 
@@ -183,15 +207,24 @@ struct JoystickSample
     uint32_t sequence;
 };
 
+// Cadence/work counters and release-to-completion deadline counters answer
+// different questions. USB submission and actual completion are also separate
+// events; only completed fresh position reports advance freshPositionTiming.
 SunFFB::TimingStream forceTiming(FORCE_TASK_PERIOD_MS * 1000);
 SunFFB::ForceDeadlineStream forceDeadlines(FORCE_TASK_PERIOD_MS * 1000);
 SunFFB::TimingStream positionRxTiming(2000), inputTiming(2000);
 SunFFB::TimingStream usbSubmitTiming(2000), usbCompleteTiming(2000);
 SunFFB::TimingStream freshPositionTiming(2000), motorTxTiming(2000);
 
+// Latest durations for the LCD, rather than lifetime maxima. These scalars do
+// not replace the synchronized TimingStream/ForceDeadlineStream statistics.
 volatile uint32_t reportProcessTime = 0;
 volatile uint32_t effectProcessTime = 0;
 
+// Mailbox ownership:
+// gPositions: transport RX -> joystick task (receive consumes the latest sample).
+// gForces: force task -> motor TX and LCD (peek leaves the snapshot available).
+// gJoystickReportData: joystick task -> USB sender (peek permits submission retry).
 QueueHandle_t gPositions;
 QueueHandle_t gForces;
 QueueHandle_t gJoystickReportData;
@@ -240,6 +273,9 @@ class FFBUSBHIDDevice : public USBHIDDevice
         }
 };
 
+// These objects live for the entire firmware lifetime. The input mutex protects
+// ffbDeviceInput; the handler mutex protects ffbHandler, including its effect pool.
+// The calculator is used only by the force task while both model locks are held.
 USBHID usb_hid;
 FFBUSBHIDDevice ffbUsbHidDevice;
 SunFFB::FFBDeviceInput ffbDeviceInput;
@@ -248,6 +284,8 @@ SunFFB::FFBForceCalculator ffbForceCalculator;
 
 struct DeferredHIDReport
 {
+    // Persistent storage bridges the sender task and a queued USB-service callback.
+    // owner receives an acceptance notification; this is not a wire-completion signal.
     TaskHandle_t owner;
     uint8_t id;
     uint16_t length;
@@ -256,6 +294,8 @@ struct DeferredHIDReport
     bool fresh;
 };
 static DeferredHIDReport deferredReport{};
+// The single HID IN endpoint has one in-flight transfer. The completion hook
+// attributes that transfer using the freshness flag saved when it was accepted.
 static bool submittedPositionFresh;
 
 static void submit_hid_report(void*)
@@ -279,6 +319,9 @@ static void submit_hid_report(void*)
 
 void hid_report_complete_hook(const uint8_t* report, uint16_t length)
 {
+    // Called by the compatibility wrapper after TinyUSB completes an IN transfer.
+    // The completed buffer includes its report ID; PID state traffic is excluded
+    // from joystick cadence and fresh-position measurements.
     if (length && report[0] == REPORT_ID_JOYSTICK)
     {
         usbCompleteTiming.record(micros());
@@ -302,6 +345,8 @@ static bool submitReport(uint8_t id, const void* payload, uint16_t length,
     deferredReport.fresh = fresh;
     memcpy(deferredReport.bytes, payload, length);
     usbd_defer_func(submit_hid_report, nullptr, false);
+    // Values 1/2 distinguish accepted/rejected submission. Waiting here also
+    // prevents the next report from overwriting the deferred callback's input.
     uint32_t result;
     xTaskNotifyWait(0, UINT32_MAX, &result, portMAX_DELAY);
     return result == 1;
@@ -313,15 +358,21 @@ static uint32_t forceReleaseUs;
 
 static void force_timer_callback(void*)
 {
+    // Runs in esp_timer's task context, not an interrupt. Advance a nominal
+    // release phase instead of scheduling the next job relative to completion.
     constexpr uint32_t periodUs = FORCE_TASK_PERIOD_MS * 1000;
     forceReleaseUs += periodUs;
     const uint32_t nowUs = micros();
     const uint32_t behindUs = nowUs - forceReleaseUs;
+    // A difference in the upper half of uint32_t represents a future release
+    // under wraparound arithmetic, so it must not be interpreted as huge lateness.
     if (behindUs >= periodUs && behindUs < 0x80000000U)
     {
         // Coalesce delayed releases; never replay a backlog of stale force samples.
         forceReleaseUs += (behindUs / periodUs) * periodUs;
     }
+    // The notification is a latest-release mailbox: a busy force task receives
+    // the newest phase timestamp, and deadline accounting detects skipped phases.
     xTaskNotify(forceCalculationTaskHandle, forceReleaseUs, eSetValueWithOverwrite);
 }
 SemaphoreHandle_t semaphoreFFBDeviceInput;
@@ -330,6 +381,9 @@ SemaphoreHandle_t semaphoreFFBReportHandler;
 uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer,
                                  uint16_t reqlen)
 {
+    // Only the allocation result and pool description are readable Feature
+    // reports here. Return zero for unsupported requests or undersized buffers.
+    // The callback payload excludes the report ID; the USB layer handles that ID.
     switch (report_type)
     {
         case HID_REPORT_TYPE_FEATURE:
@@ -387,6 +441,9 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
 void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, const uint8_t* buffer,
                              uint16_t bufSize)
 {
+    // Validate type, ID and payload size before interpreting packed host data.
+    // The dispatcher implements protocol semantics; this entry point supplies
+    // serialization and timing around changes to the shared effect model.
     const uint32_t startTime = micros();
     if (!SunFFB::valid_output_report(reportId, reportType, buffer, bufSize))
         return;
@@ -414,6 +471,8 @@ static void push_lcd_sprite_bounded()
     auto* pixels = static_cast<uint16_t*>(sprite.getPointer());
     configASSERT(pixels != nullptr);
     const bool oldSwapBytes = lcd.getSwapBytes();
+    // Sprite pixels already use the byte order expected by this raw push path.
+    // Restore the previous display setting so other TFT operations retain theirs.
     lcd.setSwapBytes(false);
 
     for (int16_t row = 0; row < TFT_H; row += rowsPerTransfer)
@@ -433,6 +492,9 @@ static void push_lcd_sprite_bounded()
 
 void lcd_task(void* params)
 {
+    // Render from snapshots, so a slow display never holds a model mutex during
+    // text drawing or SPI transfers. A timed-out snapshot keeps the previous
+    // axis/effect display; it does not delay the control loop indefinitely.
     // Hold shared locks only for snapshots; release them before rendering and SPI display transfers.
     // gForces is a one-slot latest-value queue; peek does not consume motor output.
     TickType_t wakeupTime = xTaskGetTickCount();
@@ -457,6 +519,8 @@ void lcd_task(void* params)
             xSemaphoreGive(semaphoreFFBDeviceInput);
         }
 
+        // Map signed full-scale position into the upper 40x40 plot, leaving a
+        // two-pixel margin so the marker stays inside the red border.
         uint8_t coords[NUM_AXIS];
 #pragma unroll
         for (uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -531,6 +595,8 @@ void lcd_task(void* params)
         sprite.printf("Z:%d F:%d", axisSnapshot[2], forces[2]);
 #endif
         const uint32_t uptimeSeconds = millis() / 1000U;
+        // Hours may exceed two digits; minutes and seconds wrap within 0..59.
+        // This is boot uptime based on millis(), including its natural wraparound.
         const uint32_t uptimeHours = uptimeSeconds / 3600U;
         const uint32_t uptimeMinutes = (uptimeSeconds / 60U) % 60U;
         const uint32_t uptimeSecondsPart = uptimeSeconds % 60U;
@@ -546,6 +612,7 @@ void lcd_task(void* params)
             xSemaphoreGive(semaphoreFFBReportHandler);
         }
 
+        // One marker per effect slot: green is free, blue allocated, red playing.
         for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
         {
             uint16_t color = TFT_BLACK;
@@ -589,14 +656,19 @@ void joystick_task(void* params)
 #if USE_EXTERNAL_POSITION
         PositionSample sample;
         xQueueReceive(gPositions, &sample, portMAX_DELAY);
+        // External feedback drives this task by arrival. The one-slot queue
+        // coalesces bursts; a sample is processed once rather than polled again.
         receivedUs = sample.receivedUs;
         sequence = sample.sequence;
 
+        // Encoder center is 32768. Clamp before narrowing to the symmetric HID
+        // range, so encoder value zero maps to -32767 rather than -32768.
         for (uint8_t i = 0; i < NUM_AXIS; ++i)
             coords[i] = std::clamp<int32_t>(int32_t(sample.position[i]) - 32768,
                                             -32767, 32767);
 #else
         receivedUs = micros();
+        // ADC mode establishes a new source sequence on each periodic acquisition.
         ++sequence;
 #pragma unroll
         for (uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -611,6 +683,8 @@ void joystick_task(void* params)
         uint8_t btnState = digitalRead(SW_PIN) ? 0 : 1;
 #endif
 
+        // Update filters/derivatives and copy the HID report under one lock.
+        // Force computation therefore sees a consistent set of motion metrics.
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
 #ifdef USE_BUTTON
         ffbDeviceInput.update_buttons(btnState);
@@ -636,6 +710,8 @@ void force_calculation_task(void* params)
     forceCalculationTaskHandle = xTaskGetCurrentTaskHandle();
     // Start deadlines only after setup has created every peer task and queue.
     xSemaphoreTake(forceStartGate, portMAX_DELAY);
+    // Peer-task creation may preempt this task during setup. The startup gate
+    // excludes that initialization work from the periodic release phase.
     esp_timer_handle_t forceTimer;
     esp_timer_create_args_t timerArgs{};
     timerArgs.callback = force_timer_callback;
@@ -650,11 +726,16 @@ void force_calculation_task(void* params)
     {
         uint32_t releaseUs;
         xTaskNotifyWait(0, UINT32_MAX, &releaseUs, portMAX_DELAY);
+        // releaseUs is the nominal deadline origin; startTime is when this task
+        // actually runs. Keeping both exposes scheduler wake-up latency.
         const uint32_t startTime = micros();
         int32_t forces[NUM_AXIS] = {0};
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
         xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
+        // These timestamps separate mutex wait from computation and publication.
+        // Keep each event's tuple together; independent maxima may be from
+        // different cycles and cannot be added to reconstruct one slow cycle.
         const uint32_t lockedUs = micros();
         const uint32_t context = uint32_t(ffbHandler.deviceState);
         ffbForceCalculator.force_calculator(ffbHandler, ffbDeviceInput, (int32_t*)forces);
@@ -666,6 +747,8 @@ void force_calculation_task(void* params)
 
         uint32_t endTime = micros();
         effectProcessTime = endTime - startTime;
+        // The duration shown on the LCD excludes release-to-start latency. Deadline accounting
+        // includes it and records skipped releases as well as completed-job misses.
         forceTiming.record(endTime, effectProcessTime);
         forceDeadlines.record_detail(releaseUs, startTime, lockedUs, computedUs, endTime,
                                     context
@@ -733,6 +816,8 @@ void send_report_task(void* params)
                 bool pending = false;
                 if (xSemaphoreTake(semaphoreFFBReportHandler, 0) == pdTRUE)
                 {
+                    // Snapshot both content and revision. A later host command
+                    // may change state while this snapshot is being submitted.
                     pending = ffbHandler.peek_pid_state_report(data, revision);
                     xSemaphoreGive(semaphoreFFBReportHandler);
                 }
@@ -742,12 +827,16 @@ void send_report_task(void* params)
                 if (pending && submitReport(REPORT_ID_PID_STATE, &data, sizeof(data)))
                 {
                     xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
+                    // Revision-aware acknowledgement must not clear a newer
+                    // state change that occurred after the snapshot was taken.
                     ffbHandler.acknowledge_pid_state_report(data, revision);
                     xSemaphoreGive(semaphoreFFBReportHandler);
                 }
             }
         }
 
+        // Preserve periodic pacing when on time; after an overrun, yield and
+        // restart the tick phase rather than spinning through missed periods.
         if (xTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(1)) == pdFALSE)
         {
             vTaskDelay(1);
@@ -769,6 +858,8 @@ void send_force_task(void* params)
     {
         int32_t forces[NUM_AXIS];
         xQueuePeek(gForces, forces, portMAX_DELAY);
+        // Peek blocks until the first force exists, then resends the newest
+        // snapshot at the transport period even if input has not changed.
         const uint32_t startUs = micros();
         if (motorLink.sendForce(forces))
             motorTxTiming.record(micros(), micros() - startUs);
@@ -779,6 +870,8 @@ void send_force_task(void* params)
         if (uint32_t(millis() - lastHealthMs) >= 1000)
         {
             lastHealthMs = millis();
+            // HIL telemetry shares UART1 and its TX owner. Its bounded records
+            // are emitted here so a second task cannot interleave motor frames.
             emit_hil_diagnostics(motorLink, forceDeadlines,
                                  forceCalculationTaskHandle, lastHealthMs);
         }
@@ -802,6 +895,7 @@ void receive_position_task(void* params)
     while (true)
     {
 #if MOTOR_TRANSPORT == 1
+        // A bus recovery invalidates the receiver's prior sequence history.
         if (canHal.service())
             motorLink.resetReceiver();
 #endif
@@ -826,6 +920,8 @@ void receive_position_task(void* params)
                 continue;
 #endif
             PositionSample sample{};
+            // Only a validated position payload gets a timestamp and sequence.
+            // Transport errors/other CAN IDs cannot refresh the input mailbox.
             memcpy(sample.position, payload.position, sizeof(sample.position));
             sample.receivedUs = micros();
             sample.sequence = ++sequence;
@@ -867,6 +963,8 @@ void timing_task(void*)
         for (uint8_t i = 0; i < 7; ++i)
         {
             const auto stat = streams[i]->take_window();
+            // count is cumulative, while window maxima/failures are drained by
+            // take_window(). Rate uses the actual elapsed reporting interval.
             consolePrintf(
                 "TIMING %s hz=%.1f max_gap_us=%lu gap_over_budget=%lu max_work_us=%lu fail=%lu\n",
                 names[i], float(stat.count - previous[i]) * 1000000.f / windowUs,
@@ -896,6 +994,8 @@ void setup()
     uint8_t protoCore = 0;
 
     firmwareConsole.begin(SERIAL_BAUD);
+    // Console setup precedes all diagnostic producers. Its finite queue bounds
+    // memory use and its low-priority writer handles physical UART backpressure.
     consoleLines = xQueueCreate(16, sizeof(ConsoleLine));
     configASSERT(consoleLines);
     const BaseType_t consoleStarted =
@@ -916,7 +1016,9 @@ void setup()
 
 #endif
 
-    // init joystick and calibrate
+    // ADC calibration treats the boot position as center. Hold the controls at
+    // their intended neutral position during these samples. External encoders
+    // use their protocol center instead and skip ADC setup/calibration entirely.
 #ifdef USE_BUTTON
     pinMode(SW_PIN, INPUT);
 #endif
@@ -939,6 +1041,8 @@ void setup()
 #endif
 
 #if ENABLE_LCD
+    // Create the long-lived framebuffer before starting display/control tasks.
+    // The splash is a synchronous startup transfer; later frames use row groups.
     lcd.init();
     lcd.setRotation(1);
     lcd.setTextWrap(true, true);
@@ -954,6 +1058,9 @@ void setup()
 #endif
 
     ffbHandler.init();
+    // Initialize the protocol model before publishing USB callbacks. Queues,
+    // mutexes and the input model must also exist before USB.begin() can expose
+    // the device to host requests, even though worker tasks are not yet started.
 
     gPositions = xQueueCreate(1, sizeof(PositionSample));
     // Single-slot overwrite queues are latest-value mailboxes, not full sample-history buffers.
@@ -980,7 +1087,9 @@ void setup()
     configASSERT(usbStarted);
 
 
-    // Start processing even before a host enumerates the USB interface.
+    // Start processing even before a host enumerates the USB interface. Tasks
+    // can run immediately when created, so all shared resources are ready above.
+    // The force task alone waits on the gate until the final peer is created.
 
 #if ENABLE_TIMING_DIAGNOSTICS
     createFirmwareTask(timing_task, "Timing", TIMING_TASK_STACK_SIZE, 1, protoCore);
