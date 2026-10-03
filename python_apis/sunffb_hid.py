@@ -373,6 +373,11 @@ class SunFFBDevice:
     # Feature reports use a control transfer, including Create New Effect, rather than the output endpoint.
     def send_feature(self, report_id: int, payload: PackedStruct) -> int:
         data = pack_report(report_id, payload)
+        # Windows HidD_SetFeature requires the collection's maximum FeatureReportByteLength,
+        # including the ID. Short Create New Effect reports otherwise fail before USB delivery.
+        # The maximum feature payload is shared by Pool and Block Load (four bytes).
+        if os.name == "nt":
+            data = data.ljust(1 + max(PoolReportData.sizeof(), BlockLoadReportData.sizeof()), b"\x00")
         return self._require().send_feature_report(data)
 
     # Request payload size plus one ID byte; parsing checks the returned report identifier and length.

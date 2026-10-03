@@ -1,0 +1,1006 @@
+{
+  "position_hz": 500.0,
+  "soak_seconds": 60.0,
+  "checks": [
+    {
+      "name": "position roundtrip (12000, -9000)",
+      "passed": true,
+      "evidence": [
+        11999,
+        -8999
+      ]
+    },
+    {
+      "name": "position roundtrip (-16000, 18000)",
+      "passed": true,
+      "evidence": [
+        -15999,
+        17999
+      ]
+    },
+    {
+      "name": "position roundtrip (32767, -32767)",
+      "passed": true,
+      "evidence": [
+        32766,
+        -32766
+      ]
+    },
+    {
+      "name": "pool allocation and full status",
+      "passed": true,
+      "evidence": {
+        "capacity": 15,
+        "full_status": 2
+      }
+    },
+    {
+      "name": "pool reuse",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "name": "constant direction 9000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -4000,
+          0
+        ],
+        "observed": [
+          -4000.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "constant direction 0",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          4000
+        ],
+        "observed": [
+          0.0,
+          4000.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "constant direction 18000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          -4000
+        ],
+        "observed": [
+          0.0,
+          -4000.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "constant direction 27000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          4000,
+          0
+        ],
+        "observed": [
+          4000,
+          0
+        ],
+        "frames": 153
+      }
+    },
+    {
+      "name": "device gain",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          2007.8431372549019,
+          0
+        ],
+        "observed": [
+          2007.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "pause",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "continue",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          4000,
+          0
+        ],
+        "observed": [
+          4000,
+          0
+        ],
+        "frames": 149
+      }
+    },
+    {
+      "name": "disable",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0,
+          0
+        ],
+        "frames": 153
+      }
+    },
+    {
+      "name": "continue remains disabled",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0,
+          0
+        ],
+        "frames": 149
+      }
+    },
+    {
+      "name": "enable",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          4000,
+          0
+        ],
+        "observed": [
+          4000.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "stop all",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0,
+          0
+        ],
+        "frames": 150
+      }
+    },
+    {
+      "name": "effect gain",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -2007.8431372549019,
+          0
+        ],
+        "observed": [
+          -2007.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "effect sum saturation",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -10000,
+          0
+        ],
+        "observed": [
+          -10000.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "periodic type 3 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3500,
+        "max": 2500,
+        "frames": 552
+      }
+    },
+    {
+      "name": "periodic type 4 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3499,
+        "max": 2499,
+        "frames": 552
+      }
+    },
+    {
+      "name": "periodic type 5 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3500,
+        "max": 2500,
+        "frames": 552
+      }
+    },
+    {
+      "name": "periodic type 6 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3470,
+        "max": 2500,
+        "frames": 553
+      }
+    },
+    {
+      "name": "periodic type 7 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3485,
+        "max": 2485,
+        "frames": 553
+      }
+    },
+    {
+      "name": "ramp and finite duration",
+      "passed": true,
+      "evidence": {
+        "frames": 430
+      }
+    },
+    {
+      "name": "constant attack/fade envelope",
+      "passed": true,
+      "evidence": [
+        533,
+        4000,
+        732.9
+      ]
+    },
+    {
+      "name": "start delay and expiration",
+      "passed": true,
+      "evidence": {
+        "frames": 428
+      }
+    },
+    {
+      "name": "samplePeriod holds ramp samples",
+      "passed": true,
+      "evidence": {
+        "levels": [
+          -2800,
+          -2400,
+          -2000,
+          -1600,
+          -1200,
+          -800,
+          -400,
+          0
+        ]
+      }
+    },
+    {
+      "name": "condition 8: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 746
+      }
+    },
+    {
+      "name": "condition 9: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 728
+      }
+    },
+    {
+      "name": "condition 10: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 235
+      }
+    },
+    {
+      "name": "condition 11: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 746
+      }
+    },
+    {
+      "name": "CRC rejects corrupted positions",
+      "passed": true,
+      "evidence": {
+        "trailing_reports": [
+          [
+            0.00015100000018719584,
+            6999,
+            -7999
+          ],
+          [
+            0.003898799999660696,
+            6999,
+            -7999
+          ]
+        ]
+      }
+    },
+    {
+      "name": "parser recovers after bad CRC",
+      "passed": true,
+      "evidence": [
+        0.3989278999997623,
+        -9999,
+        10999
+      ]
+    },
+    {
+      "name": "loaded soak: UART output and USB input survive",
+      "passed": true,
+      "evidence": {
+        "seconds": 60.00011900000027,
+        "uart_host_received_hz": 499.9990083352979,
+        "usb_reports": 26898,
+        "uart_parser": {
+          "crc_errors": 0,
+          "len_errors": 0,
+          "frames_rx": 42463
+        }
+      }
+    }
+  ],
+  "timing": {},
+  "uart_health": [
+    {
+      "uptime_ms": 4001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 5001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 6001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 7001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 8001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 9001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 10001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 11001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 12001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 13001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 14001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 15001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 16001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 17001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 18001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 19001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 20001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 21001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 22001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 23001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 24001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 25001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 26001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 27001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 28001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 29001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 30001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 31001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 32001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 33001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 34001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 35001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 36001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 37001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 38001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 39001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 40001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 41001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 42001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 43001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 44001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 45001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 46001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 47001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 48001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 49001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 50001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 51001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 52001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 53001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 54001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 55001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 56001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 57001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 58001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 59001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 60001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 61001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 62001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 63001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 64001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 65001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 66001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 67001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 68001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 69001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 70001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 71001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 72001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 73001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 74001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 75001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 76001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 77001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 78001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 79001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 80001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 81001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 82001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 83001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 84001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 85001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 86001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 87001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    },
+    {
+      "uptime_ms": 88001,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 331988
+    }
+  ],
+  "firmware_log": ""
+}

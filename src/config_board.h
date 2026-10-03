@@ -10,6 +10,14 @@
 #include "config_ffb.h"
 
 // ===== Display (debug only; disabled for normal use) =====
+// CDC is opt-in only: simultaneous HID/CDC stress remains unresolved on this SDK.
+#ifndef ENABLE_USB_CDC
+#define ENABLE_USB_CDC 0
+#endif
+#if ENABLE_USB_CDC != 0 && ENABLE_USB_CDC != 1
+#error "ENABLE_USB_CDC must be 0 or 1"
+#endif
+
 #ifndef ENABLE_LCD
 #define ENABLE_LCD 0
 #endif
@@ -25,8 +33,12 @@
 // ===== GPIO Pins =====
 // #define USE_BUTTON
 #define SW_PIN 16
+#ifndef TDX_PIN
 #define TDX_PIN 4
+#endif
+#ifndef RDX_PIN
 #define RDX_PIN 5
+#endif
 
 #define AXIS0_ADC_PIN 18
 #define AXIS1_ADC_PIN 17

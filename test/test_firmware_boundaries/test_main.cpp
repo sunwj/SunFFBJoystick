@@ -5,6 +5,8 @@
  */
 
 #include "realtime_timing.h"
+#include "diagnostic_output.h"
+#include "hid_control_buffer.h"
 #include <unity.h>
 #include <cstring>
 #include <vector>
@@ -450,9 +452,129 @@ void test_force_transmit_reports_short_write()
     TEST_ASSERT_FALSE(bad.sendForce(forces));
 }
 
+struct DiagnosticSink
+{
+    int space = 0;
+    size_t writes = 0;
+    bool shortWrite = false;
+
+    int availableForWrite()
+    {
+        return space;
+    }
+
+    size_t write(const uint8_t*, size_t length)
+    {
+        ++writes;
+        return shortWrite ? length - 1 : length;
+    }
+};
+
+void test_diagnostics_never_write_past_available_space()
+{
+    const uint8_t line[] = {'t', 'e', 's', 't'};
+    DiagnosticSink sink;
+    TEST_ASSERT_FALSE(try_diagnostic_write(sink, line, sizeof(line)));
+    sink.space = 3;
+    TEST_ASSERT_FALSE(try_diagnostic_write(sink, line, sizeof(line)));
+    TEST_ASSERT_EQUAL_UINT32(0, sink.writes);
+    sink.space = 4;
+    TEST_ASSERT_TRUE(try_diagnostic_write(sink, line, sizeof(line)));
+    sink.shortWrite = true;
+    TEST_ASSERT_FALSE(try_diagnostic_write(sink, line, sizeof(line)));
+    TEST_ASSERT_FALSE(try_diagnostic_write(sink, nullptr, sizeof(line)));
+}
+
+void test_timing_windows_do_not_keep_historical_maxima()
+{
+    TimingStream stream(1000);
+    stream.record(1000, 50);
+    stream.record(5000, 800);
+    stream.failed();
+    const auto first = stream.take_window();
+    TEST_ASSERT_EQUAL_UINT32(4000, first.maxGapUs);
+    TEST_ASSERT_EQUAL_UINT32(1, first.failures);
+    stream.record(6000, 20);
+    const auto second = stream.take_window();
+    TEST_ASSERT_EQUAL_UINT32(3, second.count);
+    TEST_ASSERT_EQUAL_UINT32(1000, second.maxGapUs);
+    TEST_ASSERT_EQUAL_UINT32(20, second.maxWorkUs);
+    TEST_ASSERT_EQUAL_UINT32(0, second.overBudget);
+    TEST_ASSERT_EQUAL_UINT32(0, second.failures);
+}
+
+void test_force_deadlines_measure_release_to_completion()
+{
+    ForceDeadlineStream deadlines(1000);
+    deadlines.record(0xfffffff0U, 0xfffffff0U + 20U,
+                     0xfffffff0U + 30U, 0xfffffff0U + 60U);
+    auto stat = deadlines.take_window();
+    TEST_ASSERT_EQUAL_UINT32(20, stat.maxWakeUs);
+    TEST_ASSERT_EQUAL_UINT32(10, stat.maxLockUs);
+    TEST_ASSERT_EQUAL_UINT32(60, stat.maxElapsedUs);
+    TEST_ASSERT_EQUAL_UINT32(0, stat.missed);
+    deadlines.record(1000, 1900, 1950, 2050);
+    stat = deadlines.take_window();
+    TEST_ASSERT_EQUAL_UINT32(1, stat.count);
+    TEST_ASSERT_EQUAL_UINT32(1050, stat.maxElapsedUs);
+    TEST_ASSERT_EQUAL_UINT32(1, stat.missed);
+    TEST_ASSERT_EQUAL_UINT32(0, stat.skipped);
+    // Release history persists across diagnostic windows; coalescing is not compliance.
+    deadlines.record(4000, 4020, 4030, 4060);
+    stat = deadlines.take_window();
+    TEST_ASSERT_EQUAL_UINT32(2, stat.skipped);
+    TEST_ASSERT_EQUAL_UINT32(0, stat.missed);
+    // UART readers retain all evidence after console windows have been consumed.
+    const auto lifetime = deadlines.snapshot();
+    TEST_ASSERT_EQUAL_UINT32(3, lifetime.count);
+    TEST_ASSERT_EQUAL_UINT32(1, lifetime.missed);
+    TEST_ASSERT_EQUAL_UINT32(2, lifetime.skipped);
+    TEST_ASSERT_EQUAL_UINT32(1050, lifetime.maxElapsedUs);
+    TEST_ASSERT_EQUAL_UINT32(3, deadlines.snapshot().count);
+    TEST_ASSERT_EQUAL_UINT32(0, deadlines.take_window().count);
+}
+
+void test_control_report_storage_is_independent_of_interrupt_reports()
+{
+    HIDControlBuffer<64> control;
+    uint8_t interrupt[64]{};
+    const uint16_t length = control.prepare_get(17, 5,
+        [](uint8_t* buffer, uint16_t capacity)
+        {
+            TEST_ASSERT_EQUAL_UINT16(4, capacity);
+            const uint8_t result[] = {1, 1, 0, 1};
+            memcpy(buffer, result, sizeof(result));
+            return uint16_t(sizeof(result));
+        });
+    memset(interrupt, 2, sizeof(interrupt));
+    TEST_ASSERT_EQUAL_UINT16(5, length);
+    TEST_ASSERT_EQUAL_UINT8(17, control.bytes[0]);
+    TEST_ASSERT_EQUAL_UINT8(1, control.bytes[1]);
+    TEST_ASSERT_FALSE(control.set_length_valid(65));
+    TEST_ASSERT_FALSE(control.set_length_valid(0));
+    TEST_ASSERT_TRUE(control.set_length_valid(64));
+    control.bytes[0] = 13;
+    control.bytes[1] = 4;
+    uint16_t size = 2;
+    TEST_ASSERT_EQUAL_PTR(control.bytes + 1, control.set_payload(13, size));
+    TEST_ASSERT_EQUAL_UINT16(1, size);
+    control.bytes[0] = 4;
+    size = 1;
+    TEST_ASSERT_EQUAL_PTR(control.bytes, control.set_payload(13, size));
+    TEST_ASSERT_EQUAL_UINT16(1, size);
+    TEST_ASSERT_EQUAL_UINT16(0, control.prepare_get(17, 1,
+        [](uint8_t*, uint16_t) { return uint16_t(4); }));
+    TEST_ASSERT_EQUAL_UINT16(0, control.prepare_get(17, 5,
+        [](uint8_t*, uint16_t) { return uint16_t(5); }));
+}
+
 int main()
 {
     UNITY_BEGIN();
+    RUN_TEST(test_control_report_storage_is_independent_of_interrupt_reports);
+    RUN_TEST(test_diagnostics_never_write_past_available_space);
+    RUN_TEST(test_timing_windows_do_not_keep_historical_maxima);
+    RUN_TEST(test_force_deadlines_measure_release_to_completion);
     RUN_TEST(test_force_transmit_reports_short_write);
     RUN_TEST(test_report_schedule_retries_and_preserves_phase);
     RUN_TEST(test_timing_wrap_and_stalled_stream);

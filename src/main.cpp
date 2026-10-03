@@ -1,7 +1,7 @@
 /**
  * Firmware entry point and FreeRTOS orchestration; loop is deleted after setup creates tasks.
  * Data flow: input source -> snapshot/metrics -> effect calculation -> force queue -> optional motors.
- * USB commands are copied to a worker; input and PID state reports share the endpoint with retries.
+ * USB commands execute in the serialized service callback; input and PID state share an endpoint.
  * LCD and CDC are diagnostic paths, not evidence that motors are enabled or timing is compliant.
  */
 
@@ -10,17 +10,135 @@
 #include <USB.h>
 #include <USBHID.h>
 #include <esp_system.h>
+#include <esp_timer.h>
+#include "device/usbd.h"
+#include "device/usbd_pvt.h"
+#include <stdarg.h>
 #include <memory.h>
 #include <algorithm>
+#include <atomic>
 #include "constants.h"
+
+#if ENABLE_HIL_DIAGNOSTICS
+// Independent UART snapshots locate a stalled USB service without relying on CDC.
+static std::atomic<uint32_t> consoleStage{0}, consoleCalls{0};
+static std::atomic<uint32_t> hidCalls{0}, commandStarts{0}, commandEnds{0};
+static std::atomic<TaskHandle_t> usbServiceHandle{nullptr};
+#endif
 
 #if ENABLE_USB_CDC
 #include <USBCDC.h>
+#include "class/cdc/cdc_device.h"
 // Instantiate CDC manually to avoid USB startup before setup and late HID registration failures.
 USBCDC firmwareConsole;
 #else
 auto& firmwareConsole = Serial;
 #endif
+
+#include "diagnostic_output.h"
+struct ConsoleLine
+{
+    uint16_t length;
+    uint8_t bytes[256];
+};
+static QueueHandle_t consoleLines;
+
+#if ENABLE_USB_CDC
+struct DeferredConsoleWrite
+{
+    TaskHandle_t owner;
+    uint16_t length;
+    uint8_t bytes[64];
+};
+static DeferredConsoleWrite deferredConsole{};
+
+static void submit_console_write(void*)
+{
+#if ENABLE_HIL_DIAGNOSTICS
+    usbServiceHandle.store(xTaskGetCurrentTaskHandle(), std::memory_order_relaxed);
+    consoleCalls.fetch_add(1, std::memory_order_relaxed);
+    consoleStage.store(1, std::memory_order_relaxed);
+#endif
+    // FIFO writes and endpoint flushes share TinyUSB's service context with HID.
+    // Never enter Arduino CDC's full-FIFO spin loop, even on disconnection.
+    uint32_t written = 0;
+    if (tud_cdc_n_connected(0))
+    {
+        const uint32_t length = std::min(uint32_t(deferredConsole.length),
+                                         tud_cdc_n_write_available(0));
+        if (length)
+        {
+#if ENABLE_HIL_DIAGNOSTICS
+            consoleStage.store(2, std::memory_order_relaxed);
+#endif
+            written = tud_cdc_n_write(0, deferredConsole.bytes, length);
+#if ENABLE_HIL_DIAGNOSTICS
+            consoleStage.store(3, std::memory_order_relaxed);
+#endif
+            tud_cdc_n_write_flush(0);
+        }
+    }
+#if ENABLE_HIL_DIAGNOSTICS
+    consoleStage.store(4, std::memory_order_relaxed);
+#endif
+    xTaskNotify(deferredConsole.owner, written + 1, eSetValueWithOverwrite);
+}
+#endif
+
+static void consolePrintf(const char* format, ...)
+{
+    ConsoleLine line{};
+    va_list args;
+    va_start(args, format);
+    const int length = vsnprintf(reinterpret_cast<char*>(line.bytes), sizeof(line.bytes), format, args);
+    va_end(args);
+
+    // A full queue drops this diagnostic, not a force sample or a USB command.
+    if (!consoleLines || length <= 0 || size_t(length) >= sizeof(line.bytes))
+    {
+        return;
+    }
+
+    line.length = uint16_t(length);
+    xQueueSend(consoleLines, &line, 0);
+}
+
+static void console_task(void*)
+{
+    ConsoleLine line;
+    while (true)
+    {
+        xQueueReceive(consoleLines, &line, portMAX_DELAY);
+        size_t offset = 0;
+        while (offset < line.length)
+        {
+#if ENABLE_USB_CDC
+            if (!firmwareConsole)
+            {
+                break;
+            }
+            // One writer owns this persistent slot until the deferred call returns.
+            deferredConsole.owner = xTaskGetCurrentTaskHandle();
+            deferredConsole.length = std::min(sizeof(deferredConsole.bytes), size_t(line.length) - offset);
+            memcpy(deferredConsole.bytes, line.bytes + offset, deferredConsole.length);
+            usbd_defer_func(submit_console_write, nullptr, false);
+            uint32_t result;
+            xTaskNotifyWait(0, UINT32_MAX, &result, portMAX_DELAY);
+            offset += result - 1;
+#else
+            const int space = firmwareConsole.availableForWrite();
+            const size_t chunk = space > 0 ? std::min(size_t(space), size_t(line.length) - offset) : 0;
+            // This is the only console writer; never call CDC write on a full FIFO.
+            if (chunk && SunFFB::try_diagnostic_write(firmwareConsole, line.bytes + offset, chunk))
+            {
+                offset += chunk;
+            }
+#endif
+            // CDC 2.0.17's internal full-FIFO loop does not yield. Wait here instead.
+            vTaskDelay(1);
+        }
+    }
+}
 
 #if ENABLE_LCD
 #include <TFT_eSPI.h>
@@ -58,12 +176,11 @@ static_assert((4 + sizeof(SunFFB::ForcePayload)) * 10 * 500 < UART1_BAUD,
 #if CONFIG_FREERTOS_UNICORE
 constexpr BaseType_t applicationCore = 0;
 
-// Keep periodic I/O below force calculation on a shared CPU.
-constexpr UBaseType_t periodicIOPriority = 2;
 #else
 constexpr BaseType_t applicationCore = 1;
-constexpr UBaseType_t periodicIOPriority = configMAX_PRIORITIES - 1;
 #endif
+// Leave the USB service, timer service and force task ahead of periodic I/O.
+constexpr UBaseType_t periodicIOPriority = 2;
 
 static void createFirmwareTask(TaskFunction_t entry, const char* name, uint32_t stackBytes,
                                UBaseType_t priority, BaseType_t core)
@@ -72,7 +189,7 @@ static void createFirmwareTask(TaskFunction_t entry, const char* name, uint32_t 
         xTaskCreatePinnedToCore(entry, name, stackBytes, nullptr, priority, nullptr, core);
     configASSERT(result == pdPASS);
 #if ENABLE_LCD && ENABLE_USB_CDC
-    firmwareConsole.printf("Task %s: created=%d, free_heap=%lu\n", name, int(result == pdPASS),
+    consolePrintf("Task %s: created=%d, free_heap=%lu\n", name, int(result == pdPASS),
                   (unsigned long)ESP.getFreeHeap());
 #endif
 }
@@ -136,6 +253,7 @@ struct JoystickSample
 };
 
 SunFFB::TimingStream forceTiming(FORCE_TASK_PERIOD_MS * 1000);
+SunFFB::ForceDeadlineStream forceDeadlines(FORCE_TASK_PERIOD_MS * 1000);
 SunFFB::TimingStream positionRxTiming(2000), inputTiming(2000);
 SunFFB::TimingStream usbSubmitTiming(2000), usbCompleteTiming(2000);
 SunFFB::TimingStream freshPositionTiming(2000), motorTxTiming(2000);
@@ -197,7 +315,83 @@ SunFFB::FFBDeviceInput ffbDeviceInput;
 SunFFB::FFBReportHandler ffbHandler;
 SunFFB::FFBForceCalculator ffbForceCalculator;
 
+struct DeferredHIDReport
+{
+    TaskHandle_t owner;
+    uint8_t id;
+    uint16_t length;
+    uint8_t bytes[sizeof(SunFFB::JoystickInputReportData)];
+    uint32_t receivedUs;
+    bool fresh;
+};
+static DeferredHIDReport deferredReport{};
+static bool submittedPositionFresh;
+
+static void submit_hid_report(void*)
+{
+#if ENABLE_HIL_DIAGNOSTICS
+    usbServiceHandle.store(xTaskGetCurrentTaskHandle(), std::memory_order_relaxed);
+    hidCalls.fetch_add(1, std::memory_order_relaxed);
+#endif
+    // Submit from TinyUSB's service context, not concurrently from another core.
+    // The service must never wait for its own completion callback.
+    const bool accepted = tud_hid_n_ready(0) &&
+        tud_hid_n_report(0, deferredReport.id, deferredReport.bytes, deferredReport.length);
+    if (accepted && deferredReport.id == REPORT_ID_JOYSTICK)
+    {
+        submittedPositionFresh = deferredReport.fresh;
+        const uint32_t nowUs = micros();
+        usbSubmitTiming.record(nowUs, nowUs - deferredReport.receivedUs);
+    }
+    xTaskNotify(deferredReport.owner, accepted ? 1 : 2, eSetValueWithOverwrite);
+}
+
+void hid_report_complete_hook(const uint8_t* report, uint16_t length)
+{
+    if (length && report[0] == REPORT_ID_JOYSTICK)
+    {
+        usbCompleteTiming.record(micros());
+        if (submittedPositionFresh)
+        {
+            freshPositionTiming.record(micros());
+        }
+    }
+}
+
+static bool submitReport(uint8_t id, const void* payload, uint16_t length,
+                         uint32_t receivedUs = 0, bool fresh = false)
+{
+    // Only send_report_task owns this persistent slot. Await submission, not USB
+    // wire completion; it cannot be reused until the queued callback has consumed it.
+    configASSERT(length <= sizeof(deferredReport.bytes));
+    deferredReport.owner = xTaskGetCurrentTaskHandle();
+    deferredReport.id = id;
+    deferredReport.length = length;
+    deferredReport.receivedUs = receivedUs;
+    deferredReport.fresh = fresh;
+    memcpy(deferredReport.bytes, payload, length);
+    usbd_defer_func(submit_hid_report, nullptr, false);
+    uint32_t result;
+    xTaskNotifyWait(0, UINT32_MAX, &result, portMAX_DELAY);
+    return result == 1;
+}
+
 TaskHandle_t forceCalculationTaskHandle;
+static uint32_t forceReleaseUs;
+
+static void force_timer_callback(void*)
+{
+    constexpr uint32_t periodUs = FORCE_TASK_PERIOD_MS * 1000;
+    forceReleaseUs += periodUs;
+    const uint32_t nowUs = micros();
+    const uint32_t behindUs = nowUs - forceReleaseUs;
+    if (behindUs >= periodUs && behindUs < 0x80000000U)
+    {
+        // Coalesce delayed releases; never replay a backlog of stale force samples.
+        forceReleaseUs += (behindUs / periodUs) * periodUs;
+    }
+    xTaskNotify(forceCalculationTaskHandle, forceReleaseUs, eSetValueWithOverwrite);
+}
 SemaphoreHandle_t semaphoreFFBDeviceInput;
 SemaphoreHandle_t semaphoreFFBReportHandler;
 
@@ -222,7 +416,7 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                     xSemaphoreGive(semaphoreFFBReportHandler);
 
 #ifdef SERIAL_PRINT
-                    firmwareConsole.printf("Block load: idx=%d status=%d (1=success, 2=full)\n",
+                    consolePrintf("Block load: idx=%d status=%d (1=success, 2=full)\n",
                                   data->effectBlockIndex, data->blockLoadStatus);
 #endif
                     return 4;
@@ -240,7 +434,7 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                     xSemaphoreGive(semaphoreFFBReportHandler);
 
 #ifdef SERIAL_PRINT
-                    firmwareConsole.printf("Pool report.\n");
+                    consolePrintf("Pool report.\n");
 #endif
                     return 4;
                 }
@@ -258,36 +452,6 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
     return 0;
 }
 
-// A single TinyUSB task produces commands. Completion preserves the ordering
-// of SET_REPORT and subsequent GET_REPORT without sharing USB buffers.
-struct HIDCommand
-{
-    uint8_t id;
-    uint8_t type;
-    uint16_t length;
-    uint8_t data[sizeof(SunFFB::SetEffectReportData)];
-};
-
-static_assert(sizeof(SunFFB::SetEffectReportData) >= sizeof(SunFFB::SetConditionReportData));
-QueueHandle_t gHIDCommands;
-SemaphoreHandle_t semaphoreHIDCommandDone;
-
-void hid_command_task(void*)
-{
-    // Update effects under the handler lock; completion makes changes visible to subsequent host queries.
-    HIDCommand command;
-
-    while (true)
-    {
-        xQueueReceive(gHIDCommands, &command, portMAX_DELAY);
-        xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
-        SunFFB::dispatch_output_report(ffbHandler, command.id, command.type, command.data,
-                                       command.length);
-        xSemaphoreGive(semaphoreFFBReportHandler);
-        xSemaphoreGive(semaphoreHIDCommandDone);
-    }
-}
-
 void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, const uint8_t* buffer,
                              uint16_t bufSize)
 {
@@ -295,13 +459,18 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
     if (!SunFFB::valid_output_report(reportId, reportType, buffer, bufSize))
         return;
 
-    HIDCommand command{};
-    command.id = reportId;
-    command.type = reportType;
-    command.length = bufSize;
-    memcpy(command.data, buffer, bufSize);
-    xQueueSend(gHIDCommands, &command, portMAX_DELAY);
-    xSemaphoreTake(semaphoreHIDCommandDone, portMAX_DELAY);
+#if ENABLE_HIL_DIAGNOSTICS
+    commandStarts.fetch_add(1, std::memory_order_relaxed);
+#endif
+    // TinyUSB serializes callbacks. Execute bounded command handling here rather
+    // than suspending its service task for a second task on the same core.
+    // Dispatch copies packed reports locally and ordering is preserved before GET.
+    xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
+    SunFFB::dispatch_output_report(ffbHandler, reportId, reportType, buffer, bufSize);
+    xSemaphoreGive(semaphoreFFBReportHandler);
+#if ENABLE_HIL_DIAGNOSTICS
+    commandEnds.fetch_add(1, std::memory_order_relaxed);
+#endif
     reportProcessTime = micros() - startTime;
 }
 
@@ -312,7 +481,7 @@ void lcd_task(void* params)
     // gForces is a one-slot latest-value queue; peek does not consume motor output.
     TickType_t wakeupTime = xTaskGetTickCount();
 #if ENABLE_USB_CDC
-    firmwareConsole.println("LCD task started");
+    consolePrintf("LCD task started\n");
 #endif
 
     while (true)
@@ -501,15 +670,27 @@ void force_calculation_task(void* params)
 {
     // Lock order is input -> effect pool; other paths holding both locks must preserve that order.
     // Publish only the latest computed force so slow consumers do not accumulate stale control output.
-    TickType_t wakeupTime = xTaskGetTickCount();
+    forceCalculationTaskHandle = xTaskGetCurrentTaskHandle();
+    esp_timer_handle_t forceTimer;
+    esp_timer_create_args_t timerArgs{};
+    timerArgs.callback = force_timer_callback;
+    timerArgs.name = "ffb_force";
+    timerArgs.dispatch_method = ESP_TIMER_TASK;
+    timerArgs.skip_unhandled_events = true;
+    ESP_ERROR_CHECK(esp_timer_create(&timerArgs, &forceTimer));
+    forceReleaseUs = micros();
+    ESP_ERROR_CHECK(esp_timer_start_periodic(forceTimer, FORCE_TASK_PERIOD_MS * 1000));
 
     while (true)
     {
-        uint32_t startTime = micros();
+        uint32_t releaseUs;
+        xTaskNotifyWait(0, UINT32_MAX, &releaseUs, portMAX_DELAY);
+        const uint32_t startTime = micros();
         int32_t forces[NUM_AXIS] = {0};
 
         xSemaphoreTake(semaphoreFFBDeviceInput, portMAX_DELAY);
         xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
+        const uint32_t lockedUs = micros();
         ffbForceCalculator.force_calculator(ffbHandler, ffbDeviceInput, (int32_t*)forces);
         xSemaphoreGive(semaphoreFFBReportHandler);
         xSemaphoreGive(semaphoreFFBDeviceInput);
@@ -519,13 +700,13 @@ void force_calculation_task(void* params)
         uint32_t endTime = micros();
         effectProcessTime = endTime - startTime;
         forceTiming.record(endTime, effectProcessTime);
+        forceDeadlines.record(releaseUs, startTime, lockedUs, endTime);
 
         // A missed deadline must not turn the highest periodic task into a
         // busy loop, especially when all firmware tasks share one CPU.
-        if (xTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(FORCE_TASK_PERIOD_MS)) == pdFALSE)
+        if (effectProcessTime >= FORCE_TASK_PERIOD_MS * 1000)
         {
             vTaskDelay(1);
-            wakeupTime = xTaskGetTickCount();
         }
     }
 }
@@ -559,16 +740,12 @@ void send_report_task(void* params)
             {
                 if (hasSample)
                 {
-                    if (usb_hid.SendReport(REPORT_ID_JOYSTICK, &sample.report,
-                                           sizeof(sample.report), USB_REPORT_TIMEOUT_MS))
+                    if (submitReport(REPORT_ID_JOYSTICK, &sample.report,
+                                     sizeof(sample.report), sample.receivedUs, fresh))
                     {
                         schedule.sent(nowUs);
-                        const uint32_t submittedUs = micros();
-                        usbSubmitTiming.record(submittedUs, submittedUs - sample.receivedUs);
-                        usbCompleteTiming.record(submittedUs);
                         if (fresh)
                         {
-                            freshPositionTiming.record(micros());
                             lastSequence = sample.sequence;
                             hasSequence = true;
                         }
@@ -577,20 +754,25 @@ void send_report_task(void* params)
                         usbSubmitTiming.failed();
                 }
             }
-            else if (xSemaphoreTake(semaphoreFFBReportHandler, 0) == pdTRUE)
+            else
             {
-                // State uses spare 1 ms endpoint slots; new position always has priority.
-                if (ffbHandler.pidStateDirty)
+                SunFFB::PIDStateReportData data{};
+                uint32_t revision = 0;
+                bool pending = false;
+                if (xSemaphoreTake(semaphoreFFBReportHandler, 0) == pdTRUE)
                 {
-                    SunFFB::PIDStateReportData data;
-                    uint32_t revision;
-                    if (ffbHandler.peek_pid_state_report(data, revision) &&
-                        usb_hid.SendReport(REPORT_ID_PID_STATE, &data, sizeof(data),
-                                           USB_REPORT_TIMEOUT_MS))
-                        ffbHandler.acknowledge_pid_state_report(data, revision);
+                    pending = ffbHandler.peek_pid_state_report(data, revision);
+                    xSemaphoreGive(semaphoreFFBReportHandler);
                 }
 
-                xSemaphoreGive(semaphoreFFBReportHandler);
+                // Never wait for USB completion while holding an effects mutex.
+                // Its command callback needs that mutex before servicing completion.
+                if (pending && submitReport(REPORT_ID_PID_STATE, &data, sizeof(data)))
+                {
+                    xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
+                    ffbHandler.acknowledge_pid_state_report(data, revision);
+                    xSemaphoreGive(semaphoreFFBReportHandler);
+                }
             }
         }
 
@@ -607,6 +789,9 @@ void send_force_task(void* params)
     // Attempt latest-force submission at 500 Hz; sendForce success means transport acceptance only.
     // Do not wait for UART drain or CAN wire completion on the core shared with USB.
     TickType_t wakeupTime = xTaskGetTickCount();
+#if ENABLE_HIL_DIAGNOSTICS && MOTOR_TRANSPORT == 0
+    uint32_t lastHealthMs = 0;
+#endif
 
     while (true)
     {
@@ -618,7 +803,46 @@ void send_force_task(void* params)
         else
             motorTxTiming.failed();
 
-        vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(SEND_FORCE_TASK_PERIOD_MS));
+#if ENABLE_HIL_DIAGNOSTICS && MOTOR_TRANSPORT == 0
+        if (uint32_t(millis() - lastHealthMs) >= 1000)
+        {
+            lastHealthMs = millis();
+            // Test-only UART health survives loss of the USB diagnostics port.
+            // One TX owner sends both records; production motor framing is unchanged.
+            const uint32_t health[] = {lastHealthMs, uint32_t(esp_reset_reason()),
+                uint32_t(tud_mounted()), uint32_t(tud_suspended()),
+                uint32_t(ESP.getFreeHeap())};
+            motorLink.sendRaw(0x7E, reinterpret_cast<const uint8_t*>(health), sizeof(health),
+                              SunFFB::SerialFrameFormat::Variable);
+            const TaskHandle_t service = usbServiceHandle.load(std::memory_order_relaxed);
+            const uint32_t progress[] = {lastHealthMs,
+                consoleStage.load(std::memory_order_relaxed),
+                consoleCalls.load(std::memory_order_relaxed),
+                hidCalls.load(std::memory_order_relaxed),
+                commandStarts.load(std::memory_order_relaxed),
+                commandEnds.load(std::memory_order_relaxed),
+                service ? uint32_t(eTaskGetState(service)) : UINT32_MAX,
+                service ? uint32_t(uxTaskGetStackHighWaterMark(service)) : 0};
+            motorLink.sendRaw(0x7D, reinterpret_cast<const uint8_t*>(progress), sizeof(progress),
+                              SunFFB::SerialFrameFormat::Variable);
+            // Lifetime counters preserve evidence even if a UART record is lost.
+            const auto deadline = forceDeadlines.snapshot();
+            const uint32_t deadlines[] = {lastHealthMs, deadline.count, deadline.maxWakeUs,
+                deadline.maxLockUs, deadline.maxElapsedUs, deadline.missed, deadline.skipped,
+                uint32_t(FORCE_TASK_PERIOD_MS * 1000),
+                forceCalculationTaskHandle
+                    ? uint32_t(uxTaskGetStackHighWaterMark(forceCalculationTaskHandle)) : 0};
+            motorLink.sendRaw(0x7C, reinterpret_cast<const uint8_t*>(deadlines), sizeof(deadlines),
+                              SunFFB::SerialFrameFormat::Variable);
+        }
+#endif
+
+        if (xTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(SEND_FORCE_TASK_PERIOD_MS)) == pdFALSE)
+        {
+            // Do not replay missed output periods in a tight catch-up loop.
+            vTaskDelay(1);
+            wakeupTime = xTaskGetTickCount();
+        }
     }
 }
 
@@ -681,7 +905,7 @@ void timing_task(void*)
     {
 #if MOTOR_TRANSPORT == 1
         const auto can = canHal.stats();
-        firmwareConsole.printf(
+        consolePrintf(
             "CAN accepted=%lu rejected=%lu success_alerts=%lu failure_alerts=%lu bus_off=%lu recovery=%lu overflow_alerts=%lu\n",
             (unsigned long)can.accepted, (unsigned long)can.rejected,
             (unsigned long)can.successAlerts, (unsigned long)can.failureAlerts,
@@ -695,8 +919,8 @@ void timing_task(void*)
 
         for (uint8_t i = 0; i < 7; ++i)
         {
-            const auto stat = streams[i]->snapshot();
-            firmwareConsole.printf(
+            const auto stat = streams[i]->take_window();
+            consolePrintf(
                 "TIMING %s hz=%.1f max_gap_us=%lu gap_over_budget=%lu max_work_us=%lu fail=%lu\n",
                 names[i], float(stat.count - previous[i]) * 1000000.f / windowUs,
                 (unsigned long)stat.maxGapUs, (unsigned long)stat.overBudget,
@@ -704,8 +928,15 @@ void timing_task(void*)
             previous[i] = stat.count;
         }
 
-        firmwareConsole.printf("TIMING max_position_age_at_submit_us=%lu\n",
-                      (unsigned long)usbSubmitTiming.snapshot().maxWorkUs);
+        const auto deadline = forceDeadlines.take_window();
+        consolePrintf("DEADLINE force count=%lu wake_us=%lu lock_us=%lu elapsed_us=%lu missed=%lu skipped=%lu\n",
+                      (unsigned long)deadline.count, (unsigned long)deadline.maxWakeUs,
+                      (unsigned long)deadline.maxLockUs, (unsigned long)deadline.maxElapsedUs,
+                      (unsigned long)deadline.missed, (unsigned long)deadline.skipped);
+        consolePrintf("HEALTH uptime_ms=%lu heap=%lu force_stack_free=%lu\n",
+                      (unsigned long)millis(), (unsigned long)ESP.getFreeHeap(),
+                      (unsigned long)(forceCalculationTaskHandle
+                          ? uxTaskGetStackHighWaterMark(forceCalculationTaskHandle) : 0));
     }
 }
 #endif
@@ -718,11 +949,19 @@ void setup()
     uint8_t protoCore = 0;
 
     firmwareConsole.begin(SERIAL_BAUD);
+    consoleLines = xQueueCreate(16, sizeof(ConsoleLine));
+    configASSERT(consoleLines);
+    const BaseType_t consoleStarted =
+        xTaskCreatePinnedToCore(console_task, "Console", TASK_STACK_SIZE, nullptr, 1, nullptr, protoCore);
+    configASSERT(consoleStarted == pdPASS);
+#if ENABLE_USB_CDC
+    firmwareConsole.setTxTimeoutMs(0);
+#endif
 #if MOTOR_TRANSPORT == 1
     const bool canStarted =
         canHal.begin(CAN_TX_PIN, CAN_RX_PIN, CAN_BITRATE, CAN_POSITION_ID, CAN_SINGLE_SHOT);
     if (!canStarted)
-        firmwareConsole.println("CAN initialization failed");
+        consolePrintf("CAN initialization failed\n");
     configASSERT(canStarted);
 #else
     comSerial.begin(UART1_BAUD, SERIAL_8N1, RDX_PIN, TDX_PIN);
@@ -776,17 +1015,11 @@ void setup()
     // Single-slot overwrite queues are latest-value mailboxes, not full sample-history buffers.
     gForces = xQueueCreate(1, sizeof(int32_t) * NUM_AXIS);
     gJoystickReportData = xQueueCreate(1, sizeof(JoystickSample));
-    gHIDCommands = xQueueCreate(8, sizeof(HIDCommand));
     semaphoreFFBDeviceInput = xSemaphoreCreateMutex();
     semaphoreFFBReportHandler = xSemaphoreCreateMutex();
-    semaphoreHIDCommandDone = xSemaphoreCreateBinary();
-    configASSERT(gPositions && gForces && gJoystickReportData && gHIDCommands &&
-                 semaphoreFFBDeviceInput && semaphoreFFBReportHandler && semaphoreHIDCommandDone);
+    configASSERT(gPositions && gForces && gJoystickReportData &&
+                 semaphoreFFBDeviceInput && semaphoreFFBReportHandler);
     ffbDeviceInput.reset();
-    const BaseType_t commandTaskCreated =
-        xTaskCreatePinnedToCore(hid_command_task, "HIDCommand", TASK_STACK_SIZE, nullptr,
-                                configMAX_PRIORITIES - 1, nullptr, protoCore);
-    configASSERT(commandTaskCreated == pdPASS);
 
     USB.VID(DEVICE_VID);
     USB.PID(DEVICE_PID);
@@ -808,9 +1041,9 @@ void setup()
     {
         delay(10);
     }
-    firmwareConsole.printf("BOOT reset_reason=%d, free_heap=%lu, USB=%d\n",
+    consolePrintf("BOOT reset_reason=%d, free_heap=%lu, USB=%d\n",
                   int(esp_reset_reason()), (unsigned long)ESP.getFreeHeap(), int(usbStarted));
-    firmwareConsole.println("LCD initialized; starting worker tasks");
+    consolePrintf("LCD initialized; starting worker tasks\n");
 #endif
 
     // Start processing even before a host enumerates the USB interface.

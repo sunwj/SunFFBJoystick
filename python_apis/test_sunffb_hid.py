@@ -33,6 +33,30 @@ except ImportError:
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_windows_feature_report_is_padded_to_collection_maximum(self):
+        import sunffb_hid as module
+        from unittest.mock import Mock
+
+        device = SunFFBDevice(0xFFFF, 0x2010)
+        device.dev = Mock()
+        with patch.object(module.os, "name", "nt"):
+            device.send_feature(module.REPORT_ID_CREATE_NEW_EFFECT_REPORT,
+                                module.CreateNewEffectReportData(effectType=1))
+        device.dev.send_feature_report.assert_called_once_with(
+            bytes([module.REPORT_ID_CREATE_NEW_EFFECT_REPORT, 1, 0, 0, 0]))
+
+    def test_non_windows_feature_report_keeps_exact_payload(self):
+        import sunffb_hid as module
+        from unittest.mock import Mock
+
+        device = SunFFBDevice(0xFFFF, 0x2010)
+        device.dev = Mock()
+        with patch.object(module.os, "name", "posix"):
+            device.send_feature(module.REPORT_ID_CREATE_NEW_EFFECT_REPORT,
+                                module.CreateNewEffectReportData(effectType=1))
+        device.dev.send_feature_report.assert_called_once_with(
+            bytes([module.REPORT_ID_CREATE_NEW_EFFECT_REPORT, 1]))
+
     def test_open_selected_path_uses_hid_device_path(self):
         class FakeHidDevice:
             def __init__(self, **kwargs):

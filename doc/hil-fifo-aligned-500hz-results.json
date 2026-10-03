@@ -1,0 +1,254 @@
+{
+  "position_hz": 500.0,
+  "soak_seconds": 60.0,
+  "checks": [
+    {
+      "name": "position roundtrip (12000, -9000)",
+      "passed": true,
+      "evidence": [
+        11999,
+        -8999
+      ]
+    },
+    {
+      "name": "position roundtrip (-16000, 18000)",
+      "passed": true,
+      "evidence": [
+        -15999,
+        17999
+      ]
+    },
+    {
+      "name": "position roundtrip (32767, -32767)",
+      "passed": true,
+      "evidence": [
+        32766,
+        -32766
+      ]
+    }
+  ],
+  "timing": {
+    "streams": {
+      "force": {
+        "windows": 3,
+        "min_hz": 999.9,
+        "max_hz": 1000.0,
+        "max_gap_us": 1060,
+        "max_work_us": 75,
+        "failures": 0
+      },
+      "rx": {
+        "windows": 3,
+        "min_hz": 7.0,
+        "max_hz": 498.5,
+        "max_gap_us": 4052,
+        "max_work_us": 0,
+        "failures": 0
+      },
+      "input": {
+        "windows": 3,
+        "min_hz": 7.0,
+        "max_hz": 498.5,
+        "max_gap_us": 4065,
+        "max_work_us": 0,
+        "failures": 0
+      },
+      "usb_submit": {
+        "windows": 3,
+        "min_hz": 7.0,
+        "max_hz": 491.5,
+        "max_gap_us": 5029,
+        "max_work_us": 1226,
+        "failures": 0
+      },
+      "usb_done": {
+        "windows": 3,
+        "min_hz": 7.0,
+        "max_hz": 491.5,
+        "max_gap_us": 5022,
+        "max_work_us": 0,
+        "failures": 0
+      },
+      "fresh": {
+        "windows": 3,
+        "min_hz": 7.0,
+        "max_hz": 491.5,
+        "max_gap_us": 5023,
+        "max_work_us": 0,
+        "failures": 0
+      },
+      "motor_tx": {
+        "windows": 3,
+        "min_hz": 499.5,
+        "max_hz": 500.5,
+        "max_gap_us": 2124,
+        "max_work_us": 85,
+        "failures": 0
+      }
+    },
+    "deadline_windows": 3,
+    "max_wake_us": 48,
+    "max_lock_us": 19,
+    "max_elapsed_us": 100,
+    "missed": 0,
+    "skipped": 0
+  },
+  "uart_health": [
+    {
+      "uptime_ms": 31093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 32093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 33093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 34093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 35093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 36093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 37093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 38093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    },
+    {
+      "uptime_ms": 39093,
+      "reset_reason": 0,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326760
+    }
+  ],
+  "usb_progress": [
+    {
+      "uptime_ms": 31093,
+      "console_stage": 4,
+      "console_calls": 5,
+      "hid_calls": 10,
+      "command_starts": 1,
+      "command_ends": 1,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 32093,
+      "console_stage": 4,
+      "console_calls": 21,
+      "hid_calls": 502,
+      "command_starts": 1,
+      "command_ends": 1,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 33093,
+      "console_stage": 4,
+      "console_calls": 36,
+      "hid_calls": 985,
+      "command_starts": 2,
+      "command_ends": 2,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 34093,
+      "console_stage": 4,
+      "console_calls": 53,
+      "hid_calls": 1002,
+      "command_starts": 6,
+      "command_ends": 6,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 35093,
+      "console_stage": 4,
+      "console_calls": 1053,
+      "hid_calls": 1002,
+      "command_starts": 6,
+      "command_ends": 6,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 36093,
+      "console_stage": 4,
+      "console_calls": 2053,
+      "hid_calls": 1002,
+      "command_starts": 6,
+      "command_ends": 6,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 37093,
+      "console_stage": 4,
+      "console_calls": 3053,
+      "hid_calls": 1002,
+      "command_starts": 6,
+      "command_ends": 6,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 38093,
+      "console_stage": 4,
+      "console_calls": 4053,
+      "hid_calls": 1002,
+      "command_starts": 6,
+      "command_ends": 6,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    },
+    {
+      "uptime_ms": 39093,
+      "console_stage": 4,
+      "console_calls": 5053,
+      "hid_calls": 1002,
+      "command_starts": 6,
+      "command_ends": 6,
+      "usb_task_state": 2,
+      "usb_stack_free": 2880
+    }
+  ],
+  "firmware_log": "TIMING force hz=999.9 max_gap_us=1060 gap_over_budget=65 max_work_us=75 fail=0\nTIMING rx hz=7.0 max_gap_us=3034 gap_over_budget=2 max_work_us=0 fail=0\nTIMING input hz=7.0 max_gap_us=3034 gap_over_budget=2 max_work_us=0 fail=0\nTIMING usb_submit hz=7.0 max_gap_us=3032 gap_over_budget=4 max_work_us=1023 fail=0\nTIMING usb_done hz=7.0 max_gap_us=3000 gap_over_budget=1 max_work_us=0 fail=0\nTIMING fresh hz=7.0 max_gap_us=2999 gap_over_budget=2 max_work_us=0 fail=0\nTIMING motor_tx hz=500.0 max_gap_us=2063 gap_over_budget=49 max_work_us=85 fail=0\nDEADLINE force count=1001 wake_us=40 lock_us=10 elapsed_us=100 missed=0 skipped=0\nHEALTH uptime_ms=31090 heap=326760 force_stack_free=1228\nTIMING force hz=1000.0 max_gap_us=1030 gap_over_budget=378 max_work_us=41 fail=0\nTIMING rx hz=497.5 max_gap_us=4052 gap_over_budget=223 max_work_us=0 fail=0\nTIMING input hz=497.5 max_gap_us=4065 gap_over_budget=207 max_work_us=0 fail=0\nTIMING usb_submit hz=491.5 max_gap_us=5029 gap_over_budget=248 max_work_us=1226 fail=0\nTIMING usb_done hz=491.5 max_gap_us=5022 gap_over_budget=154 max_work_us=0 fail=0\nTIMING fresh hz=491.5 max_gap_us=5023 gap_over_budget=157 max_work_us=0 fail=0\nTIMING motor_tx hz=500.5 max_gap_us=2124 gap_over_budget=144 max_work_us=64 fail=0\nDEADLINE force count=1001 wake_us=48 lock_us=19 elapsed_us=83 missed=0 skipped=0\nHEALTH uptime_ms=32090 heap=326760 force_stack_free=1200\nTIMING force hz=1000.0 max_gap_us=1028 gap_over_budget=382 max_work_us=41 fail=0\nTIMING rx hz=498.5 max_gap_us=4051 gap_over_budget=187 max_work_us=0 fail=0\nTIMING input hz=498.5 max_gap_us=4063 gap_over_budget=192 max_work_us=0 fail=0\nTIMING usb_submit hz=482.5 max_gap_us=4997 gap_over_budget=209 max_work_us=1167 fail=0\nTIMING usb_done hz=482.5 max_gap_us=5020 gap_over_budget=161 max_work_us=0 fail=0\nTIMING fresh hz=482.5 max_gap_us=5020 gap_over_budget=156 max_work_us=0 fail=0\nTIMING motor_tx hz=499.5 max_gap_us=2064 gap_over_budget=140 max_work_us=82 fail=0\nDEADLINE force count=1001 wake_us=42 lock_us=18 elapsed_us=81 missed=0 skipped=0\nHEALTH uptime_ms=33091 heap=326760 force_stack_free=1200\n"
+}

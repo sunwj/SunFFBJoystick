@@ -1,0 +1,263 @@
+{
+  "position_hz": 500.0,
+  "soak_seconds": 10.0,
+  "checks": [
+    {
+      "name": "position roundtrip (12000, -9000)",
+      "passed": true,
+      "evidence": [
+        11999,
+        -8999
+      ]
+    },
+    {
+      "name": "position roundtrip (-16000, 18000)",
+      "passed": true,
+      "evidence": [
+        -15999,
+        17999
+      ]
+    },
+    {
+      "name": "position roundtrip (32767, -32767)",
+      "passed": true,
+      "evidence": [
+        32766,
+        -32766
+      ]
+    }
+  ],
+  "timing": {},
+  "uart_health": [
+    {
+      "uptime_ms": 31090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 32090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 33090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 34090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 35090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 36090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 37090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 38090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    }
+  ],
+  "usb_progress": [
+    {
+      "uptime_ms": 31090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 446,
+      "command_starts": 1,
+      "command_ends": 1,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 32090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 945,
+      "command_starts": 1,
+      "command_ends": 1,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 33090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1024,
+      "command_starts": 10,
+      "command_ends": 10,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 34090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1024,
+      "command_starts": 10,
+      "command_ends": 10,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 35090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1024,
+      "command_starts": 10,
+      "command_ends": 10,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 36090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1024,
+      "command_starts": 10,
+      "command_ends": 10,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 37090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1024,
+      "command_starts": 10,
+      "command_ends": 10,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 38090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1024,
+      "command_starts": 10,
+      "command_ends": 10,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    }
+  ],
+  "endurance_seconds": 1800.0,
+  "uart_deadlines": [
+    {
+      "uptime_ms": 31090,
+      "count": 29994,
+      "max_wake_us": 446,
+      "max_lock_us": 58,
+      "max_elapsed_us": 460,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1236
+    },
+    {
+      "uptime_ms": 32090,
+      "count": 30994,
+      "max_wake_us": 446,
+      "max_lock_us": 58,
+      "max_elapsed_us": 460,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1236
+    },
+    {
+      "uptime_ms": 33090,
+      "count": 31990,
+      "max_wake_us": 596,
+      "max_lock_us": 58,
+      "max_elapsed_us": 615,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1220
+    },
+    {
+      "uptime_ms": 34090,
+      "count": 32990,
+      "max_wake_us": 596,
+      "max_lock_us": 58,
+      "max_elapsed_us": 615,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1220
+    },
+    {
+      "uptime_ms": 35090,
+      "count": 33990,
+      "max_wake_us": 596,
+      "max_lock_us": 58,
+      "max_elapsed_us": 615,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1220
+    },
+    {
+      "uptime_ms": 36090,
+      "count": 34990,
+      "max_wake_us": 596,
+      "max_lock_us": 58,
+      "max_elapsed_us": 615,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1220
+    },
+    {
+      "uptime_ms": 37090,
+      "count": 35990,
+      "max_wake_us": 596,
+      "max_lock_us": 58,
+      "max_elapsed_us": 615,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1220
+    },
+    {
+      "uptime_ms": 38090,
+      "count": 36990,
+      "max_wake_us": 596,
+      "max_lock_us": 58,
+      "max_elapsed_us": 615,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1220
+    }
+  ],
+  "firmware_log": ""
+}

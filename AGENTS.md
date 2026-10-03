@@ -58,7 +58,7 @@ tools/                        — Windows .exe test utilities (JoyTester, simFFB
 doc/                          — HID/PID spec PDFs, reference documentation
 ```
 
-- **`include/`** is an empty placeholder (contains only a README).
+- **`include/tft_setup.h`** supplies the repository's ESP32-S3 LCD pin/driver setup.
 - Firmware and motor-protocol adapters use `namespace SunFFB`; the independent communication library uses `namespace EmbeddedComm`.
 
 ## FreeRTOS Task Architecture
@@ -70,13 +70,13 @@ Tasks are pinned to specific cores:
 | `lcd_task` | App (core 1) | 1 | TFT display refresh (60ms) |
 | `joystick_task` | App (core 1) | 2 | ADC read + axis filter (2ms) |
 | `force_calculation_task` | App (core 1) | 3 | Effect computation (1ms) |
-| `send_report_task` | Proto (core 0) | max-1 | USB HID report transmission |
-| `send_force_task` | Proto (core 0) | max-1 | Serial output to motor driver |
-| `receive_position_task` | Proto (core 0) | max-1 | Serial input from encoder board |
+| `send_report_task` | Proto (core 0) | 2 | USB HID report transmission |
+| `send_force_task` | Proto (core 0) | 2 | Serial output to motor driver |
+| `receive_position_task` | Proto (core 0) | 2 | Serial input from encoder board |
 
 On ESP32-S2 (`esp32-s2*` environments), all tasks use core 0. Periodic USB/UART I/O uses priority 2, below force calculation (3). UART receive has a bounded batch and unconditional delay; missed force deadlines also yield. ADC reads explicitly use 12-bit resolution; third-axis ADC defaults to GPIO15 to reserve GPIO19/20 for native USB. The S2 reference board is `esp32-s2-saola-1`; LCD-enabled builds require external board-specific TFT pin setup.
 
-Tasks communicate via FreeRTOS queues and mutexes. `hid_command_task` processes copied USB commands on core 0; USB callbacks wait for completion to preserve report ordering. `semaphoreFFBDeviceInput` and `semaphoreFFBReportHandler` protect shared state between force calculation and input/report tasks.
+Tasks communicate via FreeRTOS queues and mutexes. USB callbacks dispatch bounded commands directly under the effect-handler mutex, preserving SET/GET ordering without a same-core worker round trip. This latency reduction is under hardware validation, not a confirmed USB stability fix. `semaphoreFFBDeviceInput` and `semaphoreFFBReportHandler` protect shared state between force calculation and input/report tasks.
 
 ## Serial Protocol (Motor Controller)
 
@@ -91,7 +91,16 @@ Tasks communicate via FreeRTOS queues and mutexes. `hid_command_task` processes 
 
 LCD is disabled by default (`ENABLE_LCD=0`). Normal builds omit TFT_eSPI and all LCD code/resources. Use `esp32-s3-lcd` or `esp32-s2-lcd` for debug display. Timing diagnostics are independent.
 
-When LCD is enabled, the `TFT_eSPI` library (via `lib_deps`) requires a board-specific `User_Setup_Select.h` to map LCD pins. This config is **not in the repository** — it must exist in the PlatformIO library cache or be provided externally. LCD-enabled builds require this external setup.
+`esp32-s3-lcd` force-includes `include/tft_setup.h` for both application and TFT_eSPI compilation. Its `USER_SETUP_LOADED` guard prevents a competing library-cache setup. The S2 LCD environment still requires external board-specific setup.
+
+## Hardware-in-the-loop Validation
+
+- `esp32-s3-hil` extends the S3 LCD environment, enables UART motor output and serial position input, and overrides ESP RX to GPIO48 and TX to GPIO45. CDC is disabled in production, LCD and HIL environments after failed repair attempts; `ENABLE_USB_CDC` defaults to 0. Default production UART pins remain RX5/TX4.
+- Connect adapter TX to GPIO48, adapter RX to GPIO45, and common ground using 3.3 V TTL. Disconnect motors before flashing this environment. GPIO45 is a strapping pin; do not externally drive it during boot.
+- Run `python python_apis/validate_hardware.py --port COM8 --motors-disconnected`. Do not pass `--console` with CDC disabled. Port numbers must be re-enumerated on each machine. Future uploads require manual BOOT/RESET because no CDC upload port is exposed; enumerate the ROM port before flashing.
+- The runner resets the effect pool, streams simulated positions, reads real UART force frames and USB joystick reports, and stops/disables/frees effects on exit when USB remains reachable. It does not verify physical motors, ADC, buttons, CAN, visual LCD correctness or wire-level timing. Keep motors disconnected after testing; firmware reset re-enables actuators.
+- On Windows, Feature SET buffers must be padded to the collection's maximum Feature report size (five bytes including ID). A two-byte Create New Effect buffer failed on hardware, while the padded report succeeded. Keep firmware payload validation exact; host padding is a Windows API requirement, not a new wire layout.
+- Initial hardware runs exposed intermittent USB input stalls, control-report failures and a task-watchdog reset under simultaneous traffic. Do not treat passing effect checks or approximately 500 Hz host UART reception as overall stability or worst-case timing compliance; see `doc/hardware-validation.md`.
 
 ## Testing
 
@@ -130,6 +139,16 @@ Automated tests are available via `pio test -e native -e native-axis1 -e native-
 - `esp32-s2-timing`/`esp32-s3-timing` enable UART0 rate logs and motor output/serial input.
 - `python_apis/check_update_rate.py` measures read-only host report cadence; it does not enable motors.
 - Never claim timing compliance from compilation alone. Use `usb_done` and `fresh`, motor-side reception, and wire measurements under worst-case load.
+- Periodic I/O uses priority 2 on S3 as well as S2. Force releases use esp_timer task notifications; obsolete releases are coalesced, not replayed. Count both release-to-completion deadline misses and skipped releases, including across timing windows.
+- Never hold the effect-handler mutex while submitting USB IN reports. HID IN submission is deferred to the TinyUSB service task; completion counters come from the actual HID completion callback, not successful queue submission.
+- Arduino 2.0.17 bundles TinyUSB 0.16 with shared interrupt/control HID buffers. `usb_hid_control_compat.cpp` and linker wrapping isolate control storage for this version; newer versions delegate to their driver. Preserve report ordering and the actual Output/Feature type.
+- CDC diagnostics have a bounded queue and one capacity-limited writer. A full console must drop or defer diagnostics without blocking force computation or spinning on CDC's full-FIFO write loop.
+- CDC FIFO write/flush operations are deferred to TinyUSB's service context with persistent storage owned by one console task; do not reintroduce concurrent application-task endpoint submissions. Full LCD/CDC hardware tests still fail at requested 500 Hz. The USB service continues executing deferred callbacks after host disappearance; do not claim a service deadlock or a successful CDC repair from these tests.
+- Both `esp32-s3-hil-minimal` (no LCD/CDC) and `esp32-s3-hil-lcd-only` (LCD, no CDC) passed 34 checks and a 60-second requested-500-Hz soak. These environments require manual BOOT/RESET to regain a flashing port. CDC-free success is not full LCD/CDC stability or deadline compliance.
+- Final `esp32-s3-hil` with CDC disabled passed 34 checks and a 60-second requested-500-Hz soak (UART receipt 500.005 Hz, 29428 USB reports). Stop/Disable/Free succeeded; 248 subsequently observed UART force frames were all zero. Do not extrapolate this short single-effect soak to worst-case deadlines or long-term endurance.
+- Experimental FIFO-register relocation and endpoint/FIFO alignment both failed hardware validation. Their source, linker wrapper and tests were removed; do not reinstate them as verified repairs. CDC is disabled per the user's fallback authorization. Preserve the failure evidence in `doc/hardware-validation.md`; the common final cause of HID/CDC failure is still unresolved.
+- HIL-only UART health uses variable frame ID 0x7E and five little-endian uint32 values (uptime ms, reset reason, USB mounted, USB suspended, free heap). Continuous UART uptime after a USB error is evidence against a reboot in that interval; a mounted flag alone does not prove a working host USB connection. High-rate USB stability remains unresolved; see `doc/hardware-validation.md`.
+- The direct-dispatch candidate passed 36 checks and a 30-minute requested-500-Hz full-pool/LCD stress run with CDC off. Maximum observed force latency was 764 us; no completed-job misses or additional skipped releases occurred (seven lifetime skips were already present). This is bounded validation, not proof of a sole root cause, multi-day stability or wire-level compliance. An unsuccessful optional endpoint-status diagnostic was removed afterward; the cleaned source is build-verified but not the exact flashed/stress-tested binary. Preserve the capture and qualifications in `doc/hardware-validation.md`.
 
 ## CAN Transport
 

@@ -57,7 +57,7 @@ namespace SunFFB
     inline bool dispatch_output_report(FFBReportHandler& handler, uint8_t id, uint8_t type,
                                        const uint8_t* data, uint16_t length)
     {
-        // No locking here: the firmware worker synchronizes access; native tests call this directly.
+        // No locking here: the firmware callback synchronizes access; native tests call this directly.
         if (!valid_output_report(id, type, data, length))
             return false;
 

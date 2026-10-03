@@ -1,0 +1,6640 @@
+{
+  "position_hz": 500.0,
+  "soak_seconds": 10.0,
+  "checks": [
+    {
+      "name": "position roundtrip (12000, -9000)",
+      "passed": true,
+      "evidence": [
+        11999,
+        -8999
+      ]
+    },
+    {
+      "name": "position roundtrip (-16000, 18000)",
+      "passed": true,
+      "evidence": [
+        -15999,
+        17999
+      ]
+    },
+    {
+      "name": "position roundtrip (32767, -32767)",
+      "passed": true,
+      "evidence": [
+        32766,
+        -32766
+      ]
+    },
+    {
+      "name": "pool allocation and full status",
+      "passed": true,
+      "evidence": {
+        "capacity": 15,
+        "full_status": 2
+      }
+    },
+    {
+      "name": "pool reuse",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "name": "constant direction 9000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -4000,
+          0
+        ],
+        "observed": [
+          -4000.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "constant direction 0",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          4000
+        ],
+        "observed": [
+          0.0,
+          4000.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "constant direction 18000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          -4000
+        ],
+        "observed": [
+          0.0,
+          -4000.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "constant direction 27000",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          4000,
+          0
+        ],
+        "observed": [
+          4000.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "device gain",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          2007.8431372549019,
+          0
+        ],
+        "observed": [
+          2007.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "pause",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "continue",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          4000,
+          0
+        ],
+        "observed": [
+          4000,
+          0
+        ],
+        "frames": 149
+      }
+    },
+    {
+      "name": "disable",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "continue remains disabled",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "enable",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          4000,
+          0
+        ],
+        "observed": [
+          4000,
+          0
+        ],
+        "frames": 149
+      }
+    },
+    {
+      "name": "stop all",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          0,
+          0
+        ],
+        "observed": [
+          0.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "effect gain",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -2007.8431372549019,
+          0
+        ],
+        "observed": [
+          -2007.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "effect sum saturation",
+      "passed": true,
+      "evidence": {
+        "expected": [
+          -10000,
+          0
+        ],
+        "observed": [
+          -10000.0,
+          0.0
+        ],
+        "frames": 152
+      }
+    },
+    {
+      "name": "periodic type 3 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3500,
+        "max": 2500,
+        "frames": 552
+      }
+    },
+    {
+      "name": "periodic type 4 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3500,
+        "max": 2500,
+        "frames": 552
+      }
+    },
+    {
+      "name": "periodic type 5 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3470,
+        "max": 2470,
+        "frames": 552
+      }
+    },
+    {
+      "name": "periodic type 6 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3485,
+        "max": 2485,
+        "frames": 551
+      }
+    },
+    {
+      "name": "periodic type 7 range and cross-axis isolation",
+      "passed": true,
+      "evidence": {
+        "min": -3485,
+        "max": 2485,
+        "frames": 551
+      }
+    },
+    {
+      "name": "ramp and finite duration",
+      "passed": true,
+      "evidence": {
+        "frames": 426
+      }
+    },
+    {
+      "name": "constant attack/fade envelope",
+      "passed": true,
+      "evidence": [
+        519.6571428571428,
+        4000,
+        732.8620689655172
+      ]
+    },
+    {
+      "name": "start delay and expiration",
+      "passed": true,
+      "evidence": {
+        "frames": 426
+      }
+    },
+    {
+      "name": "samplePeriod holds ramp samples",
+      "passed": true,
+      "evidence": {
+        "levels": [
+          -2800,
+          -2400,
+          -2000,
+          -1600,
+          -1200,
+          -800,
+          -400,
+          0
+        ]
+      }
+    },
+    {
+      "name": "condition 8: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 746
+      }
+    },
+    {
+      "name": "condition 9: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 726
+      }
+    },
+    {
+      "name": "condition 10: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 235
+      }
+    },
+    {
+      "name": "condition 11: directed XY blocks and envelope isolation",
+      "passed": true,
+      "evidence": {
+        "peaks": [
+          1000,
+          2000
+        ],
+        "paired_frames": 746
+      }
+    },
+    {
+      "name": "CRC rejects corrupted positions",
+      "passed": true,
+      "evidence": {
+        "trailing_reports": [
+          [
+            0.00019980000070063397,
+            6999,
+            -7999
+          ],
+          [
+            0.0030946000006224494,
+            6999,
+            -7999
+          ]
+        ]
+      }
+    },
+    {
+      "name": "parser recovers after bad CRC",
+      "passed": true,
+      "evidence": [
+        0.39790999999968335,
+        -9999,
+        10999
+      ]
+    },
+    {
+      "name": "loaded soak: UART output and USB input survive",
+      "passed": true,
+      "evidence": {
+        "seconds": 10.001763300002494,
+        "uart_host_received_hz": 499.81186817316035,
+        "usb_reports": 4967,
+        "uart_parser": {
+          "crc_errors": 0,
+          "len_errors": 0,
+          "frames_rx": 17484
+        }
+      }
+    },
+    {
+      "name": "hardware execution completed",
+      "passed": false,
+      "evidence": {
+        "error": "hid_write/GetOverlappedResult: (0x0000001F) \u8fde\u5230\u7cfb\u7edf\u4e0a\u7684\u8bbe\u5907\u6ca1\u6709\u53d1\u6325\u4f5c\u7528\u3002"
+      }
+    }
+  ],
+  "timing": {},
+  "uart_health": [
+    {
+      "uptime_ms": 34090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 35090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 36090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 37090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 38090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 39090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 40090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 41090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 42090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 43090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 44090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 45090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 46090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 47090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 48090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 49090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 50090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 51090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 52090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 53090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 54090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 55090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 56090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 57090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 58090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 59090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 60090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 61090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 62090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 63090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 64090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 65090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 66090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 67090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 68090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 69090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 70090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 71090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 72090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 73090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 74090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 75090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 76090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 77090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 78090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 79090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 80090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 81090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 82090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 83090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 84090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 85090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 86090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 87090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 88090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 89090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 90090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 91090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 92090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 93090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 94090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 95090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 96090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 97090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 98090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 99090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 100090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 101090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 102090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 103090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 104090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 105090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 106090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 107090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 108090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 109090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 110090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 111090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 112090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 113090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 114090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 115090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 116090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 117090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 118090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 119090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 120090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 121090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 122090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 123090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 124090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 125090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 126090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 127090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 128090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 129090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 130090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 131090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 132090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 133090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 134090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 135090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 136090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 137090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 138090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 139090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 140090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 141090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 142090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 143090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 144090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 145090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 146090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 147090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 148090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 149090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 150090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 151090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 152090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 153090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 154090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 155090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 156090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 157090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 158090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 159090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 160090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 161090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 162090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 163090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 164090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 165090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 166090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 167090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 168090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 169090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 170090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 171090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 172090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 173090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 174090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 175090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 176090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 177090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 178090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 179090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 180090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 181090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 182090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 183090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 184090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 185090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 186090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 187090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 188090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 189090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 190090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 191090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 192090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 193090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 194090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 195090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 196090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 197090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 198090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 199090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 200090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 201090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 202090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 203090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 204090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 205090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 206090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 207090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 208090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 209090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 210090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 211090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 212090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 213090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 214090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 215090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 216090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 217090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 218090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 219090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 220090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 221090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 222090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 223090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 224090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 225090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 226090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 227090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 228090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 229090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 230090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 231090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 232090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 233090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 234090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 235090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 236090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 237090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 238090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 239090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 240090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 241090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 242090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 243090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 244090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 245090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 246090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 247090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 248090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 249090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 250090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 251090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 252090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 253090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 254090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    },
+    {
+      "uptime_ms": 255090,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326020
+    }
+  ],
+  "usb_progress": [
+    {
+      "uptime_ms": 34090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 200,
+      "command_starts": 1,
+      "command_ends": 1,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 35090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 697,
+      "command_starts": 1,
+      "command_ends": 1,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 36090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1209,
+      "command_starts": 25,
+      "command_ends": 25,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 37090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 1706,
+      "command_starts": 36,
+      "command_ends": 36,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 38090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 2201,
+      "command_starts": 44,
+      "command_ends": 44,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 39090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 2698,
+      "command_starts": 47,
+      "command_ends": 47,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 40090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 3191,
+      "command_starts": 57,
+      "command_ends": 57,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 41090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 3690,
+      "command_starts": 62,
+      "command_ends": 62,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 42090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 4190,
+      "command_starts": 67,
+      "command_ends": 67,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 43090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 4685,
+      "command_starts": 72,
+      "command_ends": 72,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 44090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 5182,
+      "command_starts": 73,
+      "command_ends": 73,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 45090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 5681,
+      "command_starts": 77,
+      "command_ends": 77,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 46090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 6178,
+      "command_starts": 82,
+      "command_ends": 82,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 47090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 6675,
+      "command_starts": 87,
+      "command_ends": 87,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 48090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 7172,
+      "command_starts": 93,
+      "command_ends": 93,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 49090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 7671,
+      "command_starts": 98,
+      "command_ends": 98,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 50090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 8169,
+      "command_starts": 103,
+      "command_ends": 103,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 51090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 8663,
+      "command_starts": 110,
+      "command_ends": 110,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 52090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 9156,
+      "command_starts": 110,
+      "command_ends": 110,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 53090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 9644,
+      "command_starts": 117,
+      "command_ends": 117,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 54090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 10136,
+      "command_starts": 124,
+      "command_ends": 124,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 55090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 10631,
+      "command_starts": 124,
+      "command_ends": 124,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 56090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 11124,
+      "command_starts": 131,
+      "command_ends": 131,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 57090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 11616,
+      "command_starts": 131,
+      "command_ends": 131,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 58090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 11987,
+      "command_starts": 132,
+      "command_ends": 132,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 59090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 12480,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 60090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 12978,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 61090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 13474,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 62090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 13971,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 63090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 14466,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 64090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 14962,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 65090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 15461,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 66090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 15957,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 67090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 16457,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 68090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 16954,
+      "command_starts": 137,
+      "command_ends": 137,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 69090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 17434,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 70090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 17914,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 71090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 18385,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 72090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 18868,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 73090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 19355,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 74090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 19835,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 75090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 20326,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 76090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 20809,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 77090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 21284,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 78090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 21767,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 79090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 22253,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 80090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 22743,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 81090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 23213,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 82090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 23700,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 83090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 24191,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 84090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 24670,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 85090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 25161,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 86090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 25647,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 87090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 26138,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 88090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 26616,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 89090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 27109,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 90090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 27585,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 91090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 28055,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 92090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 28534,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 93090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 29015,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 94090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 29505,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 95090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 30001,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 96090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 30481,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 97090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 30968,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 98090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 31437,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 99090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 31921,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 100090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 32396,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 101090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 32872,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 102090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 33350,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 103090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 33835,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 104090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 34312,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 105090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 34802,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 106090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 35293,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 107090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 35776,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 108090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 36259,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 109090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 36733,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 110090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 37218,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 111090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 37701,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 112090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 38189,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 113090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 38672,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 114090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 39143,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 115090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 39620,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 116090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 40098,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 117090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 40582,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 118090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 41070,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 119090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 41556,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 120090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 42042,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 121090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 42531,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 122090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 43015,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 123090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 43498,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 124090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 43983,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 125090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 44455,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 126090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 44938,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 127090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 45418,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 128090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 45901,
+      "command_starts": 213,
+      "command_ends": 213,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 129090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 46392,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 130090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 46888,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 131090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 47385,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 132090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 47878,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 133090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 48375,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 134090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 48866,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 135090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 49361,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 136090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 49855,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 137090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 50348,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 138090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 50845,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 139090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 51341,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 140090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 51838,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 141090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 52334,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 142090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 52831,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 143090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 53325,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 144090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 53819,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 145090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 54307,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 146090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 54800,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 147090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 55293,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 148090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 55791,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 149090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 56288,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 150090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 56783,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 151090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 57282,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 152090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 57781,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 153090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 58278,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 154090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 58774,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 155090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 59269,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 156090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 59767,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 157090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 60262,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 158090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 60755,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 159090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 61253,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 160090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 61753,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 161090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 62249,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 162090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 62742,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 163090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 63232,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 164090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 63726,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 165090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 64220,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 166090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 64719,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 167090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 65217,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 168090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 65711,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 169090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 66208,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 170090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 66703,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 171090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 67200,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 172090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 67692,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 173090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 68190,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 174090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 68686,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 175090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 69184,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 176090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 69680,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 177090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 70179,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 178090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 70671,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 179090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 71164,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 180090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 71660,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 181090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 72157,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 182090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 72651,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 183090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 73144,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 184090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 73641,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 185090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 74139,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 186090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 74634,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 187090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 75127,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 188090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 75624,
+      "command_starts": 304,
+      "command_ends": 304,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 189090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 76135,
+      "command_starts": 314,
+      "command_ends": 314,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 190090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 76614,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 191090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 77109,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 192090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 77598,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 193090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 78081,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 194090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 78567,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 195090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 79056,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 196090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 79534,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 197090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 80026,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 198090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 80517,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 199090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 81003,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 200090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 81498,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 201090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 81982,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 202090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 82463,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 203090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 82953,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 204090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 83443,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 205090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 83931,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 206090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 84415,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 207090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 84903,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 208090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 85389,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 209090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 85882,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 210090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 86379,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 211090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 86868,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 212090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 87358,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 213090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 87848,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 214090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 88339,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 215090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 88821,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 216090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 89309,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 217090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 89805,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 218090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 90295,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 219090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 90787,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 220090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 91279,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 221090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 91767,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 222090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 92255,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 223090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 92742,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 224090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 93234,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 225090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 93720,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 226090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 94206,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 227090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 94700,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 228090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 95192,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 229090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 95684,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 230090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 96171,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 231090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 96657,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 232090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 97142,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 233090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 97633,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 234090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 98124,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 235090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 98607,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 236090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 99099,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 237090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 99590,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 238090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 100084,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 239090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 100580,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 240090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 101073,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 241090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 101558,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 242090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 102039,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 243090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 102522,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 244090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 103013,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 245090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 103502,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 246090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 103990,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 247090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 104475,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 248090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 104970,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 249090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105466,
+      "command_starts": 390,
+      "command_ends": 390,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 250090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105613,
+      "command_starts": 422,
+      "command_ends": 422,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 251090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105613,
+      "command_starts": 422,
+      "command_ends": 422,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 252090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105613,
+      "command_starts": 422,
+      "command_ends": 422,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 253090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105613,
+      "command_starts": 422,
+      "command_ends": 422,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 254090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105613,
+      "command_starts": 422,
+      "command_ends": 422,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    },
+    {
+      "uptime_ms": 255090,
+      "console_stage": 0,
+      "console_calls": 0,
+      "hid_calls": 105613,
+      "command_starts": 422,
+      "command_ends": 422,
+      "usb_task_state": 2,
+      "usb_stack_free": 2952
+    }
+  ],
+  "endurance_seconds": 1800.0,
+  "uart_deadlines": [
+    {
+      "uptime_ms": 34090,
+      "count": 32994,
+      "max_wake_us": 690,
+      "max_lock_us": 37,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1220
+    },
+    {
+      "uptime_ms": 35090,
+      "count": 33994,
+      "max_wake_us": 690,
+      "max_lock_us": 37,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 36090,
+      "count": 34994,
+      "max_wake_us": 690,
+      "max_lock_us": 42,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 37090,
+      "count": 35994,
+      "max_wake_us": 690,
+      "max_lock_us": 42,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 38090,
+      "count": 36994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 39090,
+      "count": 37994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 40090,
+      "count": 38994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 41090,
+      "count": 39994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 42090,
+      "count": 40994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 43090,
+      "count": 41994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 44090,
+      "count": 42994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 45090,
+      "count": 43994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 46090,
+      "count": 44994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 47090,
+      "count": 45994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 48090,
+      "count": 46994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 49090,
+      "count": 47994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 50090,
+      "count": 48994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 51090,
+      "count": 49994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 52090,
+      "count": 50994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 53090,
+      "count": 51994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 54090,
+      "count": 52994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 55090,
+      "count": 53994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 56090,
+      "count": 54994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 57090,
+      "count": 55994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 58090,
+      "count": 56994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 59090,
+      "count": 57994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 60090,
+      "count": 58994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 61090,
+      "count": 59994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 62090,
+      "count": 60994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 63090,
+      "count": 61994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 64090,
+      "count": 62994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 65090,
+      "count": 63994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 66090,
+      "count": 64994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 67090,
+      "count": 65994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 68090,
+      "count": 66994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1208
+    },
+    {
+      "uptime_ms": 69090,
+      "count": 67994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 70090,
+      "count": 68994,
+      "max_wake_us": 690,
+      "max_lock_us": 53,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 71090,
+      "count": 69994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 72090,
+      "count": 70994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 73090,
+      "count": 71994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 74090,
+      "count": 72994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 75090,
+      "count": 73994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 76090,
+      "count": 74994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 77090,
+      "count": 75994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 78090,
+      "count": 76994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 79090,
+      "count": 77994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 80090,
+      "count": 78994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 81090,
+      "count": 79994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 82090,
+      "count": 80994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 83090,
+      "count": 81994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 84090,
+      "count": 82994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 85090,
+      "count": 83994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 86090,
+      "count": 84994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 87090,
+      "count": 85994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 88090,
+      "count": 86994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 89090,
+      "count": 87994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 90090,
+      "count": 88994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 91090,
+      "count": 89994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 92090,
+      "count": 90994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 93090,
+      "count": 91994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 94090,
+      "count": 92994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 95090,
+      "count": 93994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 96090,
+      "count": 94994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 97090,
+      "count": 95994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 98090,
+      "count": 96994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 99090,
+      "count": 97994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 100090,
+      "count": 98994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 101090,
+      "count": 99994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 102090,
+      "count": 100994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 103090,
+      "count": 101994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 104090,
+      "count": 102994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 105090,
+      "count": 103994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 106090,
+      "count": 104994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 107090,
+      "count": 105994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 108090,
+      "count": 106994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 109090,
+      "count": 107994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 110090,
+      "count": 108994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 111090,
+      "count": 109994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 112090,
+      "count": 110994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 113090,
+      "count": 111994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 114090,
+      "count": 112994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 115090,
+      "count": 113994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 116090,
+      "count": 114994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 117090,
+      "count": 115994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 118090,
+      "count": 116994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 119090,
+      "count": 117994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 120090,
+      "count": 118994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 121090,
+      "count": 119994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 122090,
+      "count": 120994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 123090,
+      "count": 121994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 124090,
+      "count": 122994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 125090,
+      "count": 123994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 126090,
+      "count": 124994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 127090,
+      "count": 125994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 128090,
+      "count": 126994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 129090,
+      "count": 127994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 130090,
+      "count": 128994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 131090,
+      "count": 129994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 132090,
+      "count": 130994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 133090,
+      "count": 131994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 134090,
+      "count": 132994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 135090,
+      "count": 133994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 136090,
+      "count": 134994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 137090,
+      "count": 135994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 138090,
+      "count": 136994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 139090,
+      "count": 137994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 140090,
+      "count": 138994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 141090,
+      "count": 139994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 142090,
+      "count": 140994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 143090,
+      "count": 141994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 144090,
+      "count": 142994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 145090,
+      "count": 143994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 146090,
+      "count": 144994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 147090,
+      "count": 145994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 148090,
+      "count": 146994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 149090,
+      "count": 147994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 150090,
+      "count": 148994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 151090,
+      "count": 149994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 152090,
+      "count": 150994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 153090,
+      "count": 151994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 154090,
+      "count": 152994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 155090,
+      "count": 153994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 156090,
+      "count": 154994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 157090,
+      "count": 155994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 158090,
+      "count": 156994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 159090,
+      "count": 157994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 160090,
+      "count": 158994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 161090,
+      "count": 159994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 162090,
+      "count": 160994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 163090,
+      "count": 161994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 164090,
+      "count": 162994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 165090,
+      "count": 163994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 166090,
+      "count": 164994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 167090,
+      "count": 165994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 168090,
+      "count": 166994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 169090,
+      "count": 167994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 170090,
+      "count": 168994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 171090,
+      "count": 169994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 172090,
+      "count": 170994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 173090,
+      "count": 171994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 174090,
+      "count": 172994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 175090,
+      "count": 173994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 176090,
+      "count": 174994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 177090,
+      "count": 175994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 178090,
+      "count": 176994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 179090,
+      "count": 177994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 180090,
+      "count": 178994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 181090,
+      "count": 179994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 182090,
+      "count": 180994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 183090,
+      "count": 181994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 184090,
+      "count": 182994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 185090,
+      "count": 183994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 186090,
+      "count": 184994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 187090,
+      "count": 185994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 188090,
+      "count": 186994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 189090,
+      "count": 187994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 190090,
+      "count": 188994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 191090,
+      "count": 189994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 192090,
+      "count": 190994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 193090,
+      "count": 191994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 194090,
+      "count": 192994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 195090,
+      "count": 193994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 196090,
+      "count": 194994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 197090,
+      "count": 195994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 198090,
+      "count": 196994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 199090,
+      "count": 197994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 200090,
+      "count": 198994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 201090,
+      "count": 199994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 202090,
+      "count": 200994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 203090,
+      "count": 201994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 204090,
+      "count": 202994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 205090,
+      "count": 203994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 206090,
+      "count": 204994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 207090,
+      "count": 205994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 208090,
+      "count": 206994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 209090,
+      "count": 207994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 210090,
+      "count": 208994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 211090,
+      "count": 209994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 212090,
+      "count": 210994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 213090,
+      "count": 211994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 214090,
+      "count": 212994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 215090,
+      "count": 213994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 216090,
+      "count": 214994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 217090,
+      "count": 215994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 218090,
+      "count": 216994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 219090,
+      "count": 217994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 220090,
+      "count": 218994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 221090,
+      "count": 219994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 222090,
+      "count": 220994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 223090,
+      "count": 221994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 224090,
+      "count": 222994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 225090,
+      "count": 223994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 226090,
+      "count": 224994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 227090,
+      "count": 225994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 228090,
+      "count": 226994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 229090,
+      "count": 227994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 230090,
+      "count": 228994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 231090,
+      "count": 229994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 232090,
+      "count": 230994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 233090,
+      "count": 231994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 234090,
+      "count": 232994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 235090,
+      "count": 233994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 236090,
+      "count": 234994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 237090,
+      "count": 235994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 238090,
+      "count": 236994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 239090,
+      "count": 237994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 240090,
+      "count": 238994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 241090,
+      "count": 239994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 242090,
+      "count": 240994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 243090,
+      "count": 241994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 244090,
+      "count": 242994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 245090,
+      "count": 243994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 246090,
+      "count": 244994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 247090,
+      "count": 245994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 248090,
+      "count": 246994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 249090,
+      "count": 247994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 250090,
+      "count": 248994,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 6,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 251090,
+      "count": 249990,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 252090,
+      "count": 250990,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 253090,
+      "count": 251990,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 254090,
+      "count": 252990,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    },
+    {
+      "uptime_ms": 255090,
+      "count": 253990,
+      "max_wake_us": 690,
+      "max_lock_us": 57,
+      "max_elapsed_us": 704,
+      "missed": 0,
+      "skipped": 10,
+      "budget_us": 1000,
+      "force_stack_free": 1108
+    }
+  ],
+  "execution_error": "hid_write/GetOverlappedResult: (0x0000001F) \u8fde\u5230\u7cfb\u7edf\u4e0a\u7684\u8bbe\u5907\u6ca1\u6709\u53d1\u6325\u4f5c\u7528\u3002",
+  "firmware_log": ""
+}

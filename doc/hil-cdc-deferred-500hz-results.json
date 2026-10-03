@@ -1,0 +1,114 @@
+{
+  "position_hz": 500.0,
+  "soak_seconds": 60.0,
+  "checks": [
+    {
+      "name": "position roundtrip (12000, -9000)",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "name": "position roundtrip (-16000, 18000)",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "name": "position roundtrip (32767, -32767)",
+      "passed": false,
+      "evidence": []
+    }
+  ],
+  "timing": {
+    "streams": {
+      "force": {
+        "windows": 1,
+        "min_hz": 1000.0,
+        "max_hz": 1000.0,
+        "max_gap_us": 1046,
+        "max_work_us": 55,
+        "failures": 0
+      },
+      "rx": {
+        "windows": 1,
+        "min_hz": 33.0,
+        "max_hz": 33.0,
+        "max_gap_us": 2968,
+        "max_work_us": 0,
+        "failures": 0
+      },
+      "input": {
+        "windows": 1,
+        "min_hz": 33.0,
+        "max_hz": 33.0,
+        "max_gap_us": 2969,
+        "max_work_us": 0,
+        "failures": 0
+      }
+    },
+    "deadline_windows": 0,
+    "max_wake_us": null,
+    "max_lock_us": null,
+    "max_elapsed_us": null,
+    "missed": 0,
+    "skipped": 0
+  },
+  "uart_health": [
+    {
+      "uptime_ms": 23092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    },
+    {
+      "uptime_ms": 24092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    },
+    {
+      "uptime_ms": 25092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    },
+    {
+      "uptime_ms": 26092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    },
+    {
+      "uptime_ms": 27092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    },
+    {
+      "uptime_ms": 28092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    },
+    {
+      "uptime_ms": 29092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    },
+    {
+      "uptime_ms": 30092,
+      "reset_reason": 1,
+      "usb_mounted": 1,
+      "usb_suspended": 0,
+      "heap": 326976
+    }
+  ],
+  "firmware_log": "TIMING force hz=1000.0 max_gap_us=1046 gap_over_budget=57 max_work_us=55 fail=0\nTIMING rx hz=33.0 max_gap_us=2968 gap_over_budget=16 max_work_us=0 fail=0\nTIMING input hz=33.0 max_gap_us=2969 gap_over_budget=16 max_work_us=0 fail=0\n"
+}
