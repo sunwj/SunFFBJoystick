@@ -13,6 +13,7 @@
 #include "ffb_force_calculator.h"
 #include "ffb_report_dispatch.h"
 #include "motor_protocol/serial_link.h"
+#include "math_utils.h"
 
 using namespace SunFFB;
 static uint32_t nowMs, nowUs;
@@ -24,10 +25,6 @@ extern "C" uint32_t _millis(void)
 extern "C" uint32_t _micros(void)
 {
     return nowUs;
-}
-
-extern "C" void _debug_printf(const char*, ...)
-{
 }
 
 void setUp()
@@ -117,6 +114,125 @@ void test_invalid_reports_leave_state_unchanged()
     uint8_t gain = 64;
     TEST_ASSERT_TRUE(dispatch_output_report(f.handler, REPORT_ID_DEVICE_GAIN_REPORT, 2, &gain, 1));
     TEST_ASSERT_EQUAL_UINT8(64, f.handler.deviceGain);
+}
+
+void test_freed_effect_cannot_restart_or_accept_parameters()
+{
+    Fixture f;
+    const uint8_t id = f.effect();
+    f.start(id);
+    TEST_ASSERT_EQUAL_INT32(6000, f.force());
+    f.handler.free_effect(id);
+    const EffectBlock before = f.handler.get_all_effect_blocks()[id - 1];
+
+    SetEffectReportData common{};
+    common.effectBlockIndex = id;
+    common.effectType = ET_CONSTANT;
+    common.gain = 255;
+    SetEnvelopeReportData envelope{id, 100, 200, 10, 20};
+    SetConditionReportData condition{id, 0, 0, 1000, 1000, 10000, 10000, 0};
+    SetPeriodicReportData periodic{id, 1000, 0, 0, 100};
+    SetConstantForceReportData constant{id, 9000};
+    SetRampForceReportData ramp{id, 1000, 9000};
+    f.handler.set_effect(&common);
+    f.handler.set_envelope(&envelope);
+    f.handler.set_condition(&condition);
+    f.handler.set_periodic(&periodic);
+    f.handler.set_constant_force(&constant);
+    f.handler.set_ramp_force(&ramp);
+    f.start(id);
+
+    TEST_ASSERT_EQUAL_MEMORY(&before, &f.handler.get_all_effect_blocks()[id - 1], sizeof(before));
+    TEST_ASSERT_EQUAL_INT32(0, f.force());
+}
+
+void test_start_solo_on_free_slot_does_not_stop_live_effect()
+{
+    Fixture f;
+    const uint8_t active = f.effect();
+    const uint8_t released = f.effect();
+    f.start(active);
+    f.handler.free_effect(released);
+    EffectOperationReportData solo{released, 2, 1};
+    f.handler.set_effect_operation(&solo);
+    TEST_ASSERT_EQUAL_INT32(6000, f.force());
+    TEST_ASSERT_EQUAL_UINT8(EFFECT_STATE_FREE,
+                            f.handler.get_all_effect_blocks()[released - 1].state);
+}
+
+void test_unsupported_effect_creation_preserves_pool()
+{
+    Fixture f;
+    const uint16_t available = f.handler.get_block_load_report_data()->ramPoolAvailable;
+    for (uint8_t type : {uint8_t(0), uint8_t(NUM_SUPPORTED_EFFECTS + 1), uint8_t(255)})
+    {
+        CreateNewEffectReportData request{type};
+        f.handler.create_new_effect(&request);
+        const auto& result = *f.handler.get_block_load_report_data();
+        TEST_ASSERT_EQUAL_UINT8(0, result.effectBlockIndex);
+        TEST_ASSERT_EQUAL_UINT8(3, result.blockLoadStatus);
+        TEST_ASSERT_EQUAL_UINT16(available, result.ramPoolAvailable);
+    }
+    TEST_ASSERT_EQUAL_UINT8(1, f.effect());
+}
+
+void test_full_condition_pool_uses_current_axis_metrics_each_call()
+{
+    Fixture f;
+    for (uint8_t slot = 0; slot < MAX_EFFECTS; ++slot)
+    {
+        const uint8_t id = f.effect(ET_SPRING);
+        SetEffectReportData common{};
+        common.effectBlockIndex = id;
+        common.effectType = ET_SPRING;
+        common.duration = USB_DURATION_INFINITE;
+        common.triggerButton = USB_NO_TRIGGER_BUTTON;
+        common.gain = 255;
+        common.axisEnable = (1U << NUM_AXIS) - 1;
+        f.handler.set_effect(&common);
+        for (uint8_t axis = 0; axis < NUM_AXIS; ++axis)
+        {
+            SetConditionReportData condition{id, axis, 0, 1000, 1000, 10000, 10000, 0};
+            f.handler.set_condition(&condition);
+        }
+        f.start(id);
+    }
+
+    for (int sign : {1, -1})
+    {
+        int16_t positions[NUM_AXIS];
+        for (uint8_t axis = 0; axis < NUM_AXIS; ++axis)
+        {
+            positions[axis] = sign * (axis + 1) * 5000;
+        }
+        nowUs += 1000;
+        f.input.update_axis(positions);
+        int32_t forces[NUM_AXIS]{};
+        f.calculator.force_calculator(f.handler, f.input, forces);
+        for (uint8_t axis = 0; axis < NUM_AXIS; ++axis)
+        {
+            const float expected =
+                -float(positions[axis]) / USB_AXIS_MAX_ABSOLUTE * 1000 * MAX_EFFECTS;
+            TEST_ASSERT_INT32_WITHIN(1, int32_t(expected), forces[axis]);
+        }
+    }
+}
+
+void test_optional_math_helpers_handle_negative_angles_and_float_widths()
+{
+    for (float value : {1.f, 4.f, 9.f, 10000.f})
+    {
+        TEST_ASSERT_FLOAT_WITHIN(sqrtf(value) * 0.05f, sqrtf(value), _sqrt(value));
+    }
+    TEST_ASSERT_EQUAL_FLOAT(0.f, _sqrt(0.f));
+    TEST_ASSERT_TRUE(isnan(_sqrt(-1.f)));
+    TEST_ASSERT_TRUE(isinf(_sqrt(INFINITY)));
+    for (float angle : {-float(M_PI) * 2.5f, -float(M_PI_2), 0.f, float(M_PI_2), float(M_PI)})
+    {
+        TEST_ASSERT_FLOAT_WITHIN(0.0005f, sinf(angle), _sinf(angle));
+        TEST_ASSERT_FLOAT_WITHIN(0.0005f, cosf(angle), _cosf(angle));
+    }
+    TEST_ASSERT_TRUE(isnan(_sinf(INFINITY)));
 }
 
 void test_envelope_does_not_corrupt_adjacent_effect()
@@ -506,8 +622,7 @@ void test_timing_windows_do_not_keep_historical_maxima()
 void test_force_deadlines_measure_release_to_completion()
 {
     ForceDeadlineStream deadlines(1000);
-    deadlines.record(0xfffffff0U, 0xfffffff0U + 20U,
-                     0xfffffff0U + 30U, 0xfffffff0U + 60U);
+    deadlines.record(0xfffffff0U, 0xfffffff0U + 20U, 0xfffffff0U + 30U, 0xfffffff0U + 60U);
     auto stat = deadlines.take_window();
     TEST_ASSERT_EQUAL_UINT32(20, stat.maxWakeUs);
     TEST_ASSERT_EQUAL_UINT32(10, stat.maxLockUs);
@@ -544,13 +659,13 @@ void test_control_report_storage_is_independent_of_interrupt_reports()
     HIDControlBuffer<64> control;
     uint8_t interrupt[64]{};
     const uint16_t length = control.prepare_get(17, 5,
-        [](uint8_t* buffer, uint16_t capacity)
-        {
-            TEST_ASSERT_EQUAL_UINT16(4, capacity);
-            const uint8_t result[] = {1, 1, 0, 1};
-            memcpy(buffer, result, sizeof(result));
-            return uint16_t(sizeof(result));
-        });
+                                                [](uint8_t* buffer, uint16_t capacity)
+                                                {
+                                                    TEST_ASSERT_EQUAL_UINT16(4, capacity);
+                                                    const uint8_t result[] = {1, 1, 0, 1};
+                                                    memcpy(buffer, result, sizeof(result));
+                                                    return uint16_t(sizeof(result));
+                                                });
     memset(interrupt, 2, sizeof(interrupt));
     TEST_ASSERT_EQUAL_UINT16(5, length);
     TEST_ASSERT_EQUAL_UINT8(17, control.bytes[0]);
@@ -567,10 +682,10 @@ void test_control_report_storage_is_independent_of_interrupt_reports()
     size = 1;
     TEST_ASSERT_EQUAL_PTR(control.bytes, control.set_payload(13, size));
     TEST_ASSERT_EQUAL_UINT16(1, size);
-    TEST_ASSERT_EQUAL_UINT16(0, control.prepare_get(17, 1,
-        [](uint8_t*, uint16_t) { return uint16_t(4); }));
-    TEST_ASSERT_EQUAL_UINT16(0, control.prepare_get(17, 5,
-        [](uint8_t*, uint16_t) { return uint16_t(5); }));
+    TEST_ASSERT_EQUAL_UINT16(
+        0, control.prepare_get(17, 1, [](uint8_t*, uint16_t) { return uint16_t(4); }));
+    TEST_ASSERT_EQUAL_UINT16(
+        0, control.prepare_get(17, 5, [](uint8_t*, uint16_t) { return uint16_t(5); }));
 }
 
 int main()
@@ -584,6 +699,11 @@ int main()
     RUN_TEST(test_report_schedule_retries_and_preserves_phase);
     RUN_TEST(test_timing_wrap_and_stalled_stream);
     RUN_TEST(test_invalid_reports_leave_state_unchanged);
+    RUN_TEST(test_freed_effect_cannot_restart_or_accept_parameters);
+    RUN_TEST(test_start_solo_on_free_slot_does_not_stop_live_effect);
+    RUN_TEST(test_unsupported_effect_creation_preserves_pool);
+    RUN_TEST(test_full_condition_pool_uses_current_axis_metrics_each_call);
+    RUN_TEST(test_optional_math_helpers_handle_negative_angles_and_float_widths);
     RUN_TEST(test_envelope_does_not_corrupt_adjacent_effect);
     RUN_TEST(test_disabled_stays_disabled_after_pause_resume);
     RUN_TEST(test_cold_boot_pause_preserves_implicit_enable);

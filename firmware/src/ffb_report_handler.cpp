@@ -31,6 +31,14 @@ namespace SunFFB
 
     void FFBReportHandler::create_new_effect(const CreateNewEffectReportData* data)
     {
+        if (data->effectType < ET_CONSTANT || data->effectType > ET_FRICTION)
+        {
+            // Unsupported types must not consume a slot or return an old ID.
+            blockLoadData.effectBlockIndex = 0;
+            blockLoadData.blockLoadStatus = 3;
+            pidStateDirty = true;
+            return;
+        }
         // ID zero indicates a full pool; successful allocation clears runtime state before marking the slot allocated.
         // Pool capacity includes internal state and caches, not just wire parameter bytes.
         blockLoadData.effectBlockIndex = get_next_free_effect_block_index();
@@ -51,24 +59,11 @@ namespace SunFFB
         }
 
         pidStateDirty = true;
-
-#ifdef SERIAL_PRINT
-        _debug_printf("Create new effect: status=%d (1=success, 2=full)\n",
-                      blockLoadData.blockLoadStatus);
-#endif
     }
 
     uint8_t FFBReportHandler::get_next_free_effect_block_index()
     {
         // Round-robin allocation checks at most MAX_EFFECTS slots and returns a one-based host ID.
-        // for(uint8_t i = 0; i < MAX_EFFECTS; ++i)
-        // {
-        //     if(EFFECT_STATE_FREE == effectBlocks[i].state)
-        //         return i + 1;
-        // }
-
-        // return 0;
-
         uint8_t idx = 0;
 
         for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
@@ -122,6 +117,14 @@ namespace SunFFB
             return (EffectBlock*)&effectBlocks[idx - 1];
 
         return nullptr;
+    }
+
+    EffectBlock* FFBReportHandler::get_allocated_effect_block(uint8_t idx) const
+    {
+        // A freed slot may still contain old parameters. Configuration/playback
+        // commands must never make those values live without a new allocation.
+        EffectBlock* block = get_effect_block(idx);
+        return block && (block->state & EFFECT_STATE_ALLOCATED) ? block : nullptr;
     }
 
     void FFBReportHandler::start_effect(EffectBlock* effectBlock)
@@ -182,7 +185,7 @@ namespace SunFFB
     void FFBReportHandler::set_effect(const SetEffectReportData* data)
     {
         // Common-parameter updates retain received axis conditions; set_effect is not reallocation.
-        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_allocated_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
 
@@ -193,7 +196,8 @@ namespace SunFFB
 
         effectBlock->originalDuration = effectData->duration;
 
-// The descriptor declares angular coordinates; Direction Enable selects condition mode.
+        // The descriptor declares angular coordinates. Received condition blocks
+        // and Direction Enable jointly select the documented condition model.
 #if NUM_AXIS == 1
         effectBlock->directionUnitVector[0] = 1.f;
 #endif
@@ -224,35 +228,11 @@ namespace SunFFB
         effectBlock->directionUnitVector[2] = -_sinf(phi);
 #endif
 #endif
-#ifdef SERIAL_PRINT
-#if NUM_AXIS == 1
-        _debug_printf(
-            "Set effect: idx=%d type=%d duration=%d repeat=%d samplePeriod=%d gain=%d trigBtn=%d axisEnable=0x%02x dir0=%d startDelay=%d\n",
-            effectData->effectBlockIndex, effectData->effectType, effectData->duration,
-            effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain,
-            effectData->triggerButton, effectData->axisEnable, effectData->directions[0],
-            effectData->startDelay);
-#elif NUM_AXIS == 2
-        _debug_printf(
-            "Set effect: idx=%d type=%d duration=%d repeat=%d samplePeriod=%d gain=%d trigBtn=%d axisEnable=0x%02x dir0=%d dir1=%d startDelay=%d\n",
-            effectData->effectBlockIndex, effectData->effectType, effectData->duration,
-            effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain,
-            effectData->triggerButton, effectData->axisEnable, effectData->directions[0],
-            effectData->directions[1], effectData->startDelay);
-#elif NUM_AXIS == 3
-        _debug_printf(
-            "Set effect: idx=%d type=%d duration=%d repeat=%d samplePeriod=%d gain=%d trigBtn=%d axisEnable=0x%02x dir0=%d dir1=%d dir2=%d startDelay=%d\n",
-            effectData->effectBlockIndex, effectData->effectType, effectData->duration,
-            effectData->triggerRepeatInterval, effectData->samplePeriod, effectData->gain,
-            effectData->triggerButton, effectData->axisEnable, effectData->directions[0],
-            effectData->directions[1], effectData->directions[2], effectData->startDelay);
-#endif
-#endif
     }
 
     void FFBReportHandler::set_envelope(const SetEnvelopeReportData* data)
     {
-        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_allocated_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
 
@@ -268,13 +248,6 @@ namespace SunFFB
         SetEnvelopeReportData* envelopData = &(effectBlock->envelopeData);
         memcpy((void*)envelopData, data, sizeof(SetEnvelopeReportData));
         effectBlock->envelopParameter = true;
-
-#ifdef SERIAL_PRINT
-        _debug_printf(
-            "Set envelope: idx=%d attackLevel=%d fadeLevel=%d attackTime=%d fadeTime=%d\n",
-            envelopData->effectBlockIndex, envelopData->attackLevel, envelopData->fadeLevel,
-            envelopData->attackTime, envelopData->fadeTime);
-#endif
     }
 
     void FFBReportHandler::set_condition(const SetConditionReportData* data)
@@ -284,7 +257,7 @@ namespace SunFFB
         if (parameterBlockOffset > (NUM_AXIS - 1))
             return;
 
-        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_allocated_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
 
@@ -296,20 +269,11 @@ namespace SunFFB
 
         effectBlock->conditionBlockFlags |= (0x01 << parameterBlockOffset);
         // The bitmap tracks received parameters and selects compatibility mode; preserve other axis bits.
-
-#ifdef SERIAL_PRINT
-        _debug_printf(
-            "Set condition: idx=%d block=%d cpOffset=%d posCoeff=%d negCoeff=%d posSat=%d negSat=%d deadBand=%d\n",
-            conditionData->effectBlockIndex, conditionData->parameterBlockOffset,
-            conditionData->cpOffset, conditionData->positiveCoefficient,
-            conditionData->negativeCoefficient, conditionData->positiveSaturation,
-            conditionData->negativeSaturation, conditionData->deadBand);
-#endif
     }
 
     void FFBReportHandler::set_periodic(const SetPeriodicReportData* data)
     {
-        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_allocated_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
 
@@ -318,17 +282,11 @@ namespace SunFFB
         SetPeriodicReportData* periodicData =
             &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].periodicData);
         memcpy((void*)periodicData, data, sizeof(SetPeriodicReportData));
-
-#ifdef SERIAL_PRINT
-        _debug_printf("Set periodic: idx=%d magnitude=%d offset=%d phase=%d period=%d\n",
-                      periodicData->effectBlockIndex, periodicData->magnitude, periodicData->offset,
-                      periodicData->phase, periodicData->period);
-#endif
     }
 
     void FFBReportHandler::set_constant_force(const SetConstantForceReportData* data)
     {
-        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_allocated_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
 
@@ -337,16 +295,11 @@ namespace SunFFB
         SetConstantForceReportData* constantData =
             &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData);
         memcpy(constantData, data, sizeof(SetConstantForceReportData));
-
-#ifdef SERIAL_PRINT
-        _debug_printf("Set constant: idx=%d magnitude=%d\n", constantData->effectBlockIndex,
-                      constantData->magnitude);
-#endif
     }
 
     void FFBReportHandler::set_ramp_force(const SetRampForceReportData* data)
     {
-        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_allocated_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
 
@@ -355,21 +308,12 @@ namespace SunFFB
         SetRampForceReportData* rampData =
             &(effectBlock->typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].rampData);
         memcpy(rampData, data, sizeof(SetRampForceReportData));
-
-#ifdef SERIAL_PRINT
-        _debug_printf("Set ramp: idx=%d rampStart=%d rampEnd=%d\n", rampData->effectBlockIndex,
-                      rampData->rampStart, rampData->rampEnd);
-#endif
     }
 
     void FFBReportHandler::set_device_gain(const DeviceGainReportData* data)
     {
         deviceGain = data->gain;
         pidStateDirty = true;
-
-#ifdef SERIAL_PRINT
-        _debug_printf("Device gain: %d\n", deviceGain);
-#endif
     }
 
     void FFBReportHandler::update_device_state()
@@ -450,20 +394,15 @@ namespace SunFFB
 
             break;
         }
-
-#ifdef SERIAL_PRINT
-        _debug_printf(
-            "Device control: state=%d (1=enable,2=disable,3=stopAll,4=reset,5=pause,6=continue)\n",
-            data->state);
-#endif
     }
 
     void FFBReportHandler::set_effect_operation(const EffectOperationReportData* data)
     {
-        pidStateDirty = true;
-        EffectBlock* effectBlock = get_effect_block(data->effectBlockIndex);
+        EffectBlock* effectBlock = get_allocated_effect_block(data->effectBlockIndex);
         if (nullptr == effectBlock)
             return;
+
+        pidStateDirty = true;
 
         switch (data->effectOperation)
         {
@@ -496,12 +435,6 @@ namespace SunFFB
 
             break;
         }
-
-#ifdef SERIAL_PRINT
-        _debug_printf(
-            "Effect operation: idx=%d op=%d loopCount=%d (op: 1=start,2=startSolo,3=stop)\n",
-            data->effectBlockIndex, data->effectOperation, data->loopCount);
-#endif
     }
 
     void FFBReportHandler::set_effect_block_free(const BlockFreeReportData* data)
@@ -512,10 +445,6 @@ namespace SunFFB
             free_effect(data->effectBlockIndex);
 
         pidStateDirty = true;
-
-#ifdef SERIAL_PRINT
-        _debug_printf("Block free: idx=%d (255=all)\n", data->effectBlockIndex);
-#endif
     }
 
     void FFBReportHandler::publish_effect_state(EffectBlock& block, bool playing)

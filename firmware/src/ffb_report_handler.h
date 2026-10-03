@@ -60,7 +60,8 @@ namespace SunFFB
             return (EffectBlock*)effectBlocks;
         };
 
-        // HID output handlers dispatched by hid_command_task after copying and validating USB bytes.
+        // HID handlers run in the serialized USB callback after payload validation/copying.
+        // Configuration/playback commands ignore slots that have not been allocated.
         // None of these methods supplies its own mutex; direct callers must preserve the lock contract.
         void set_effect(const SetEffectReportData* data);                 // Report 3
         void set_envelope(const SetEnvelopeReportData* data);             // Report 4
@@ -91,10 +92,11 @@ namespace SunFFB
 
         private:
         EffectBlock* get_effect_block(uint8_t idx) const; // 1-based → 0-based lookup
-        void free_all_effects();                          // free all blocks, reset pool
-        void start_effect(EffectBlock* effectBlock);      // set PLAYING + init startTime
-        void stop_effect(EffectBlock* effectBlock);       // clear PLAYING + update pidStates
-        void stop_all_effects(); // stop all + clear pidStates.effectBlockIndex
+        EffectBlock* get_allocated_effect_block(uint8_t idx) const;
+        void free_all_effects();                     // free all blocks, reset pool
+        void start_effect(EffectBlock* effectBlock); // set PLAYING + init startTime
+        void stop_effect(EffectBlock* effectBlock);  // clear PLAYING + update pidStates
+        void stop_all_effects();                     // stop all + clear pidStates.effectBlockIndex
 
         bool is_trigger_playing(EffectBlock& effectBlock, uint8_t triggerButtonState,
                                 uint32_t currentTime);

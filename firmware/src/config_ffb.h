@@ -9,7 +9,6 @@
 
 // ===== Build Options =====
 // #define USE_FAST_MATH
-// #define SERIAL_PRINT
 
 // ===== Axis Configuration =====
 // Enable bits occupy the low NUM_AXIS bits; the next bit requests direction-based behavior.

@@ -20,10 +20,6 @@ extern "C" uint32_t _micros()
     return us;
 }
 
-extern "C" void _debug_printf(const char*, ...)
-{
-}
-
 void setUp()
 {
     ms = us = 0;

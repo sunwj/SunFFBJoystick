@@ -10,6 +10,40 @@
 
 namespace SunFFB
 {
+    namespace
+    {
+        // All effects in one calculation read the same locked input snapshot.
+        // Normalize each metric only on first use, then share it across effects.
+        // Local lifetime avoids stale values after input or normalization changes.
+        class NormalizedAxisMetrics
+        {
+            public:
+            NormalizedAxisMetrics(const float* values, const float* maxima)
+                : values(values), maxima(maxima)
+            {
+            }
+
+            const float* get()
+            {
+                if (!ready)
+                {
+                    for (uint8_t axis = 0; axis < NUM_AXIS; ++axis)
+                    {
+                        normalized[axis] = values[axis] / maxima[axis];
+                    }
+                    ready = true;
+                }
+                return normalized;
+            }
+
+            private:
+            const float* values;
+            const float* maxima;
+            float normalized[NUM_AXIS];
+            bool ready = false;
+        };
+    } // namespace
+
     float FFBForceCalculator::constant_force_calculator(const EffectBlock& effectBlock) const
     {
         return effectBlock.typeSpecificData[TYPE_SPECIFIC_BLOCK_OFFSET_1].constantData.magnitude;
@@ -77,33 +111,33 @@ namespace SunFFB
                                               float metric) const
     {
         const int16_t cpOffset = conditionData.cpOffset;
-        const int16_t postiveCoeff = conditionData.positiveCoefficient;
+        const int16_t positiveCoeff = conditionData.positiveCoefficient;
         const int16_t negativeCoeff = conditionData.negativeCoefficient;
         const uint16_t deadBand = conditionData.deadBand;
 
         float force = 0.f;
 
-        const float invRange = 1.f / USB_MAX_MAGNITUDE;
+        constexpr float invRange = 1.f / USB_MAX_MAGNITUDE;
+        const float lowerBound = (cpOffset - deadBand) * invRange;
+        const float upperBound = (cpOffset + deadBand) * invRange;
         // Normalize cpOffset/deadBand to metric units; coefficients remain in nominal force units.
         // Negation makes positive coefficients restorative/resistive; negative coefficients reverse the force.
-        if (metric < (cpOffset - deadBand) * invRange)
+        if (metric < lowerBound)
         {
-            force = (metric - (cpOffset - deadBand) * invRange) * negativeCoeff;
+            force = (metric - lowerBound) * negativeCoeff;
         }
-        else if (metric > (cpOffset + deadBand) * invRange)
+        else if (metric > upperBound)
         {
-            force = (metric - (cpOffset + deadBand) * invRange) * postiveCoeff;
+            force = (metric - upperBound) * positiveCoeff;
         }
 
-        const float saturation = metric < (cpOffset - deadBand) * invRange
-                                     ? conditionData.negativeSaturation
-                                     : conditionData.positiveSaturation;
+        const float saturation = metric < lowerBound ? conditionData.negativeSaturation
+                                                     : conditionData.positiveSaturation;
         return clamp(-force, -saturation, saturation);
     }
 
     void FFBForceCalculator::condition_force_calculator(const EffectBlock& block,
                                                         const float metrics[NUM_AXIS],
-                                                        const float maxima[NUM_AXIS],
                                                         float forces[NUM_AXIS]) const
     {
         const auto metric_for = [&](float value)
@@ -131,7 +165,7 @@ namespace SunFFB
             // A single directed condition acts along that direction, not on perpendicular motion.
 
             for (uint8_t i = 0; i < NUM_AXIS; ++i)
-                projected += metrics[i] / maxima[i] * block.directionUnitVector[i];
+                projected += metrics[i] * block.directionUnitVector[i];
             const float force =
                 apply_condition(block.typeSpecificData[0].conditionData, metric_for(projected));
 
@@ -144,7 +178,7 @@ namespace SunFFB
                 if ((directed || (block.effectData.axisEnable & (1 << i))) &&
                     (block.conditionBlockFlags & (1 << i)))
                     forces[i] = apply_condition(block.typeSpecificData[i].conditionData,
-                                                metric_for(metrics[i] / maxima[i]));
+                                                metric_for(metrics[i]));
         }
     }
 
@@ -166,6 +200,11 @@ namespace SunFFB
         float forcesSum[NUM_AXIS] = {0};
         // Accumulate in float, then apply device gain and clamp once to avoid per-effect rounding loss.
         const uint32_t currentTime = _millis();
+        NormalizedAxisMetrics position(ffbDeviceInput.get_position(),
+                                       ffbDeviceInput.get_max_position());
+        NormalizedAxisMetrics speed(ffbDeviceInput.get_speed(), ffbDeviceInput.get_max_speed());
+        NormalizedAxisMetrics acceleration(ffbDeviceInput.get_acceleration(),
+                                           ffbDeviceInput.get_max_acceleration());
 
         for (uint8_t i = 0; i < MAX_EFFECTS; ++i)
         {
@@ -197,7 +236,6 @@ namespace SunFFB
                 float sampled[NUM_AXIS] = {0};
 
                 float force = 0;
-                float forcesCondition[NUM_AXIS] = {0};
 
                 switch (effectType)
                 {
@@ -218,25 +256,16 @@ namespace SunFFB
                         break;
 
                     case ET_SPRING:
-                        condition_force_calculator(effectBlock, ffbDeviceInput.get_position(),
-                                                   ffbDeviceInput.get_max_position(),
-                                                   forcesCondition);
+                        condition_force_calculator(effectBlock, position.get(), sampled);
                         break;
 
                     case ET_FRICTION:
-                        condition_force_calculator(effectBlock, ffbDeviceInput.get_speed(),
-                                                   ffbDeviceInput.get_max_speed(), forcesCondition);
-                        break;
-
                     case ET_DAMPER:
-                        condition_force_calculator(effectBlock, ffbDeviceInput.get_speed(),
-                                                   ffbDeviceInput.get_max_speed(), forcesCondition);
+                        condition_force_calculator(effectBlock, speed.get(), sampled);
                         break;
 
                     case ET_INERTIA:
-                        condition_force_calculator(effectBlock, ffbDeviceInput.get_acceleration(),
-                                                   ffbDeviceInput.get_max_acceleration(),
-                                                   forcesCondition);
+                        condition_force_calculator(effectBlock, acceleration.get(), sampled);
                         break;
 
                     default:
@@ -277,12 +306,7 @@ namespace SunFFB
                     case ET_FRICTION:
                     case ET_DAMPER:
                     case ET_INERTIA:
-#pragma unroll
-                        for (uint8_t axis = 0; axis < NUM_AXIS; ++axis)
-                        {
-                            sampled[axis] = forcesCondition[axis];
-                        }
-
+                        // Condition calculation already wrote each sampled axis.
                         break;
 
                     default:
@@ -301,7 +325,7 @@ namespace SunFFB
             }
         }
 
-// compute device gain rescaled forces
+        // Apply master gain after summing all effects, then clamp nominal output.
 #pragma unroll
         for (uint8_t i = 0; i < NUM_AXIS; ++i)
         {

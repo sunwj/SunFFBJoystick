@@ -35,10 +35,10 @@ namespace SunFFB
         float periodic_force_calculator(uint8_t effectType, const EffectBlock& effectBlock,
                                         uint32_t elapsedTime) const;
 
-        // Condition force: per-axis spring/damper/inertia/friction computation.
+        // Condition force: metrics are already normalized by each axis maximum.
+        // Per-call cached normalization is shared by all effects using that metric.
         void condition_force_calculator(const EffectBlock& effectBlock,
                                         const float metrics[NUM_AXIS],
-                                        const float maxMetrics[NUM_AXIS],
                                         float forces[NUM_AXIS]) const;
 
         // Absolute envelope amplitude: attack/fade levels remain meaningful at zero sustain.

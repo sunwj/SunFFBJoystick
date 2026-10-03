@@ -8,18 +8,27 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <cstring>
 
 __attribute__((weak)) float _sqrt(float number)
 {
-    // Legacy approximation: inverse-square-root bit trick times the input, not an exact sqrt.
-    // Pointer reinterpretation depends on target widths and aliasing; do not assume portable correctness.
-    long i;
+    // Retain the legacy approximation, using fixed-width bits without violating
+    // strict aliasing or reading past a float on platforms with a 64-bit long.
+    static_assert(sizeof(float) == sizeof(uint32_t), "Approximation requires a 32-bit float");
+    if (number < 0.f)
+    {
+        return NAN;
+    }
+    if (number == 0.f || !isfinite(number))
+    {
+        return number;
+    }
+
+    uint32_t bits;
     float y;
-    
-    y = number;
-    i = *(long*)&y;
-    i = 0x5f375a86 - (i >> 1);
-    y = *(float*)&i;
+    memcpy(&bits, &number, sizeof(bits));
+    bits = 0x5f375a86U - (bits >> 1);
+    memcpy(&y, &bits, sizeof(y));
 
     return number * y;
 }
@@ -28,14 +37,23 @@ __attribute__((weak)) float _sinf(float a)
 {
     // Mirror a quarter-cycle table across four quadrants and interpolate with eight fractional bits.
     // Table entries use a 32768 full scale; convert back to floating-point sine amplitude on return.
-    static uint16_t sine_array[65] = {0, 804, 1608, 2411, 3212, 4011, 4808, 5602, 6393,
-                                      7180, 7962, 8740, 9512, 10279, 11039, 11793, 12540, 13279,
-                                      14010, 14733, 15447, 16151, 16846, 17531, 18205, 18868, 19520,
-                                      20160, 20788, 21403, 22006, 22595, 23170, 23732, 24279, 24812,
-                                      25330, 25833, 26320, 26791, 27246, 27684, 28106, 28511, 28899,
-                                      29269, 29622, 29957, 30274, 30572, 30853, 31114, 31357, 31581,
-                                      31786, 31972, 32138, 32286, 32413, 32522, 32610, 32679, 32729,
-                                      32758, 32768};
+    static const uint16_t sine_array[65] = {
+        0,     804,   1608,  2411,  3212,  4011,  4808,  5602,  6393,  7180,  7962,  8740,  9512,
+        10279, 11039, 11793, 12540, 13279, 14010, 14733, 15447, 16151, 16846, 17531, 18205, 18868,
+        19520, 20160, 20788, 21403, 22006, 22595, 23170, 23732, 24279, 24812, 25330, 25833, 26320,
+        26791, 27246, 27684, 28106, 28511, 28899, 29269, 29622, 29957, 30274, 30572, 30853, 31114,
+        31357, 31581, 31786, 31972, 32138, 32286, 32413, 32522, 32610, 32679, 32729, 32758, 32768};
+    // A negative or non-finite float cannot be converted directly to uint32_t.
+    // Reduce to one nonnegative cycle before table indexing and interpolation.
+    if (!isfinite(a))
+    {
+        return NAN;
+    }
+    a = fmodf(a, 2.f * float(M_PI));
+    if (a < 0.f)
+    {
+        a += 2.f * float(M_PI);
+    }
     int32_t t1, t2;
     uint32_t i = uint32_t(a * (64 * 4 * 256.0f / (M_PI * 2)));
     int frac = i & 0xff;
@@ -72,8 +90,7 @@ __attribute__((weak)) float _cosf(float a)
     return _sinf(a_sin);
 }
 
-template <typename T>
-inline T normalize_angle(T angle)
+template <typename T> inline T normalize_angle(T angle)
 {
     angle = fmod(angle, M_PI * 2);
     angle = angle < 0 ? (angle + M_PI * 2) : angle;
@@ -81,8 +98,7 @@ inline T normalize_angle(T angle)
     return angle;
 }
 
-template <typename T>
-inline T clamp(T value, T minValue, T maxValue)
+template <typename T> inline T clamp(T value, T minValue, T maxValue)
 {
     return (value < minValue) ? minValue : ((value > maxValue) ? maxValue : value);
 }

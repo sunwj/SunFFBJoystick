@@ -5,7 +5,6 @@
  */
 
 #include <unity.h>
-#include <cstdarg>
 #include <cstdint>
 #include "ffb_force_calculator.h"
 #include "ffb_report_handler.h"
@@ -22,10 +21,6 @@ extern "C" uint32_t _millis(void)
 extern "C" uint32_t _micros(void)
 {
     return fakeMicros;
-}
-
-extern "C" void _debug_printf(const char*, ...)
-{
 }
 
 struct Fixture

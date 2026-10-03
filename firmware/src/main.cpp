@@ -9,7 +9,8 @@
  * - receive_position_task()/joystick_task() publish the latest input and motion metrics.
  * - force_calculation_task() combines those metrics with the host-owned effect pool.
  * - send_report_task()/send_force_task() deliver snapshots to USB and the motor transport.
- * - lcd_task()/timing_task()/console_task() observe the pipeline at lower priority.
+ * - lcd_task()/timing_task() observe the pipeline at lower priority; the diagnostic
+ *   console module owns the hardware UART0 writer and its bounded queue.
  *
  * Synchronization has two distinct roles: mutexes protect mutable model state,
  * while one-slot queues copy complete snapshots between producers and consumers.
@@ -27,7 +28,6 @@
 #include <esp_timer.h>
 #include "device/usbd.h"
 #include "device/usbd_pvt.h"
-#include <stdarg.h>
 #include <memory.h>
 #include <algorithm>
 #include <atomic>
@@ -39,60 +39,7 @@
 
 // Framework CDC auto-registration must remain disabled; Serial is hardware UART0.
 static_assert(ARDUINO_USB_CDC_ON_BOOT == 0, "Firmware requires a HID-only USB device");
-auto& firmwareConsole = Serial;
-
-#include "diagnostic_output.h"
-struct ConsoleLine
-{
-    // Queue items own their bytes; callers may return immediately after formatting.
-    uint16_t length;
-    uint8_t bytes[256];
-};
-static QueueHandle_t consoleLines;
-
-static void consolePrintf(const char* format, ...)
-{
-    // Format into a fixed-size local record, then enqueue with zero wait. This path
-    // can be called by USB or timing code without waiting for UART transmission.
-    ConsoleLine line{};
-    va_list args;
-    va_start(args, format);
-    const int length = vsnprintf(reinterpret_cast<char*>(line.bytes), sizeof(line.bytes), format, args);
-    va_end(args);
-
-    // A full queue drops this diagnostic, not a force sample or a USB command.
-    if (!consoleLines || length <= 0 || size_t(length) >= sizeof(line.bytes))
-    {
-        return;
-    }
-
-    line.length = uint16_t(length);
-    xQueueSend(consoleLines, &line, 0);
-}
-
-static void console_task(void*)
-{
-    // The sole hardware UART0 writer drains queued diagnostics at low priority.
-    // UART1 belongs to the motor link and is independent of this console.
-    ConsoleLine line;
-    while (true)
-    {
-        xQueueReceive(consoleLines, &line, portMAX_DELAY);
-        size_t offset = 0;
-        while (offset < line.length)
-        {
-            const int space = firmwareConsole.availableForWrite();
-            const size_t chunk = space > 0 ? std::min(size_t(space), size_t(line.length) - offset) : 0;
-            // This is the only UART console writer; use available buffer space.
-            if (chunk && SunFFB::try_diagnostic_write(firmwareConsole, line.bytes + offset, chunk))
-            {
-                offset += chunk;
-            }
-            // Yield between writes so diagnostics do not monopolize the CPU.
-            vTaskDelay(1);
-        }
-    }
-}
+#include "diagnostic_console.h"
 
 #if ENABLE_LCD
 #include <TFT_eSPI.h>
@@ -195,7 +142,8 @@ struct PositionSample
 {
     // Carry raw encoder values and arrival time together; sequence distinguishes fresh samples from rereads.
     uint16_t position[NUM_AXIS];
-    uint32_t receivedUs; // Timestamp after decoding a valid transport payload, not a wire timestamp.
+    uint32_t
+        receivedUs; // Timestamp after decoding a valid transport payload, not a wire timestamp.
     uint32_t sequence;
 };
 
@@ -216,10 +164,17 @@ SunFFB::TimingStream positionRxTiming(2000), inputTiming(2000);
 SunFFB::TimingStream usbSubmitTiming(2000), usbCompleteTiming(2000);
 SunFFB::TimingStream freshPositionTiming(2000), motorTxTiming(2000);
 
-// Latest durations for the LCD, rather than lifetime maxima. These scalars do
-// not replace the synchronized TimingStream/ForceDeadlineStream statistics.
-volatile uint32_t reportProcessTime = 0;
-volatile uint32_t effectProcessTime = 0;
+#if ENABLE_LCD
+// volatile alone does not synchronize tasks on different cores. Protect the
+// latest LCD durations with a short critical section, independent of model locks.
+struct ProcessingTimeSnapshot
+{
+    uint32_t reportUs = 0;
+    uint32_t effectUs = 0;
+};
+static SunFFB::TimingLock processingTimesLock;
+static ProcessingTimeSnapshot processingTimes;
+#endif
 
 // Mailbox ownership:
 // gPositions: transport RX -> joystick task (receive consumes the latest sample).
@@ -250,27 +205,28 @@ TFT_eSprite sprite = TFT_eSprite(&lcd);
 class FFBUSBHIDDevice : public USBHIDDevice
 {
     // The Arduino USBHID adapter forwards callbacks; the shared handler owns protocol semantics.
+
     public:
-        uint16_t _onGetDescriptor(uint8_t* buffer) override
-        {
-            memcpy(buffer, ffbReportDescriptor, sizeof(ffbReportDescriptor));
-            return sizeof(ffbReportDescriptor);
-        }
+    uint16_t _onGetDescriptor(uint8_t* buffer) override
+    {
+        memcpy(buffer, ffbReportDescriptor, sizeof(ffbReportDescriptor));
+        return sizeof(ffbReportDescriptor);
+    }
 
-        uint16_t _onGetFeature(uint8_t reportId, uint8_t* buffer, uint16_t length) override
-        {
-            return hid_get_report_callback(reportId, HID_REPORT_TYPE_FEATURE, buffer, length);
-        }
+    uint16_t _onGetFeature(uint8_t reportId, uint8_t* buffer, uint16_t length) override
+    {
+        return hid_get_report_callback(reportId, HID_REPORT_TYPE_FEATURE, buffer, length);
+    }
 
-        void _onSetFeature(uint8_t reportId, const uint8_t* buffer, uint16_t length) override
-        {
-            hid_set_report_callback(reportId, HID_REPORT_TYPE_FEATURE, buffer, length);
-        }
+    void _onSetFeature(uint8_t reportId, const uint8_t* buffer, uint16_t length) override
+    {
+        hid_set_report_callback(reportId, HID_REPORT_TYPE_FEATURE, buffer, length);
+    }
 
-        void _onOutput(uint8_t reportId, const uint8_t* buffer, uint16_t length) override
-        {
-            hid_set_report_callback(reportId, HID_REPORT_TYPE_OUTPUT, buffer, length);
-        }
+    void _onOutput(uint8_t reportId, const uint8_t* buffer, uint16_t length) override
+    {
+        hid_set_report_callback(reportId, HID_REPORT_TYPE_OUTPUT, buffer, length);
+    }
 };
 
 // These objects live for the entire firmware lifetime. The input mutex protects
@@ -306,7 +262,8 @@ static void submit_hid_report(void*)
 #endif
     // Submit from TinyUSB's service context, not concurrently from another core.
     // The service must never wait for its own completion callback.
-    const bool accepted = tud_hid_n_ready(0) &&
+    const bool accepted =
+        tud_hid_n_ready(0) &&
         tud_hid_n_report(0, deferredReport.id, deferredReport.bytes, deferredReport.length);
     if (accepted && deferredReport.id == REPORT_ID_JOYSTICK)
     {
@@ -332,8 +289,8 @@ void hid_report_complete_hook(const uint8_t* report, uint16_t length)
     }
 }
 
-static bool submitReport(uint8_t id, const void* payload, uint16_t length,
-                         uint32_t receivedUs = 0, bool fresh = false)
+static bool submitReport(uint8_t id, const void* payload, uint16_t length, uint32_t receivedUs = 0,
+                         bool fresh = false)
 {
     // Only send_report_task owns this persistent slot. Await submission, not USB
     // wire completion; it cannot be reused until the queued callback has consumed it.
@@ -392,37 +349,31 @@ uint16_t hid_get_report_callback(uint8_t report_id, hid_report_type_t report_typ
                 // Block Load Request
                 case REPORT_ID_BLOCK_LOAD_REPORT:
                 {
-                    if (!buffer || reqlen < 4)
+                    SunFFB::BlockLoadReportData data{};
+                    if (!buffer || reqlen < sizeof(data))
                         return 0;
 
                     xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
-                    const SunFFB::BlockLoadReportData* data =
-                        ffbHandler.get_block_load_report_data();
-                    memcpy(buffer, data, sizeof(SunFFB::BlockLoadReportData));
+                    data = *ffbHandler.get_block_load_report_data();
                     xSemaphoreGive(semaphoreFFBReportHandler);
+                    memcpy(buffer, &data, sizeof(data));
 
-#ifdef SERIAL_PRINT
-                    consolePrintf("Block load: idx=%d status=%d (1=success, 2=full)\n",
-                                  data->effectBlockIndex, data->blockLoadStatus);
-#endif
-                    return 4;
+                    return sizeof(data);
                 }
 
                 // Pool size, max simultaneous effects, etc.
                 case REPORT_ID_POOL_REPORT:
                 {
-                    if (!buffer || reqlen < 4)
+                    SunFFB::PoolReportData data{};
+                    if (!buffer || reqlen < sizeof(data))
                         return 0;
 
                     xSemaphoreTake(semaphoreFFBReportHandler, portMAX_DELAY);
-                    const SunFFB::PoolReportData* data = ffbHandler.get_pool_report_data();
-                    memcpy(buffer, data, sizeof(SunFFB::PoolReportData));
+                    data = *ffbHandler.get_pool_report_data();
                     xSemaphoreGive(semaphoreFFBReportHandler);
+                    memcpy(buffer, &data, sizeof(data));
 
-#ifdef SERIAL_PRINT
-                    consolePrintf("Pool report.\n");
-#endif
-                    return 4;
+                    return sizeof(data);
                 }
 
                 default:
@@ -460,7 +411,11 @@ void hid_set_report_callback(uint8_t reportId, hid_report_type_t reportType, con
 #if ENABLE_HIL_DIAGNOSTICS
     commandEnds.fetch_add(1, std::memory_order_relaxed);
 #endif
-    reportProcessTime = micros() - startTime;
+#if ENABLE_LCD
+    const uint32_t elapsedUs = micros() - startTime;
+    SunFFB::TimingGuard guard(processingTimesLock);
+    processingTimes.reportUs = elapsedUs;
+#endif
 }
 
 #if ENABLE_LCD
@@ -537,18 +492,23 @@ void lcd_task(void* params)
         sprite.fillSmoothCircle(coords[0], coords[1], 2, TFT_GREEN, TFT_BLACK);
 #endif
 
+        ProcessingTimeSnapshot times;
+        {
+            SunFFB::TimingGuard guard(processingTimesLock);
+            times = processingTimes;
+        }
         sprite.setCursor(40, 0);
-        sprite.printf("Report time: %d us", reportProcessTime);
+        sprite.printf("Report time: %lu us", (unsigned long)times.reportUs);
         sprite.setCursor(40, 11);
-        if (effectProcessTime > FORCE_TASK_MAX_TIME_US)
+        if (times.effectUs > FORCE_TASK_MAX_TIME_US)
         {
             sprite.setTextColor(TFT_RED);
-            sprite.printf("Effect time: %d us !", effectProcessTime);
+            sprite.printf("Effect time: %lu us !", (unsigned long)times.effectUs);
         }
         else
         {
             sprite.setTextColor(TFT_WHITE);
-            sprite.printf("Effect time: %d us", effectProcessTime);
+            sprite.printf("Effect time: %lu us", (unsigned long)times.effectUs);
         }
 
         sprite.setTextColor(TFT_WHITE);
@@ -664,8 +624,7 @@ void joystick_task(void* params)
         // Encoder center is 32768. Clamp before narrowing to the symmetric HID
         // range, so encoder value zero maps to -32767 rather than -32768.
         for (uint8_t i = 0; i < NUM_AXIS; ++i)
-            coords[i] = std::clamp<int32_t>(int32_t(sample.position[i]) - 32768,
-                                            -32767, 32767);
+            coords[i] = std::clamp<int32_t>(int32_t(sample.position[i]) - 32768, -32767, 32767);
 #else
         receivedUs = micros();
         // ADC mode establishes a new source sequence on each periodic acquisition.
@@ -746,16 +705,22 @@ void force_calculation_task(void* params)
         xQueueOverwrite(gForces, forces);
 
         uint32_t endTime = micros();
-        effectProcessTime = endTime - startTime;
+        const uint32_t effectProcessTime = endTime - startTime;
         // The duration shown on the LCD excludes release-to-start latency. Deadline accounting
         // includes it and records skipped releases as well as completed-job misses.
         forceTiming.record(endTime, effectProcessTime);
         forceDeadlines.record_detail(releaseUs, startTime, lockedUs, computedUs, endTime,
-                                    context
+                                     context
 #if ENABLE_HIL_DIAGNOSTICS
-                                    | (lcdStage.load(std::memory_order_relaxed) << 8)
+                                         | (lcdStage.load(std::memory_order_relaxed) << 8)
 #endif
-                                    );
+        );
+#if ENABLE_LCD
+        {
+            SunFFB::TimingGuard guard(processingTimesLock);
+            processingTimes.effectUs = effectProcessTime;
+        }
+#endif
 
         // A missed deadline must not turn the highest periodic task into a
         // busy loop, especially when all firmware tasks share one CPU.
@@ -795,8 +760,8 @@ void send_report_task(void* params)
             {
                 if (hasSample)
                 {
-                    if (submitReport(REPORT_ID_JOYSTICK, &sample.report,
-                                     sizeof(sample.report), sample.receivedUs, fresh))
+                    if (submitReport(REPORT_ID_JOYSTICK, &sample.report, sizeof(sample.report),
+                                     sample.receivedUs, fresh))
                     {
                         schedule.sent(nowUs);
                         if (fresh)
@@ -872,8 +837,8 @@ void send_force_task(void* params)
             lastHealthMs = millis();
             // HIL telemetry shares UART1 and its TX owner. Its bounded records
             // are emitted here so a second task cannot interleave motor frames.
-            emit_hil_diagnostics(motorLink, forceDeadlines,
-                                 forceCalculationTaskHandle, lastHealthMs);
+            emit_hil_diagnostics(motorLink, forceDeadlines, forceCalculationTaskHandle,
+                                 lastHealthMs);
         }
 #endif
 
@@ -948,7 +913,7 @@ void timing_task(void*)
     {
 #if MOTOR_TRANSPORT == 1
         const auto can = canHal.stats();
-        consolePrintf(
+        SunFFB::diagnostic_printf(
             "CAN accepted=%lu rejected=%lu success_alerts=%lu failure_alerts=%lu bus_off=%lu recovery=%lu overflow_alerts=%lu\n",
             (unsigned long)can.accepted, (unsigned long)can.rejected,
             (unsigned long)can.successAlerts, (unsigned long)can.failureAlerts,
@@ -965,7 +930,7 @@ void timing_task(void*)
             const auto stat = streams[i]->take_window();
             // count is cumulative, while window maxima/failures are drained by
             // take_window(). Rate uses the actual elapsed reporting interval.
-            consolePrintf(
+            SunFFB::diagnostic_printf(
                 "TIMING %s hz=%.1f max_gap_us=%lu gap_over_budget=%lu max_work_us=%lu fail=%lu\n",
                 names[i], float(stat.count - previous[i]) * 1000000.f / windowUs,
                 (unsigned long)stat.maxGapUs, (unsigned long)stat.overBudget,
@@ -974,38 +939,28 @@ void timing_task(void*)
         }
 
         const auto deadline = forceDeadlines.take_window();
-        consolePrintf("DEADLINE force count=%lu wake_us=%lu lock_us=%lu elapsed_us=%lu missed=%lu skipped=%lu\n",
-                      (unsigned long)deadline.count, (unsigned long)deadline.maxWakeUs,
-                      (unsigned long)deadline.maxLockUs, (unsigned long)deadline.maxElapsedUs,
-                      (unsigned long)deadline.missed, (unsigned long)deadline.skipped);
-        consolePrintf("HEALTH uptime_ms=%lu heap=%lu force_stack_free=%lu\n",
-                      (unsigned long)millis(), (unsigned long)ESP.getFreeHeap(),
-                      (unsigned long)(forceCalculationTaskHandle
-                          ? uxTaskGetStackHighWaterMark(forceCalculationTaskHandle) : 0));
+        SunFFB::diagnostic_printf(
+            "DEADLINE force count=%lu wake_us=%lu lock_us=%lu elapsed_us=%lu missed=%lu skipped=%lu\n",
+            (unsigned long)deadline.count, (unsigned long)deadline.maxWakeUs,
+            (unsigned long)deadline.maxLockUs, (unsigned long)deadline.maxElapsedUs,
+            (unsigned long)deadline.missed, (unsigned long)deadline.skipped);
+        SunFFB::diagnostic_printf(
+            "HEALTH uptime_ms=%lu heap=%lu force_stack_free=%lu\n", (unsigned long)millis(),
+            (unsigned long)ESP.getFreeHeap(),
+            (unsigned long)(forceCalculationTaskHandle
+                                ? uxTaskGetStackHighWaterMark(forceCalculationTaskHandle)
+                                : 0));
     }
 }
 #endif
 
-void setup()
+static void initialize_motor_transport()
 {
-    // Initialization: input/display -> effects/queues/locks -> HID -> USB -> worker tasks.
-    // Create callback resources first and register every USB interface before USB.begin().
-    const BaseType_t appCore = applicationCore;
-    uint8_t protoCore = 0;
-
-    firmwareConsole.begin(SERIAL_BAUD);
-    // Console setup precedes all diagnostic producers. Its finite queue bounds
-    // memory use and its low-priority writer handles physical UART backpressure.
-    consoleLines = xQueueCreate(16, sizeof(ConsoleLine));
-    configASSERT(consoleLines);
-    const BaseType_t consoleStarted =
-        xTaskCreatePinnedToCore(console_task, "Console", TASK_STACK_SIZE, nullptr, 1, nullptr, protoCore);
-    configASSERT(consoleStarted == pdPASS);
 #if MOTOR_TRANSPORT == 1
     const bool canStarted =
         canHal.begin(CAN_TX_PIN, CAN_RX_PIN, CAN_BITRATE, CAN_POSITION_ID, CAN_SINGLE_SHOT);
     if (!canStarted)
-        consolePrintf("CAN initialization failed\n");
+        SunFFB::diagnostic_printf("CAN initialization failed\n");
     configASSERT(canStarted);
 #else
     comSerial.begin(UART1_BAUD, SERIAL_8N1, RDX_PIN, TDX_PIN);
@@ -1015,7 +970,10 @@ void setup()
     comSerial.setRxTimeout(1);
 
 #endif
+}
 
+static void initialize_joystick()
+{
     // ADC calibration treats the boot position as center. Hold the controls at
     // their intended neutral position during these samples. External encoders
     // use their protocol center instead and skip ADC setup/calibration entirely.
@@ -1039,8 +997,11 @@ void setup()
         coordOffsets[i] = o / ADC_CALIBRATION_SAMPLES;
     }
 #endif
+}
 
 #if ENABLE_LCD
+static void initialize_lcd()
+{
     // Create the long-lived framebuffer before starting display/control tasks.
     // The splash is a synchronous startup transfer; later frames use row groups.
     lcd.init();
@@ -1055,8 +1016,11 @@ void setup()
     sprite.setTextFont(1);
     sprite.printf("SunFFB Joystick");
     sprite.pushSprite(TFT_X, TFT_Y);
+}
 #endif
 
+static void initialize_model_and_queues()
+{
     ffbHandler.init();
     // Initialize the protocol model before publishing USB callbacks. Queues,
     // mutexes and the input model must also exist before USB.begin() can expose
@@ -1072,20 +1036,41 @@ void setup()
     configASSERT(gPositions && gForces && gJoystickReportData && forceStartGate &&
                  semaphoreFFBDeviceInput && semaphoreFFBReportHandler);
     ffbDeviceInput.reset();
+}
 
+static void initialize_usb()
+{
     USB.VID(DEVICE_VID);
     USB.PID(DEVICE_PID);
     USB.manufacturerName(DEVICE_MANUFACTURER);
     USB.productName(DEVICE_PRODUCT);
 
-    const bool hidDeviceAdded =
-        USBHID::addDevice(&ffbUsbHidDevice, sizeof(ffbReportDescriptor));
+    const bool hidDeviceAdded = USBHID::addDevice(&ffbUsbHidDevice, sizeof(ffbReportDescriptor));
     configASSERT(hidDeviceAdded);
     usb_hid.begin();
     // HID registration is complete; the native USB device exposes HID only.
     const bool usbStarted = USB.begin();
     configASSERT(usbStarted);
+}
 
+void setup()
+{
+    // Preserve startup order: callbacks can run as soon as USB.begin() returns,
+    // and each created task can preempt setup before the next task is created.
+    const BaseType_t appCore = applicationCore;
+    constexpr BaseType_t protoCore = 0;
+
+#if ENABLE_TIMING_DIAGNOSTICS || MOTOR_TRANSPORT == 1
+    // Avoid allocating the console queue/task when this build has no log producers.
+    SunFFB::start_diagnostic_console(Serial, SERIAL_BAUD, TASK_STACK_SIZE, protoCore);
+#endif
+    initialize_motor_transport();
+    initialize_joystick();
+#if ENABLE_LCD
+    initialize_lcd();
+#endif
+    initialize_model_and_queues();
+    initialize_usb();
 
     // Start processing even before a host enumerates the USB interface. Tasks
     // can run immediately when created, so all shared resources are ready above.
