@@ -11,6 +11,11 @@
 #include "device/usbd_pvt.h"
 #include "hid_control_buffer.h"
 
+#if defined(VALIDATE_USB_UPGRADE) && VALIDATE_USB_UPGRADE
+static_assert(TUSB_VERSION_MAJOR > 0 || TUSB_VERSION_MINOR >= 17,
+              "Upgrade validation requires TinyUSB with isolated HID control storage");
+#endif
+
 extern "C" bool __real_hidd_control_xfer_cb(uint8_t rhport, uint8_t stage,
                                             const tusb_control_request_t* request);
 extern void hid_set_report_callback(uint8_t id, hid_report_type_t type,

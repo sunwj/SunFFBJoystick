@@ -19,6 +19,18 @@ No Make, npm, or other build systems — PlatformIO is the only entrypoint.
 
 ## Compile-Time Configuration
 
+- Production environments pin `espressif32@6.12.0`. Upgrade-only environments
+  `esp32-s3-upgrade` and `esp32-s3-upgrade-hil` pin pioarduino release
+  `55.03.312-1` (Arduino 3.3.12 / ESP-IDF 5.5.5). Do not switch production defaults
+  until USB control reports, dual-axis conditions, LCD/UART and full-pool hardware
+  regression tests pass. `VALIDATE_USB_UPGRADE=1` rejects TinyUSB versions below
+  0.17 so an upgrade build cannot silently exercise the old buffer backport.
+  Initial installation reached the new Arduino core but failed extracting SDK
+  files due to Windows path length limits; neither upgrade environment is yet
+  compile- or hardware-verified. Use a short physical `PLATFORMIO_CORE_DIR`
+  directory; drive mappings were canonicalized and did not solve extraction.
+  See `doc/usb-upgrade-validation.md` for dependency and callback-routing findings.
+
 - **`firmware/src/constants.h`** is a forwarding header: it only `#include`s `config_ffb.h` and `config_board.h`. Do not edit it.
 - **`firmware/src/config_ffb.h`** — `NUM_AXIS` (1/2/3) is the primary compile-time switch. It gates `#if`/`#elif` blocks across the entire codebase for axis count, HID descriptors, pin mappings, force direction formulas, and report struct sizes. Also defines `MAX_EFFECTS`, effect types (ET_*), HID PID report IDs (REPORT_ID_*, 1–18), and PID constants (`USB_MAX_MAGNITUDE` 10000, `USB_DURATION_INFINITE`, `USB_NO_TRIGGER_BUTTON`, `USB_AXIS_MAX_ABSOLUTE`, etc.). Changing `NUM_AXIS` requires a full rebuild.
 - **`firmware/src/config_board.h`** — USB VID/PID (`0xFFFF`/`0x2010`), task periods (`FORCE_TASK_PERIOD_MS=1`, `SEND_FORCE_TASK_PERIOD_MS=2`), ADC scale, and speed/acceleration normalization scales (`DEFAULT_MAX_SPEED_SCALE`/`DEFAULT_MAX_ACCEL_SCALE`, both `1.0f`).
