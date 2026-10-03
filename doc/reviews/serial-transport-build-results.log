@@ -1,0 +1,274 @@
+********************************************************************************
+Obsolete PIO Core v6.1.19 is used (previous was 6.2.0)
+Please remove multiple PIO Cores from a system:
+https://docs.platformio.org/en/latest/core/installation/troubleshooting.html
+********************************************************************************
+Processing esp32-s3-serial (platform: espressif32; board: 4d_systems_esp32s3_gen4_r8n16; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/4d_systems_esp32s3_gen4_r8n16.html
+PLATFORM: Espressif 32 (6.12.0) > 4D Systems GEN4-ESP32 16MB (ESP32S3-R8N16)
+HARDWARE: ESP32S3 240MHz, 320KB RAM, 16MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 2.40900.250804 (4.9.0) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 38 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- Adafruit TinyUSB Library @ 3.3.1
+Building in release mode
+Compiling .pio/build/esp32-s3-serial/src/main.cpp.o
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:32: warning: "USB_VID" redefined
+ #define USB_VID 0xFFFF
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:6: note: this is the location of the previous definition
+ #define USB_VID 0x303a
+ 
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:33: warning: "USB_PID" redefined
+ #define USB_PID 0x2010
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:7: note: this is the location of the previous definition
+ #define USB_PID 0x1001
+ 
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:34: warning: "USB_MANUFACTURER" redefined
+ #define USB_MANUFACTURER "SunFFB"
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:8: note: this is the location of the previous definition
+ #define USB_MANUFACTURER  "4D Systems Pty Ltd"
+ 
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:35: warning: "USB_PRODUCT" redefined
+ #define USB_PRODUCT "Force feedback joystick"
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:9: note: this is the location of the previous definition
+ #define USB_PRODUCT   "4D Systems gen4-ESP32 16MB Modules (ESP32-S3R8n16)"
+ 
+Linking .pio/build/esp32-s3-serial/firmware.elf
+Retrieving maximum program size .pio/build/esp32-s3-serial/firmware.elf
+Checking size .pio/build/esp32-s3-serial/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  10.2% (used 33424 bytes from 327680 bytes)
+Flash: [=         ]   5.0% (used 327929 bytes from 6553600 bytes)
+Building .pio/build/esp32-s3-serial/firmware.bin
+esptool.py v4.9.0
+Creating esp32s3 image...
+Merged 2 ELF sections
+Successfully created esp32s3 image.
+========================= [SUCCESS] Took 4.14 seconds =========================
+
+Processing esp32-s2-serial (board: esp32-s2-saola-1; platform: espressif32; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-s2-saola-1.html
+PLATFORM: Espressif 32 (6.12.0) > Espressif ESP32-S2-Saola-1
+HARDWARE: ESP32S2 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 2.40900.250804 (4.9.0) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s2 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 38 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- Adafruit TinyUSB Library @ 3.3.1
+Building in release mode
+Compiling .pio/build/esp32-s2-serial/src/main.cpp.o
+Linking .pio/build/esp32-s2-serial/firmware.elf
+Retrieving maximum program size .pio/build/esp32-s2-serial/firmware.elf
+Checking size .pio/build/esp32-s2-serial/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]   5.5% (used 17984 bytes from 327680 bytes)
+Flash: [==        ]  20.3% (used 266110 bytes from 1310720 bytes)
+Building .pio/build/esp32-s2-serial/firmware.bin
+esptool.py v4.9.0
+Creating esp32s2 image...
+Merged 2 ELF sections
+Successfully created esp32s2 image.
+========================= [SUCCESS] Took 3.33 seconds =========================
+
+Processing esp32-s2-serial-fixed (board: esp32-s2-saola-1; platform: espressif32; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-s2-saola-1.html
+PLATFORM: Espressif 32 (6.12.0) > Espressif ESP32-S2-Saola-1
+HARDWARE: ESP32S2 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 2.40900.250804 (4.9.0) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s2 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 38 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- Adafruit TinyUSB Library @ 3.3.1
+Building in release mode
+Compiling .pio/build/esp32-s2-serial-fixed/src/main.cpp.o
+Linking .pio/build/esp32-s2-serial-fixed/firmware.elf
+Retrieving maximum program size .pio/build/esp32-s2-serial-fixed/firmware.elf
+Checking size .pio/build/esp32-s2-serial-fixed/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]   5.5% (used 17984 bytes from 327680 bytes)
+Flash: [==        ]  20.3% (used 266170 bytes from 1310720 bytes)
+Building .pio/build/esp32-s2-serial-fixed/firmware.bin
+esptool.py v4.9.0
+Creating esp32s2 image...
+Merged 2 ELF sections
+Successfully created esp32s2 image.
+========================= [SUCCESS] Took 3.07 seconds =========================
+
+Processing esp32-s3-serial-fixed (platform: espressif32; board: 4d_systems_esp32s3_gen4_r8n16; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/4d_systems_esp32s3_gen4_r8n16.html
+PLATFORM: Espressif 32 (6.12.0) > 4D Systems GEN4-ESP32 16MB (ESP32S3-R8N16)
+HARDWARE: ESP32S3 240MHz, 320KB RAM, 16MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 2.40900.250804 (4.9.0) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 38 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- Adafruit TinyUSB Library @ 3.3.1
+Building in release mode
+Compiling .pio/build/esp32-s3-serial-fixed/src/main.cpp.o
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:32: warning: "USB_VID" redefined
+ #define USB_VID 0xFFFF
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:6: note: this is the location of the previous definition
+ #define USB_VID 0x303a
+ 
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:33: warning: "USB_PID" redefined
+ #define USB_PID 0x2010
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:7: note: this is the location of the previous definition
+ #define USB_PID 0x1001
+ 
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:34: warning: "USB_MANUFACTURER" redefined
+ #define USB_MANUFACTURER "SunFFB"
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:8: note: this is the location of the previous definition
+ #define USB_MANUFACTURER  "4D Systems Pty Ltd"
+ 
+In file included from src/constants.h:5,
+                 from src/main.cpp:6:
+src/config_board.h:35: warning: "USB_PRODUCT" redefined
+ #define USB_PRODUCT "Force feedback joystick"
+ 
+In file included from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h:29,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h:83,
+                 from /Users/sunwj/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h:36,
+                 from src/main.cpp:1:
+/Users/sunwj/.platformio/packages/framework-arduinoespressif32/variants/esp32_s3r8n16/pins_arduino.h:9: note: this is the location of the previous definition
+ #define USB_PRODUCT   "4D Systems gen4-ESP32 16MB Modules (ESP32-S3R8n16)"
+ 
+Linking .pio/build/esp32-s3-serial-fixed/firmware.elf
+Retrieving maximum program size .pio/build/esp32-s3-serial-fixed/firmware.elf
+Checking size .pio/build/esp32-s3-serial-fixed/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  10.2% (used 33424 bytes from 327680 bytes)
+Flash: [=         ]   5.0% (used 327981 bytes from 6553600 bytes)
+Building .pio/build/esp32-s3-serial-fixed/firmware.bin
+esptool.py v4.9.0
+Creating esp32s3 image...
+Merged 2 ELF sections
+Successfully created esp32s3 image.
+========================= [SUCCESS] Took 3.83 seconds =========================
+
+Processing esp32-s2-serial-mixed (board: esp32-s2-saola-1; platform: espressif32; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-s2-saola-1.html
+PLATFORM: Espressif 32 (6.12.0) > Espressif ESP32-S2-Saola-1
+HARDWARE: ESP32S2 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 2.40900.250804 (4.9.0) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s2 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 38 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- Adafruit TinyUSB Library @ 3.3.1
+Building in release mode
+Compiling .pio/build/esp32-s2-serial-mixed/src/main.cpp.o
+Linking .pio/build/esp32-s2-serial-mixed/firmware.elf
+Retrieving maximum program size .pio/build/esp32-s2-serial-mixed/firmware.elf
+Checking size .pio/build/esp32-s2-serial-mixed/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]   5.5% (used 17984 bytes from 327680 bytes)
+Flash: [==        ]  20.3% (used 266186 bytes from 1310720 bytes)
+Building .pio/build/esp32-s2-serial-mixed/firmware.bin
+esptool.py v4.9.0
+Creating esp32s2 image...
+Merged 2 ELF sections
+Successfully created esp32s2 image.
+========================= [SUCCESS] Took 3.03 seconds =========================
+
+Environment            Status    Duration
+---------------------  --------  ------------
+esp32-s3-serial        SUCCESS   00:00:04.143
+esp32-s2-serial        SUCCESS   00:00:03.333
+esp32-s2-serial-fixed  SUCCESS   00:00:03.065
+esp32-s3-serial-fixed  SUCCESS   00:00:03.828
+esp32-s2-serial-mixed  SUCCESS   00:00:03.026
+========================= 5 succeeded in 00:00:17.395 =========================

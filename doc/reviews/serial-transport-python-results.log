@@ -1,0 +1,6 @@
+..........................qt.qpa.fonts: Populating font family aliases took 30 ms. Replace uses of missing font family "Sans Serif" with one that exists to avoid this cost. 
+..................................
+----------------------------------------------------------------------
+Ran 60 tests in 0.258s
+
+OK

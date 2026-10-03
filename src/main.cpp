@@ -13,15 +13,23 @@
 #include "ffb_report_dispatch.h"
 #include "ffb_device_input.h"
 #include "ffb_force_calculator.h"
+#include "communication/motor_payload.h"
+#if MOTOR_TRANSPORT == 1
+#include "communication/can_hal_esp32.h"
+#include "communication/can_link.h"
+#else
 #include "communication/serial_hal_arduino.h"
 #include "communication/serial_link.h"
+#endif
 #include "realtime_timing.h"
 // The 1 ms force loop requires the ESP Arduino core's 1 kHz RTOS tick.
 static_assert(configTICK_RATE_HZ == 1000, "Force scheduling requires a 1 ms RTOS tick");
 static_assert(FORCE_TASK_PERIOD_MS == 1 || FORCE_TASK_PERIOD_MS == 2, "Force rate must be 500 or 1000 Hz");
 // 8N1: ten wire bits per byte, four framing bytes. TX/RX are full duplex.
+#if MOTOR_TRANSPORT == 0
 static_assert((4 + sizeof(SunFFB::ForcePayload)) * 10 * 500 < UART1_BAUD,
               "Motor UART cannot carry 500 Hz force frames");
+#endif
 #if CONFIG_FREERTOS_UNICORE
 constexpr BaseType_t applicationCore = 0;
 // Keep periodic I/O below force calculation on a shared CPU.
@@ -48,7 +56,7 @@ constexpr uint8_t joystickPins[NUM_AXIS] = {AXIS0_ADC_PIN, AXIS1_ADC_PIN};
 constexpr uint8_t joystickPins[NUM_AXIS] = {AXIS0_ADC_PIN, AXIS1_ADC_PIN, AXIS2_ADC_PIN};
 #endif
 
-#if !USE_SERIAL_POSITION
+#if !USE_EXTERNAL_POSITION
 static_assert(AXIS0_ADC_PIN != 19 && AXIS0_ADC_PIN != 20, "ADC pin conflicts with USB");
 #if NUM_AXIS >= 2
 static_assert(AXIS1_ADC_PIN != 19 && AXIS1_ADC_PIN != 20, "ADC pin conflicts with USB");
@@ -56,6 +64,19 @@ static_assert(AXIS1_ADC_PIN != 19 && AXIS1_ADC_PIN != 20, "ADC pin conflicts wit
 #if NUM_AXIS == 3
 static_assert(AXIS2_ADC_PIN != 19 && AXIS2_ADC_PIN != 20, "ADC pin conflicts with USB");
 #endif
+#endif
+
+#if MOTOR_TRANSPORT == 1 && !USE_EXTERNAL_POSITION
+static_assert(CAN_TX_PIN != AXIS0_ADC_PIN && CAN_RX_PIN != AXIS0_ADC_PIN, "CAN conflicts with ADC axis 0");
+#if NUM_AXIS >= 2
+static_assert(CAN_TX_PIN != AXIS1_ADC_PIN && CAN_RX_PIN != AXIS1_ADC_PIN, "CAN conflicts with ADC axis 1");
+#endif
+#if NUM_AXIS == 3
+static_assert(CAN_TX_PIN != AXIS2_ADC_PIN && CAN_RX_PIN != AXIS2_ADC_PIN, "CAN conflicts with ADC axis 2");
+#endif
+#endif
+#if MOTOR_TRANSPORT == 1 && defined(USE_BUTTON)
+static_assert(CAN_TX_PIN != SW_PIN && CAN_RX_PIN != SW_PIN, "CAN conflicts with button GPIO");
 #endif
 
 uint16_t coordOffsets[NUM_AXIS] = {0};
@@ -88,9 +109,15 @@ QueueHandle_t gPositions;
 QueueHandle_t gForces;
 QueueHandle_t gJoystickReportData;
 
+#if MOTOR_TRANSPORT == 1
+SunFFB::ESP32CANHal canHal;
+SunFFB::FFBCANLink<SunFFB::ESP32CANHal> motorLink(canHal, {CAN_FORCE_ID, CAN_POSITION_ID, CAN_HEARTBEAT_ID});
+#else
 HardwareSerial comSerial(1);
 SunFFB::ArduinoSerialHal serialHal(comSerial);
-SunFFB::FFBSerialLink<SunFFB::ArduinoSerialHal> serialLink(serialHal);
+SunFFB::FFBSerialLink<SunFFB::ArduinoSerialHal, static_cast<SunFFB::SerialFraming>(SERIAL_FRAMING_MODE)> motorLink(serialHal);
+
+#endif
 
 #if ENABLE_LCD
 TFT_eSPI lcd = TFT_eSPI();
@@ -333,7 +360,7 @@ void joystick_task(void* params)
     {
         uint32_t receivedUs;
         int16_t coords[NUM_AXIS];
-#if USE_SERIAL_POSITION
+#if USE_EXTERNAL_POSITION
         PositionSample sample;
         xQueueReceive(gPositions, &sample, portMAX_DELAY);
         receivedUs = sample.receivedUs;
@@ -368,7 +395,7 @@ void joystick_task(void* params)
         xSemaphoreGive(semaphoreFFBDeviceInput);
         xQueueOverwrite(gJoystickReportData, &output);
         inputTiming.record(micros());
-#if !USE_SERIAL_POSITION
+#if !USE_EXTERNAL_POSITION
         vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(JOYSTICK_TASK_PERIOD_MS));
 #endif
     }
@@ -416,7 +443,7 @@ void send_report_task(void* params)
             JoystickSample sample;
             const bool hasSample = xQueuePeek(gJoystickReportData, &sample, 0) == pdTRUE;
             const bool fresh = hasSample && (!hasSequence || sample.sequence != lastSequence);
-#if USE_SERIAL_POSITION
+#if USE_EXTERNAL_POSITION
             // Forward arrivals, not a second free-running 500 Hz sampler.
             // No duplicate reports can masquerade as fresh motor positions.
             const bool positionDue = fresh;
@@ -463,7 +490,7 @@ void send_force_task(void* params)
         int32_t forces[NUM_AXIS];
         xQueuePeek(gForces, forces, portMAX_DELAY);
         const uint32_t startUs = micros();
-        if (serialLink.sendForce(forces)) motorTxTiming.record(micros(), micros() - startUs);
+        if (motorLink.sendForce(forces)) motorTxTiming.record(micros(), micros() - startUs);
         else motorTxTiming.failed();
 
         vTaskDelayUntil(&wakeupTime, pdMS_TO_TICKS(SEND_FORCE_TASK_PERIOD_MS));
@@ -475,10 +502,23 @@ void receive_position_task(void* params)
     uint32_t sequence = 0;
     while (true)
     {
-        // Eight bounded parser calls per 1 ms; drain heartbeat/noise as well.
-        for (uint8_t frame = 0; frame < 8 && serialHal.available(); ++frame) {
+#if MOTOR_TRANSPORT == 1
+        if (canHal.service()) motorLink.resetReceiver();
+#endif
+        // Bound RX work on a shared CPU; CAN also services recovery without position input.
+        for (uint8_t frame = 0; frame < 8; ++frame) {
             SunFFB::PositionPayload payload;
-            if (!serialLink.receivePosition(payload)) continue;
+#if MOTOR_TRANSPORT == 1
+            const auto result = motorLink.pollPosition(payload, micros());
+            if (result == SunFFB::CANReceiveResult::Empty) break;
+            if (result != SunFFB::CANReceiveResult::Position) continue;
+#if !USE_CAN_POSITION
+            continue;
+#endif
+#else
+            if (!motorLink.hasPendingInput()) break;
+            if (!motorLink.receivePosition(payload)) continue;
+#endif
             PositionSample sample{};
             memcpy(sample.position, payload.position, sizeof(sample.position));
             sample.receivedUs = micros();
@@ -499,6 +539,13 @@ void timing_task(void*)
     uint32_t previous[7]{};
     uint32_t lastUs = micros();
     while (true) {
+#if MOTOR_TRANSPORT == 1
+        const auto can = canHal.stats();
+        Serial.printf("CAN accepted=%lu rejected=%lu success_alerts=%lu failure_alerts=%lu bus_off=%lu recovery=%lu overflow_alerts=%lu\n",
+            (unsigned long)can.accepted, (unsigned long)can.rejected, (unsigned long)can.successAlerts,
+            (unsigned long)can.failureAlerts, (unsigned long)can.busOffAlerts,
+            (unsigned long)can.recoveries, (unsigned long)can.overflowAlerts);
+#endif
         vTaskDelay(pdMS_TO_TICKS(1000));
         const uint32_t nowUs = micros();
         const uint32_t windowUs = nowUs - lastUs;
@@ -523,16 +570,23 @@ void setup()
     uint8_t protoCore = 0;
 
     Serial.begin(SERIAL_BAUD);
+#if MOTOR_TRANSPORT == 1
+    const bool canStarted = canHal.begin(CAN_TX_PIN, CAN_RX_PIN, CAN_BITRATE, CAN_POSITION_ID, CAN_SINGLE_SHOT);
+    if (!canStarted) Serial.println("CAN initialization failed");
+    configASSERT(canStarted);
+#else
     comSerial.begin(UART1_BAUD, SERIAL_8N1, RDX_PIN, TDX_PIN);
     // Deliver each short frame promptly instead of waiting for a large FIFO batch.
-    comSerial.setRxFIFOFull(sizeof(SunFFB::PositionPayload) + 4);
+    comSerial.setRxFIFOFull(sizeof(SunFFB::PositionPayload) + (SERIAL_FRAMING_MODE == 1 ? 3 : 4));
     comSerial.setRxTimeout(1);
+
+#endif
 
     // init joystick and calibrate
 #ifdef USE_BUTTON
     pinMode(SW_PIN, INPUT);
 #endif
-#if !USE_SERIAL_POSITION
+#if !USE_EXTERNAL_POSITION
     analogReadResolution(12); // ADC_CLAMP/ADC_SCALE assume 12-bit samples on S2 and S3.
     #pragma unroll
     for(uint8_t i = 0; i < NUM_AXIS; ++i)
@@ -618,7 +672,7 @@ void setup()
 #if ENABLE_MOTOR_OUTPUT
     createFirmwareTask(send_force_task, "SendForce", TASK_STACK_SIZE, periodicIOPriority, protoCore);
 #endif
-#if USE_SERIAL_POSITION
+#if USE_EXTERNAL_POSITION || MOTOR_TRANSPORT == 1
     createFirmwareTask(receive_position_task, "ReceivePos", TASK_STACK_SIZE, periodicIOPriority, protoCore);
 #endif
 }

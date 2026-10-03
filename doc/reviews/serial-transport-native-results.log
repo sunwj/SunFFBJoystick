@@ -1,0 +1,390 @@
+********************************************************************************
+Obsolete PIO Core v6.1.19 is used (previous was 6.2.0)
+Please remove multiple PIO Cores from a system:
+https://docs.platformio.org/en/latest/core/installation/troubleshooting.html
+********************************************************************************
+Collected 4 tests (test_effect_model, test_firmware_boundaries, test_serial_transport, test_spec_compliance)
+
+Processing test_firmware_boundaries in native-sanitized environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_firmware_boundaries/test_main.cpp:256:test_force_transmit_reports_short_write:PASS
+test/test_firmware_boundaries/test_main.cpp:257:test_report_schedule_retries_and_preserves_phase:PASS
+test/test_firmware_boundaries/test_main.cpp:258:test_timing_wrap_and_stalled_stream:PASS
+test/test_firmware_boundaries/test_main.cpp:259:test_invalid_reports_leave_state_unchanged:PASS
+test/test_firmware_boundaries/test_main.cpp:260:test_envelope_does_not_corrupt_adjacent_effect:PASS
+test/test_firmware_boundaries/test_main.cpp:261:test_disabled_stays_disabled_after_pause_resume:PASS
+test/test_firmware_boundaries/test_main.cpp:262:test_cold_boot_pause_preserves_implicit_enable:PASS
+test/test_firmware_boundaries/test_main.cpp:263:test_pause_resume_commands_are_idempotent:PASS
+test/test_firmware_boundaries/test_main.cpp:264:test_effect_started_during_pause_preserves_full_delay:PASS
+test/test_firmware_boundaries/test_main.cpp:265:test_envelope_does_not_change_condition_blocks:PASS
+test/test_firmware_boundaries/test_main.cpp:266:test_trigger_waits_for_initial_and_repeat_delay:PASS
+test/test_firmware_boundaries/test_main.cpp:267:test_trigger_infinite_duration_and_invalid_button:PASS
+test/test_firmware_boundaries/test_main.cpp:268:test_delayed_trigger_across_clock_wrap:PASS
+test/test_firmware_boundaries/test_main.cpp:269:test_fade_longer_than_duration:PASS
+test/test_firmware_boundaries/test_main.cpp:270:test_infinite_duration_ignores_fade:PASS
+test/test_firmware_boundaries/test_main.cpp:271:test_negative_coefficients_respect_asymmetric_saturation:PASS
+test/test_firmware_boundaries/test_main.cpp:272:test_serial_returns_each_frame_in_order:PASS
+test/test_firmware_boundaries/test_main.cpp:273:test_serial_partial_and_bad_crc_recovery:PASS
+test/test_firmware_boundaries/test_main.cpp:274:test_serial_noise_has_bounded_work_and_recovers:PASS
+
+-----------------------
+19 Tests 0 Failures 0 Ignored 
+OK
+
+----- native-sanitized:test_firmware_boundaries [PASSED] Took 1.49 seconds -----
+
+Processing test_spec_compliance in native-sanitized environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_spec_compliance/test_main.cpp:163:sample_cache_invalidates_on_parameter_change_and_loop_restart:PASS
+test/test_spec_compliance/test_main.cpp:164:disabled_and_paused_device_freezes_then_resumes_timer:PASS
+test/test_spec_compliance/test_main.cpp:165:zero_sustain_constant_fade_has_absolute_amplitude:PASS
+test/test_spec_compliance/test_main.cpp:166:descriptor_angles_apply_without_direction_enable:PASS
+test/test_spec_compliance/test_main.cpp:167:disabled_actuators_still_process_trigger_and_expiry:PASS
+test/test_spec_compliance/test_main.cpp:168:stop_all_preserves_pending_stopped_handles:PASS
+test/test_spec_compliance/test_main.cpp:170:pending_pid_reports_preserve_each_effect_and_retry:PASS
+test/test_spec_compliance/test_main.cpp:171:trigger_loops_complete_after_release:PASS
+test/test_spec_compliance/test_main.cpp:172:delayed_pid_state_only_plays_after_delay:PASS
+test/test_spec_compliance/test_main.cpp:173:condition_center_must_use_descriptor_scale:PASS
+test/test_spec_compliance/test_main.cpp:174:condition_deadband_must_use_descriptor_scale:PASS
+test/test_spec_compliance/test_main.cpp:175:saturation_follows_metric_side_even_with_negative_coefficient:PASS
+test/test_spec_compliance/test_main.cpp:177:button_release_must_not_cancel_started_playback:PASS
+test/test_spec_compliance/test_main.cpp:178:pid_state_must_identify_second_effect_transition:PASS
+test/test_spec_compliance/test_main.cpp:179:stopped_pid_state_must_keep_the_effect_handle:PASS
+test/test_spec_compliance/test_main.cpp:180:disabled_actuators_must_still_advance_effect_lifecycle:PASS
+test/test_spec_compliance/test_main.cpp:181:condition_sample_period_must_hold_output_between_samples:PASS
+test/test_spec_compliance/test_main.cpp:182:zero_sustain_periodic_effect_must_apply_attack_amplitude:PASS
+test/test_spec_compliance/test_main.cpp:183:direction_enable_is_not_a_coordinate_format_selector:PASS
+test/test_spec_compliance/test_main.cpp:184:directed_condition_must_ignore_stale_second_axis_block:PASS
+test/test_spec_compliance/test_main.cpp:185:directed_friction_must_not_resist_perpendicular_motion:PASS
+test/test_spec_compliance/test_main.cpp:186:infinite_periodic_effect_must_preserve_phase_after_hours:PASS
+test/test_spec_compliance/test_main.cpp:188:motion_metrics_pointer_must_have_float_alignment:PASS
+test/test_spec_compliance/test_main.cpp:189:reset_is_enabled_as_required_by_hid_pid_not_directinput_api:PASS
+
+-----------------------
+24 Tests 0 Failures 0 Ignored 
+OK
+
+------- native-sanitized:test_spec_compliance [PASSED] Took 0.75 seconds -------
+
+Processing test_effect_model in native-sanitized environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_effect_model/test_main.cpp:415:test_constant_force_and_direction:PASS
+test/test_effect_model/test_main.cpp:416:test_ramp_restarts_each_loop:PASS
+test/test_effect_model/test_main.cpp:417:test_sine_quadrants:PASS
+test/test_effect_model/test_main.cpp:418:test_envelope_preserves_periodic_offset:PASS
+test/test_effect_model/test_main.cpp:419:test_infinite_loop_remains_active:PASS
+test/test_effect_model/test_main.cpp:420:test_pause_freezes_start_delay:PASS
+test/test_effect_model/test_main.cpp:421:test_reset_and_pool_capabilities:PASS
+test/test_effect_model/test_main.cpp:422:test_combined_force_is_clamped:PASS
+test/test_effect_model/test_main.cpp:423:test_gain_scales_constant_force:PASS
+test/test_effect_model/test_main.cpp:424:test_sample_period_quantizes_waveform:PASS
+test/test_effect_model/test_main.cpp:425:test_spring_position_condition:PASS
+test/test_effect_model/test_main.cpp:426:test_damper_uses_speed_metric:PASS
+test/test_effect_model/test_main.cpp:427:test_inertia_uses_acceleration_metric:PASS
+test/test_effect_model/test_main.cpp:428:test_friction_is_sign_based:PASS
+test/test_effect_model/test_main.cpp:429:test_fade_envelope_reduces_constant_force:PASS
+test/test_effect_model/test_main.cpp:430:test_triangle_waveform_quadrants:PASS
+test/test_effect_model/test_main.cpp:431:test_sawtooth_waveforms_boundaries:PASS
+test/test_effect_model/test_main.cpp:432:test_sine_phase_quarter_cycle:PASS
+test/test_effect_model/test_main.cpp:433:test_condition_deadband_and_saturation:PASS
+test/test_effect_model/test_main.cpp:434:test_effect_duration_boundary:PASS
+test/test_effect_model/test_main.cpp:435:test_button_trigger_lifecycle:PASS
+
+-----------------------
+21 Tests 0 Failures 0 Ignored 
+OK
+
+-------- native-sanitized:test_effect_model [PASSED] Took 1.17 seconds --------
+
+Processing test_serial_transport in native-sanitized environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_serial_transport/test_main.cpp:116:test_legacy_wire_bytes_and_crc_vector:PASS
+test/test_serial_transport/test_main.cpp:117:test_fixed_motor_frames_and_heartbeat:PASS
+test/test_serial_transport/test_main.cpp:118:test_mixed_preserves_batched_frame_order_and_views:PASS
+test/test_serial_transport/test_main.cpp:119:test_custom_fixed_layout_and_max_payload:PASS
+test/test_serial_transport/test_main.cpp:120:test_255_byte_variable_frame_and_empty_id_zero:PASS
+test/test_serial_transport/test_main.cpp:121:test_split_frames_and_crc_recovery:PASS
+test/test_serial_transport/test_main.cpp:122:test_noise_work_budget_and_invalid_lengths:PASS
+test/test_serial_transport/test_main.cpp:123:test_capacity_guard_and_tx_backpressure:PASS
+test/test_serial_transport/test_main.cpp:124:test_receiver_reset_after_partial_frame:PASS
+
+-----------------------
+9 Tests 0 Failures 0 Ignored 
+OK
+
+------ native-sanitized:test_serial_transport [PASSED] Took 1.12 seconds ------
+
+Processing test_firmware_boundaries in native-sanitized-axis1 environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_firmware_boundaries/test_main.cpp:256:test_force_transmit_reports_short_write:PASS
+test/test_firmware_boundaries/test_main.cpp:257:test_report_schedule_retries_and_preserves_phase:PASS
+test/test_firmware_boundaries/test_main.cpp:258:test_timing_wrap_and_stalled_stream:PASS
+test/test_firmware_boundaries/test_main.cpp:259:test_invalid_reports_leave_state_unchanged:PASS
+test/test_firmware_boundaries/test_main.cpp:260:test_envelope_does_not_corrupt_adjacent_effect:PASS
+test/test_firmware_boundaries/test_main.cpp:261:test_disabled_stays_disabled_after_pause_resume:PASS
+test/test_firmware_boundaries/test_main.cpp:262:test_cold_boot_pause_preserves_implicit_enable:PASS
+test/test_firmware_boundaries/test_main.cpp:263:test_pause_resume_commands_are_idempotent:PASS
+test/test_firmware_boundaries/test_main.cpp:264:test_effect_started_during_pause_preserves_full_delay:PASS
+test/test_firmware_boundaries/test_main.cpp:265:test_envelope_does_not_change_condition_blocks:PASS
+test/test_firmware_boundaries/test_main.cpp:266:test_trigger_waits_for_initial_and_repeat_delay:PASS
+test/test_firmware_boundaries/test_main.cpp:267:test_trigger_infinite_duration_and_invalid_button:PASS
+test/test_firmware_boundaries/test_main.cpp:268:test_delayed_trigger_across_clock_wrap:PASS
+test/test_firmware_boundaries/test_main.cpp:269:test_fade_longer_than_duration:PASS
+test/test_firmware_boundaries/test_main.cpp:270:test_infinite_duration_ignores_fade:PASS
+test/test_firmware_boundaries/test_main.cpp:271:test_negative_coefficients_respect_asymmetric_saturation:PASS
+test/test_firmware_boundaries/test_main.cpp:272:test_serial_returns_each_frame_in_order:PASS
+test/test_firmware_boundaries/test_main.cpp:273:test_serial_partial_and_bad_crc_recovery:PASS
+test/test_firmware_boundaries/test_main.cpp:274:test_serial_noise_has_bounded_work_and_recovers:PASS
+
+-----------------------
+19 Tests 0 Failures 0 Ignored 
+OK
+
+-- native-sanitized-axis1:test_firmware_boundaries [PASSED] Took 1.13 seconds --
+
+Processing test_spec_compliance in native-sanitized-axis1 environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_spec_compliance/test_main.cpp:163:sample_cache_invalidates_on_parameter_change_and_loop_restart:PASS
+test/test_spec_compliance/test_main.cpp:164:disabled_and_paused_device_freezes_then_resumes_timer:PASS
+test/test_spec_compliance/test_main.cpp:165:zero_sustain_constant_fade_has_absolute_amplitude:PASS
+test/test_spec_compliance/test_main.cpp:166:descriptor_angles_apply_without_direction_enable:PASS
+test/test_spec_compliance/test_main.cpp:167:disabled_actuators_still_process_trigger_and_expiry:PASS
+test/test_spec_compliance/test_main.cpp:168:stop_all_preserves_pending_stopped_handles:PASS
+test/test_spec_compliance/test_main.cpp:170:pending_pid_reports_preserve_each_effect_and_retry:PASS
+test/test_spec_compliance/test_main.cpp:171:trigger_loops_complete_after_release:PASS
+test/test_spec_compliance/test_main.cpp:172:delayed_pid_state_only_plays_after_delay:PASS
+test/test_spec_compliance/test_main.cpp:173:condition_center_must_use_descriptor_scale:PASS
+test/test_spec_compliance/test_main.cpp:174:condition_deadband_must_use_descriptor_scale:PASS
+test/test_spec_compliance/test_main.cpp:175:saturation_follows_metric_side_even_with_negative_coefficient:PASS
+test/test_spec_compliance/test_main.cpp:188:motion_metrics_pointer_must_have_float_alignment:PASS
+test/test_spec_compliance/test_main.cpp:189:reset_is_enabled_as_required_by_hid_pid_not_directinput_api:PASS
+
+-----------------------
+14 Tests 0 Failures 0 Ignored 
+OK
+
+---- native-sanitized-axis1:test_spec_compliance [PASSED] Took 0.74 seconds ----
+
+Processing test_serial_transport in native-sanitized-axis1 environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_serial_transport/test_main.cpp:116:test_legacy_wire_bytes_and_crc_vector:PASS
+test/test_serial_transport/test_main.cpp:117:test_fixed_motor_frames_and_heartbeat:PASS
+test/test_serial_transport/test_main.cpp:118:test_mixed_preserves_batched_frame_order_and_views:PASS
+test/test_serial_transport/test_main.cpp:119:test_custom_fixed_layout_and_max_payload:PASS
+test/test_serial_transport/test_main.cpp:120:test_255_byte_variable_frame_and_empty_id_zero:PASS
+test/test_serial_transport/test_main.cpp:121:test_split_frames_and_crc_recovery:PASS
+test/test_serial_transport/test_main.cpp:122:test_noise_work_budget_and_invalid_lengths:PASS
+test/test_serial_transport/test_main.cpp:123:test_capacity_guard_and_tx_backpressure:PASS
+test/test_serial_transport/test_main.cpp:124:test_receiver_reset_after_partial_frame:PASS
+
+-----------------------
+9 Tests 0 Failures 0 Ignored 
+OK
+
+--- native-sanitized-axis1:test_serial_transport [PASSED] Took 1.10 seconds ---
+
+Processing test_firmware_boundaries in native-sanitized-axis3 environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_firmware_boundaries/test_main.cpp:256:test_force_transmit_reports_short_write:PASS
+test/test_firmware_boundaries/test_main.cpp:257:test_report_schedule_retries_and_preserves_phase:PASS
+test/test_firmware_boundaries/test_main.cpp:258:test_timing_wrap_and_stalled_stream:PASS
+test/test_firmware_boundaries/test_main.cpp:259:test_invalid_reports_leave_state_unchanged:PASS
+test/test_firmware_boundaries/test_main.cpp:260:test_envelope_does_not_corrupt_adjacent_effect:PASS
+test/test_firmware_boundaries/test_main.cpp:261:test_disabled_stays_disabled_after_pause_resume:PASS
+test/test_firmware_boundaries/test_main.cpp:262:test_cold_boot_pause_preserves_implicit_enable:PASS
+test/test_firmware_boundaries/test_main.cpp:263:test_pause_resume_commands_are_idempotent:PASS
+test/test_firmware_boundaries/test_main.cpp:264:test_effect_started_during_pause_preserves_full_delay:PASS
+test/test_firmware_boundaries/test_main.cpp:265:test_envelope_does_not_change_condition_blocks:PASS
+test/test_firmware_boundaries/test_main.cpp:266:test_trigger_waits_for_initial_and_repeat_delay:PASS
+test/test_firmware_boundaries/test_main.cpp:267:test_trigger_infinite_duration_and_invalid_button:PASS
+test/test_firmware_boundaries/test_main.cpp:268:test_delayed_trigger_across_clock_wrap:PASS
+test/test_firmware_boundaries/test_main.cpp:269:test_fade_longer_than_duration:PASS
+test/test_firmware_boundaries/test_main.cpp:270:test_infinite_duration_ignores_fade:PASS
+test/test_firmware_boundaries/test_main.cpp:271:test_negative_coefficients_respect_asymmetric_saturation:PASS
+test/test_firmware_boundaries/test_main.cpp:272:test_serial_returns_each_frame_in_order:PASS
+test/test_firmware_boundaries/test_main.cpp:273:test_serial_partial_and_bad_crc_recovery:PASS
+test/test_firmware_boundaries/test_main.cpp:274:test_serial_noise_has_bounded_work_and_recovers:PASS
+
+-----------------------
+19 Tests 0 Failures 0 Ignored 
+OK
+
+-- native-sanitized-axis3:test_firmware_boundaries [PASSED] Took 1.11 seconds --
+
+Processing test_spec_compliance in native-sanitized-axis3 environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_spec_compliance/test_main.cpp:163:sample_cache_invalidates_on_parameter_change_and_loop_restart:PASS
+test/test_spec_compliance/test_main.cpp:164:disabled_and_paused_device_freezes_then_resumes_timer:PASS
+test/test_spec_compliance/test_main.cpp:165:zero_sustain_constant_fade_has_absolute_amplitude:PASS
+test/test_spec_compliance/test_main.cpp:166:descriptor_angles_apply_without_direction_enable:PASS
+test/test_spec_compliance/test_main.cpp:167:disabled_actuators_still_process_trigger_and_expiry:PASS
+test/test_spec_compliance/test_main.cpp:168:stop_all_preserves_pending_stopped_handles:PASS
+test/test_spec_compliance/test_main.cpp:170:pending_pid_reports_preserve_each_effect_and_retry:PASS
+test/test_spec_compliance/test_main.cpp:171:trigger_loops_complete_after_release:PASS
+test/test_spec_compliance/test_main.cpp:172:delayed_pid_state_only_plays_after_delay:PASS
+test/test_spec_compliance/test_main.cpp:173:condition_center_must_use_descriptor_scale:PASS
+test/test_spec_compliance/test_main.cpp:174:condition_deadband_must_use_descriptor_scale:PASS
+test/test_spec_compliance/test_main.cpp:175:saturation_follows_metric_side_even_with_negative_coefficient:PASS
+test/test_spec_compliance/test_main.cpp:188:motion_metrics_pointer_must_have_float_alignment:PASS
+test/test_spec_compliance/test_main.cpp:189:reset_is_enabled_as_required_by_hid_pid_not_directinput_api:PASS
+
+-----------------------
+14 Tests 0 Failures 0 Ignored 
+OK
+
+---- native-sanitized-axis3:test_spec_compliance [PASSED] Took 0.75 seconds ----
+
+Processing test_serial_transport in native-sanitized-axis3 environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_serial_transport/test_main.cpp:116:test_legacy_wire_bytes_and_crc_vector:PASS
+test/test_serial_transport/test_main.cpp:117:test_fixed_motor_frames_and_heartbeat:PASS
+test/test_serial_transport/test_main.cpp:118:test_mixed_preserves_batched_frame_order_and_views:PASS
+test/test_serial_transport/test_main.cpp:119:test_custom_fixed_layout_and_max_payload:PASS
+test/test_serial_transport/test_main.cpp:120:test_255_byte_variable_frame_and_empty_id_zero:PASS
+test/test_serial_transport/test_main.cpp:121:test_split_frames_and_crc_recovery:PASS
+test/test_serial_transport/test_main.cpp:122:test_noise_work_budget_and_invalid_lengths:PASS
+test/test_serial_transport/test_main.cpp:123:test_capacity_guard_and_tx_backpressure:PASS
+test/test_serial_transport/test_main.cpp:124:test_receiver_reset_after_partial_frame:PASS
+
+-----------------------
+9 Tests 0 Failures 0 Ignored 
+OK
+
+--- native-sanitized-axis3:test_serial_transport [PASSED] Took 1.12 seconds ---
+
+=================================== SUMMARY ===================================
+Environment              Test                      Status    Duration
+-----------------------  ------------------------  --------  ------------
+esp32-s3                 test_firmware_boundaries  SKIPPED
+esp32-s3                 test_spec_compliance      SKIPPED
+esp32-s3                 test_effect_model         SKIPPED
+esp32-s3                 test_serial_transport     SKIPPED
+native                   test_firmware_boundaries  SKIPPED
+native                   test_spec_compliance      SKIPPED
+native                   test_effect_model         SKIPPED
+native                   test_serial_transport     SKIPPED
+native-axis1             test_firmware_boundaries  SKIPPED
+native-axis1             test_spec_compliance      SKIPPED
+native-axis1             test_effect_model         SKIPPED
+native-axis1             test_serial_transport     SKIPPED
+native-axis3             test_firmware_boundaries  SKIPPED
+native-axis3             test_spec_compliance      SKIPPED
+native-axis3             test_effect_model         SKIPPED
+native-axis3             test_serial_transport     SKIPPED
+esp32-s3-axis1           test_firmware_boundaries  SKIPPED
+esp32-s3-axis1           test_spec_compliance      SKIPPED
+esp32-s3-axis1           test_effect_model         SKIPPED
+esp32-s3-axis1           test_serial_transport     SKIPPED
+esp32-s3-axis3           test_firmware_boundaries  SKIPPED
+esp32-s3-axis3           test_spec_compliance      SKIPPED
+esp32-s3-axis3           test_effect_model         SKIPPED
+esp32-s3-axis3           test_serial_transport     SKIPPED
+esp32-s3-serial          test_firmware_boundaries  SKIPPED
+esp32-s3-serial          test_spec_compliance      SKIPPED
+esp32-s3-serial          test_effect_model         SKIPPED
+esp32-s3-serial          test_serial_transport     SKIPPED
+native-sanitized         test_firmware_boundaries  PASSED    00:00:01.486
+native-sanitized         test_spec_compliance      PASSED    00:00:00.753
+native-sanitized         test_effect_model         PASSED    00:00:01.168
+native-sanitized         test_serial_transport     PASSED    00:00:01.119
+native-sanitized-axis1   test_firmware_boundaries  PASSED    00:00:01.129
+native-sanitized-axis1   test_spec_compliance      PASSED    00:00:00.743
+native-sanitized-axis1   test_effect_model         SKIPPED
+native-sanitized-axis1   test_serial_transport     PASSED    00:00:01.101
+native-sanitized-axis3   test_firmware_boundaries  PASSED    00:00:01.110
+native-sanitized-axis3   test_spec_compliance      PASSED    00:00:00.753
+native-sanitized-axis3   test_effect_model         SKIPPED
+native-sanitized-axis3   test_serial_transport     PASSED    00:00:01.121
+esp32-s2                 test_firmware_boundaries  SKIPPED
+esp32-s2                 test_spec_compliance      SKIPPED
+esp32-s2                 test_effect_model         SKIPPED
+esp32-s2                 test_serial_transport     SKIPPED
+esp32-s2-axis1           test_firmware_boundaries  SKIPPED
+esp32-s2-axis1           test_spec_compliance      SKIPPED
+esp32-s2-axis1           test_effect_model         SKIPPED
+esp32-s2-axis1           test_serial_transport     SKIPPED
+esp32-s2-axis3           test_firmware_boundaries  SKIPPED
+esp32-s2-axis3           test_spec_compliance      SKIPPED
+esp32-s2-axis3           test_effect_model         SKIPPED
+esp32-s2-axis3           test_serial_transport     SKIPPED
+esp32-s2-serial          test_firmware_boundaries  SKIPPED
+esp32-s2-serial          test_spec_compliance      SKIPPED
+esp32-s2-serial          test_effect_model         SKIPPED
+esp32-s2-serial          test_serial_transport     SKIPPED
+esp32-s2-timing          test_firmware_boundaries  SKIPPED
+esp32-s2-timing          test_spec_compliance      SKIPPED
+esp32-s2-timing          test_effect_model         SKIPPED
+esp32-s2-timing          test_serial_transport     SKIPPED
+esp32-s3-timing          test_firmware_boundaries  SKIPPED
+esp32-s3-timing          test_spec_compliance      SKIPPED
+esp32-s3-timing          test_effect_model         SKIPPED
+esp32-s3-timing          test_serial_transport     SKIPPED
+esp32-s2-force500        test_firmware_boundaries  SKIPPED
+esp32-s2-force500        test_spec_compliance      SKIPPED
+esp32-s2-force500        test_effect_model         SKIPPED
+esp32-s2-force500        test_serial_transport     SKIPPED
+esp32-s3-lcd             test_firmware_boundaries  SKIPPED
+esp32-s3-lcd             test_spec_compliance      SKIPPED
+esp32-s3-lcd             test_effect_model         SKIPPED
+esp32-s3-lcd             test_serial_transport     SKIPPED
+esp32-s2-lcd             test_firmware_boundaries  SKIPPED
+esp32-s2-lcd             test_spec_compliance      SKIPPED
+esp32-s2-lcd             test_effect_model         SKIPPED
+esp32-s2-lcd             test_serial_transport     SKIPPED
+esp32-s2-serial-fixed    test_firmware_boundaries  SKIPPED
+esp32-s2-serial-fixed    test_spec_compliance      SKIPPED
+esp32-s2-serial-fixed    test_effect_model         SKIPPED
+esp32-s2-serial-fixed    test_serial_transport     SKIPPED
+esp32-s3-serial-fixed    test_firmware_boundaries  SKIPPED
+esp32-s3-serial-fixed    test_spec_compliance      SKIPPED
+esp32-s3-serial-fixed    test_effect_model         SKIPPED
+esp32-s3-serial-fixed    test_serial_transport     SKIPPED
+esp32-s2-serial-mixed    test_firmware_boundaries  SKIPPED
+esp32-s2-serial-mixed    test_spec_compliance      SKIPPED
+esp32-s2-serial-mixed    test_effect_model         SKIPPED
+esp32-s2-serial-mixed    test_serial_transport     SKIPPED
+native-serial-benchmark  test_firmware_boundaries  SKIPPED
+native-serial-benchmark  test_spec_compliance      SKIPPED
+native-serial-benchmark  test_effect_model         SKIPPED
+native-serial-benchmark  test_serial_transport     SKIPPED
+================ 157 test cases: 157 succeeded in 00:00:10.484 ================

@@ -80,4 +80,56 @@
 #define DEFAULT_MAX_SPEED_SCALE 1.0f
 #define DEFAULT_MAX_ACCEL_SCALE 1.0f
 
+// UART framing: 0=legacy variable (0xAA), 1=fixed (0xAB), 2=mixed RX/variable TX.
+#ifndef SERIAL_FRAMING_MODE
+#define SERIAL_FRAMING_MODE 0
+#endif
+static_assert(SERIAL_FRAMING_MODE >= 0 && SERIAL_FRAMING_MODE <= 2, "Invalid UART framing mode");
+
+// Motor transport: 0=UART (default), 1=classic CAN via ESP32 TWAI.
+#ifndef MOTOR_TRANSPORT
+#define MOTOR_TRANSPORT 0
+#endif
+#ifndef USE_CAN_POSITION
+#define USE_CAN_POSITION 0
+#endif
+#define USE_EXTERNAL_POSITION (USE_SERIAL_POSITION || USE_CAN_POSITION)
+#ifndef CAN_BITRATE
+#define CAN_BITRATE 500000
+#endif
+#ifndef CAN_SINGLE_SHOT
+#define CAN_SINGLE_SHOT 0
+#endif
+static_assert(CAN_SINGLE_SHOT == 0 || CAN_SINGLE_SHOT == 1, "Invalid CAN retransmission option");
+#ifndef CAN_TX_PIN
+#define CAN_TX_PIN 4
+#endif
+#ifndef CAN_RX_PIN
+#define CAN_RX_PIN 5
+#endif
+#ifndef CAN_FORCE_ID
+#define CAN_FORCE_ID 0x201
+#endif
+#ifndef CAN_POSITION_ID
+#define CAN_POSITION_ID 0x181
+#endif
+#ifndef CAN_HEARTBEAT_ID
+#define CAN_HEARTBEAT_ID 0x701
+#endif
+static_assert(MOTOR_TRANSPORT == 0 || MOTOR_TRANSPORT == 1, "Invalid motor transport");
+static_assert(!(USE_SERIAL_POSITION && USE_CAN_POSITION), "Select one external position source");
+static_assert(!USE_CAN_POSITION || MOTOR_TRANSPORT == 1, "CAN position requires CAN transport");
+static_assert(!USE_SERIAL_POSITION || MOTOR_TRANSPORT == 0, "Serial position requires UART transport");
+static_assert(CAN_BITRATE == 125000 || CAN_BITRATE == 250000 || CAN_BITRATE == 500000 || CAN_BITRATE == 1000000,
+              "Unsupported CAN bitrate");
+static_assert(CAN_FORCE_ID <= 0x7FF && CAN_POSITION_ID <= 0x7FF && CAN_HEARTBEAT_ID <= 0x7FF &&
+              CAN_FORCE_ID >= 0 && CAN_POSITION_ID >= 0 && CAN_HEARTBEAT_ID >= 0,
+              "CAN protocol uses 11-bit standard IDs");
+static_assert(CAN_FORCE_ID != CAN_POSITION_ID && CAN_FORCE_ID != CAN_HEARTBEAT_ID && CAN_POSITION_ID != CAN_HEARTBEAT_ID,
+              "CAN IDs must be distinct");
+#if MOTOR_TRANSPORT == 1
+static_assert(CAN_TX_PIN != CAN_RX_PIN && CAN_TX_PIN != 19 && CAN_TX_PIN != 20 && CAN_RX_PIN != 19 && CAN_RX_PIN != 20,
+              "CAN pins overlap each other or native USB");
+#endif
+
 #endif

@@ -44,7 +44,10 @@ src/                          — All firmware source (SunFFB namespace)
 src/communication/            — Serial protocol to external motor controller
   serial_link.h               — 0xAA + ID + length + payload + CRC8 framing
   serial_hal_arduino.h         — HardwareSerial adapter
-  host/                       — Python protocol and serial terminal
+  can_protocol.h / can_link.h — Classic CAN vector codec and nonblocking link
+  can_hal_esp32.h              — ESP32-S2/S3 TWAI driver, filtering and bus-off recovery
+  motor_payload.h             — Shared motor/position payload types
+  host/                       — Python UART/CAN codecs and serial terminal
 
 python_apis/                  — Host-side Python test client (hidapi-based)
   sunffb_hid.py               — Mirrors firmware report structs for host testing
@@ -77,9 +80,10 @@ Tasks communicate via FreeRTOS queues and mutexes. `hid_command_task` processes 
 ## Serial Protocol (Motor Controller)
 
 - **Port**: `HardwareSerial(1)`, 115200 baud, GPIO4 (TX), GPIO5 (RX)
-- **Format**: `0xAA` + message ID + payload length + payload + CRC-8/MAXIM-DOW (ID, length and payload)
+- **Format**: default variable `0xAA + ID + LEN + payload + CRC8`; fixed `0xAB + ID + payload + CRC8` (length from ID). CRC-8/MAXIM-DOW covers ID and payload, plus LEN in variable mode. `SERIAL_FRAMING_MODE=0/1/2` selects variable/fixed/mixed; mixed receives both and transmits variable by default. Both peers must agree on fixed lengths and axis count.
 - **Outbound**: `int32_t forces[NUM_AXIS]` — computed force values
 - **Inbound**: `uint16_t pos[NUM_AXIS]` — encoder position feedback
+- Transport uses bounded nonblocking batch reads, incremental CRC, fixed-capacity buffers and per-call byte budgets. `receiveFrame` borrows the payload until the next receive; one RX and one TX owner are supported, multiple same-direction owners need external locking. See `src/communication/README.md` for APIs and benchmark limitations.
 - See `src/communication/serial_link.h`; motor output and serial position input are opt-in (`ENABLE_MOTOR_OUTPUT` / `USE_SERIAL_POSITION`, both default 0). Position 0..65535 maps around center 32768 into the signed HID range.
 
 ## TFT_eSPI Dependency
@@ -116,3 +120,12 @@ Automated tests are available via `pio test -e native -e native-axis1 -e native-
 - `esp32-s2-timing`/`esp32-s3-timing` enable UART0 rate logs and motor output/serial input.
 - `python_apis/check_update_rate.py` measures read-only host report cadence; it does not enable motors.
 - Never claim timing compliance from compilation alone. Use `usb_done` and `fresh`, motor-side reception, and wire measurements under worst-case load.
+
+## CAN Transport
+
+- `MOTOR_TRANSPORT=0` is UART (default); `=1` selects ESP32 TWAI. `USE_CAN_POSITION=1` supplies encoder feedback; otherwise ADC remains the input source. UART/CAN position sources are mutually exclusive.
+- Defaults: 500kbit/s, TX GPIO4, RX GPIO5, standard force/position/heartbeat IDs 0x201/0x181/0x701. Requires an external CAN transceiver. Config values are overridable in `config_board.h` / build flags.
+- Custom protocol uses version+axis-count, 8-bit sequence and int16 forces / uint16 positions, all little-endian. Three-axis vectors fit one classic 8-byte CAN frame. Do not treat this as a CANopen or vendor protocol.
+- TX queue is disabled and API calls use zero wait. Hardware retransmission is enabled by default (`CAN_SINGLE_SHOT=0`); opt-in single-shot may lose frames to arbitration. RX is bounded to 8 frames per 1ms and handles nonblocking bus-off recovery.
+- `motor_tx` measures acceptance, not wire completion; driver alerts can coalesce. Validate actual 500Hz on the CAN/motor side and USB host.
+- Build environments: `esp32-s2-can`, `esp32-s3-can`, `esp32-s2-can-axis1`, `esp32-s3-can-axis3`, `esp32-s2-can-timing`, `esp32-s2-can-adc`. Protocol and wiring details: `src/communication/CAN.md`.

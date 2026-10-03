@@ -27,6 +27,7 @@ _CRC8_TABLE = bytes([
 
 SYNC = 0xAA
 MAX_PAYLOAD = 64
+FIXED_SYNC = 0xAB
 
 # Message IDs (match firmware)
 MSG_FORCE = 0x01
@@ -41,27 +42,38 @@ def calc_crc8(data: bytes) -> int:
     return crc
 
 
-def build_frame(msg_id: int, payload: bytes) -> bytes:
-    """Build: [0xAA] [MSG_ID] [LEN] [PAYLOAD] [CRC8]"""
-    if len(payload) > MAX_PAYLOAD:
-        raise ValueError(f"Payload {len(payload)} > MAX_PAYLOAD")
-    header = bytes([msg_id, len(payload)])
-    crc = calc_crc8(header + payload)
-    return bytes([SYNC]) + header + payload + bytes([crc])
+def fixed_layout(num_axes: int = 2) -> dict[int, int]:
+    if num_axes not in (1, 2, 3):
+        raise ValueError("num_axes must be 1, 2 or 3")
+    return {MSG_FORCE: 4 * num_axes, MSG_POSITION: 2 * num_axes, MSG_HEARTBEAT: 0}
 
 
-def decode_frame(raw: bytes) -> Optional[Tuple[int, bytes]]:
-    """Decode a single frame. Returns (msg_id, payload) or None."""
-    if len(raw) < 4:
+def build_frame(msg_id: int, payload: bytes, *, fixed: bool = False,
+                fixed_lengths=None, max_payload=MAX_PAYLOAD) -> bytes:
+    """Variable: AA ID LEN PAYLOAD CRC; fixed: AB ID PAYLOAD CRC."""
+    if not 1 <= max_payload <= 255 or not 0 <= msg_id <= 255 or len(payload) > max_payload:
+        raise ValueError("Invalid message ID or payload length")
+    if fixed and (fixed_lengths if fixed_lengths is not None else fixed_layout()).get(msg_id) != len(payload):
+        raise ValueError("Fixed payload length does not match message ID")
+    header = bytes([msg_id]) if fixed else bytes([msg_id, len(payload)])
+    body = header + payload
+    return bytes([FIXED_SYNC if fixed else SYNC]) + body + bytes([calc_crc8(body)])
+
+
+def decode_frame(raw: bytes, *, fixed_lengths=None, max_payload=MAX_PAYLOAD) -> Optional[Tuple[int, bytes]]:
+    """Decode exactly one complete frame of either format, validating sync and size."""
+    if len(raw) < 3 or raw[0] not in (SYNC, FIXED_SYNC):
         return None
-    crc = calc_crc8(raw[1:-1])
-    if crc != raw[-1]:
+    fixed = raw[0] == FIXED_SYNC
+    offset = 2 if fixed else 3
+    if not fixed and len(raw) < 4:
         return None
-    msg_id = raw[1]
-    payload_len = raw[2]
-    if payload_len != len(raw) - 4:
+    length = (fixed_lengths if fixed_lengths is not None else fixed_layout()).get(raw[1]) if fixed else raw[2]
+    if not 1 <= max_payload <= 255 or length is None or not 0 <= length <= max_payload or len(raw) != offset + length + 1:
         return None
-    return msg_id, raw[3:3 + payload_len]
+    if calc_crc8(raw[1:-1]) != raw[-1]:
+        return None
+    return raw[1], raw[offset:-1]
 
 
 def pack_force(forces: list) -> bytes:
@@ -89,7 +101,16 @@ def unpack_position(data: bytes) -> list:
 class SerialLink:
     """Thread-safe serial link with state machine receiver."""
 
-    def __init__(self, serial_obj):
+    def __init__(self, serial_obj, *, framing="variable", num_axes=2, fixed_lengths=None, max_payload=MAX_PAYLOAD):
+        if framing not in ("variable", "fixed", "mixed"):
+            raise ValueError("Unknown framing mode")
+        if not 1 <= max_payload <= 255:
+            raise ValueError("max_payload must be 1..255")
+        self._max_payload = max_payload
+        self._framing = framing
+        self._fixed_lengths = fixed_layout(num_axes) if fixed_lengths is None else fixed_lengths
+        self._fixed = False
+        self._crc = 0
         self._serial = serial_obj
         self._lock = threading.Lock()
         self._state = "IDLE"
@@ -102,12 +123,15 @@ class SerialLink:
         self._frames_rx = 0
         self._pending = deque()
 
-    def send(self, msg_id: int, payload: bytes) -> int:
-        frame = build_frame(msg_id, payload)
+    def send(self, msg_id: int, payload: bytes, *, fixed=None) -> int:
+        fixed = self._framing == "fixed" if fixed is None else fixed
+        if (fixed and self._framing == "variable") or (not fixed and self._framing == "fixed"):
+            raise ValueError("Frame format is not enabled")
+        frame = build_frame(msg_id, payload, fixed=fixed, fixed_lengths=self._fixed_lengths, max_payload=self._max_payload)
         with self._lock:
-            self._serial.write(frame)
-            self._serial.flush()
-        return len(frame)
+            # No per-frame flush: enqueue directly and report the actual accepted byte count.
+            written = self._serial.write(frame)
+        return written
 
     def send_force(self, forces: list) -> int:
         return self.send(MSG_FORCE, pack_force(forces))
@@ -126,39 +150,54 @@ class SerialLink:
             available = self._serial.in_waiting
             if available == 0:
                 return None
-            raw = self._serial.read(available)
+            raw = self._serial.read(min(available, 4096))
             return self._process(raw)
 
+    def _seek_sync(self, byte):
+        if byte == SYNC and self._framing != "fixed":
+            self._fixed = False
+            self._state = "HAVE_SYNC"
+        elif byte == FIXED_SYNC and self._framing != "variable":
+            self._fixed = True
+            self._state = "HAVE_SYNC"
+
+    def _accept_length(self, length, byte):
+        if length is None or not 0 <= length <= self._max_payload:
+            self._len_errors += 1
+            self._state = "IDLE"
+            self._seek_sync(byte)
+        else:
+            self._payload_len = length
+            self._buf.clear()
+            self._state = "CHECK_CRC" if length == 0 else "RECEIVING"
+
     def _process(self, data: bytes) -> Optional[Tuple[int, bytes]]:
-        for b in data:
+        for byte in data:
             if self._state == "IDLE":
-                if b == SYNC:
-                    self._state = "HAVE_SYNC"
+                self._seek_sync(byte)
             elif self._state == "HAVE_SYNC":
-                self._msg_id = b
-                self._state = "HAVE_ID"
-            elif self._state == "HAVE_ID":
-                self._payload_len = b
-                if self._payload_len > MAX_PAYLOAD:
-                    self._len_errors += 1
-                    self._state = "IDLE"
+                self._msg_id = byte
+                self._crc = _CRC8_TABLE[byte]
+                if self._fixed:
+                    self._accept_length(self._fixed_lengths.get(byte), byte)
                 else:
-                    self._buf = bytearray()
-                    self._idx = 0
-                    self._state = "CHECK_CRC" if self._payload_len == 0 else "RECEIVING"
+                    self._state = "HAVE_ID"
+            elif self._state == "HAVE_ID":
+                self._crc = _CRC8_TABLE[self._crc ^ byte]
+                self._accept_length(byte, byte)
             elif self._state == "RECEIVING":
-                self._buf.append(b)
-                self._idx += 1
-                if self._idx == self._payload_len:
+                self._buf.append(byte)
+                self._crc = _CRC8_TABLE[self._crc ^ byte]
+                if len(self._buf) == self._payload_len:
                     self._state = "CHECK_CRC"
             elif self._state == "CHECK_CRC":
-                expected = calc_crc8(bytes([self._msg_id, self._payload_len]) + self._buf)
-                if b == expected:
+                self._state = "IDLE"
+                if byte == self._crc:
                     self._pending.append((self._msg_id, bytes(self._buf)))
                     self._frames_rx += 1
                 else:
                     self._crc_errors += 1
-                self._state = "IDLE"
+                    self._seek_sync(byte)
         return self._pending.popleft() if self._pending else None
 
     @property

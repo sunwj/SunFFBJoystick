@@ -297,3 +297,7 @@ with LCD disabled. LCD-enabled firmware is only for debugging.
 Condition center and deadband now use the same nominal 10000 scale as coefficients and saturation in both the descriptor and firmware. Direction fields always use the angular coordinates advertised by the descriptor; Direction Enable selects a single directional condition block. Reconnect the USB device after flashing so the host reads the updated descriptor. Raw HID clients must send nominal condition parameters and angular directions.
 
 Actuator disable mutes output while playback timers continue; Pause freezes playback. A trigger release does not stop a running effect. Sample Period holds condition output as well as waveform output. LCD remains disabled by default; enable it only for debugging.
+
+Serial transport now supports backward-compatible variable frames, compact fixed frames, and mixed reception. See [serial transport APIs and performance validation](src/communication/README.md).
+
+Classic CAN communication is available through the ESP32-S2/S3 TWAI controller, with default 500kbit/s and atomic force/position vectors for up to three axes. See [CAN protocol, configuration and validation](src/communication/CAN.md). UART remains the default.

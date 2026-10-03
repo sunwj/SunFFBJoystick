@@ -1,0 +1,128 @@
+********************************************************************************
+Obsolete PIO Core v6.1.19 is used (previous was 6.2.0)
+Please remove multiple PIO Cores from a system:
+https://docs.platformio.org/en/latest/core/installation/troubleshooting.html
+********************************************************************************
+Collected 4 tests (test_effect_model, test_firmware_boundaries, test_serial_transport, test_spec_compliance)
+
+Processing test_serial_transport in native-serial-benchmark environment
+--------------------------------------------------------------------------------
+Building...
+
+
+Testing...
+test/test_serial_transport/test_main.cpp:118:test_legacy_wire_bytes_and_crc_vector:PASS
+test/test_serial_transport/test_main.cpp:119:test_fixed_motor_frames_and_heartbeat:PASS
+test/test_serial_transport/test_main.cpp:120:test_mixed_preserves_batched_frame_order_and_views:PASS
+test/test_serial_transport/test_main.cpp:121:test_custom_fixed_layout_and_max_payload:PASS
+test/test_serial_transport/test_main.cpp:122:test_255_byte_variable_frame_and_empty_id_zero:PASS
+test/test_serial_transport/test_main.cpp:123:test_split_frames_and_crc_recovery:PASS
+test/test_serial_transport/test_main.cpp:124:test_noise_work_budget_and_invalid_lengths:PASS
+test/test_serial_transport/test_main.cpp:125:test_capacity_guard_and_tx_backpressure:PASS
+test/test_serial_transport/test_main.cpp:126:test_receiver_reset_after_partial_frame:PASS
+BENCH variable: 300000 frames, 6969 us, 43047783 frames/s, 75000 bulk reads
+BENCH fixed: 300000 frames, 6638 us, 45194336 frames/s, 65625 bulk reads
+test/test_serial_transport/test_main.cpp:128:test_parser_benchmark:PASS
+
+-----------------------
+10 Tests 0 Failures 0 Ignored 
+OK
+
+--- native-serial-benchmark:test_serial_transport [PASSED] Took 1.44 seconds ---
+
+=================================== SUMMARY ===================================
+Environment              Test                      Status    Duration
+-----------------------  ------------------------  --------  ------------
+esp32-s3                 test_firmware_boundaries  SKIPPED
+esp32-s3                 test_spec_compliance      SKIPPED
+esp32-s3                 test_effect_model         SKIPPED
+esp32-s3                 test_serial_transport     SKIPPED
+native                   test_firmware_boundaries  SKIPPED
+native                   test_spec_compliance      SKIPPED
+native                   test_effect_model         SKIPPED
+native                   test_serial_transport     SKIPPED
+native-axis1             test_firmware_boundaries  SKIPPED
+native-axis1             test_spec_compliance      SKIPPED
+native-axis1             test_effect_model         SKIPPED
+native-axis1             test_serial_transport     SKIPPED
+native-axis3             test_firmware_boundaries  SKIPPED
+native-axis3             test_spec_compliance      SKIPPED
+native-axis3             test_effect_model         SKIPPED
+native-axis3             test_serial_transport     SKIPPED
+esp32-s3-axis1           test_firmware_boundaries  SKIPPED
+esp32-s3-axis1           test_spec_compliance      SKIPPED
+esp32-s3-axis1           test_effect_model         SKIPPED
+esp32-s3-axis1           test_serial_transport     SKIPPED
+esp32-s3-axis3           test_firmware_boundaries  SKIPPED
+esp32-s3-axis3           test_spec_compliance      SKIPPED
+esp32-s3-axis3           test_effect_model         SKIPPED
+esp32-s3-axis3           test_serial_transport     SKIPPED
+esp32-s3-serial          test_firmware_boundaries  SKIPPED
+esp32-s3-serial          test_spec_compliance      SKIPPED
+esp32-s3-serial          test_effect_model         SKIPPED
+esp32-s3-serial          test_serial_transport     SKIPPED
+native-sanitized         test_firmware_boundaries  SKIPPED
+native-sanitized         test_spec_compliance      SKIPPED
+native-sanitized         test_effect_model         SKIPPED
+native-sanitized         test_serial_transport     SKIPPED
+native-sanitized-axis1   test_firmware_boundaries  SKIPPED
+native-sanitized-axis1   test_spec_compliance      SKIPPED
+native-sanitized-axis1   test_effect_model         SKIPPED
+native-sanitized-axis1   test_serial_transport     SKIPPED
+native-sanitized-axis3   test_firmware_boundaries  SKIPPED
+native-sanitized-axis3   test_spec_compliance      SKIPPED
+native-sanitized-axis3   test_effect_model         SKIPPED
+native-sanitized-axis3   test_serial_transport     SKIPPED
+esp32-s2                 test_firmware_boundaries  SKIPPED
+esp32-s2                 test_spec_compliance      SKIPPED
+esp32-s2                 test_effect_model         SKIPPED
+esp32-s2                 test_serial_transport     SKIPPED
+esp32-s2-axis1           test_firmware_boundaries  SKIPPED
+esp32-s2-axis1           test_spec_compliance      SKIPPED
+esp32-s2-axis1           test_effect_model         SKIPPED
+esp32-s2-axis1           test_serial_transport     SKIPPED
+esp32-s2-axis3           test_firmware_boundaries  SKIPPED
+esp32-s2-axis3           test_spec_compliance      SKIPPED
+esp32-s2-axis3           test_effect_model         SKIPPED
+esp32-s2-axis3           test_serial_transport     SKIPPED
+esp32-s2-serial          test_firmware_boundaries  SKIPPED
+esp32-s2-serial          test_spec_compliance      SKIPPED
+esp32-s2-serial          test_effect_model         SKIPPED
+esp32-s2-serial          test_serial_transport     SKIPPED
+esp32-s2-timing          test_firmware_boundaries  SKIPPED
+esp32-s2-timing          test_spec_compliance      SKIPPED
+esp32-s2-timing          test_effect_model         SKIPPED
+esp32-s2-timing          test_serial_transport     SKIPPED
+esp32-s3-timing          test_firmware_boundaries  SKIPPED
+esp32-s3-timing          test_spec_compliance      SKIPPED
+esp32-s3-timing          test_effect_model         SKIPPED
+esp32-s3-timing          test_serial_transport     SKIPPED
+esp32-s2-force500        test_firmware_boundaries  SKIPPED
+esp32-s2-force500        test_spec_compliance      SKIPPED
+esp32-s2-force500        test_effect_model         SKIPPED
+esp32-s2-force500        test_serial_transport     SKIPPED
+esp32-s3-lcd             test_firmware_boundaries  SKIPPED
+esp32-s3-lcd             test_spec_compliance      SKIPPED
+esp32-s3-lcd             test_effect_model         SKIPPED
+esp32-s3-lcd             test_serial_transport     SKIPPED
+esp32-s2-lcd             test_firmware_boundaries  SKIPPED
+esp32-s2-lcd             test_spec_compliance      SKIPPED
+esp32-s2-lcd             test_effect_model         SKIPPED
+esp32-s2-lcd             test_serial_transport     SKIPPED
+esp32-s2-serial-fixed    test_firmware_boundaries  SKIPPED
+esp32-s2-serial-fixed    test_spec_compliance      SKIPPED
+esp32-s2-serial-fixed    test_effect_model         SKIPPED
+esp32-s2-serial-fixed    test_serial_transport     SKIPPED
+esp32-s3-serial-fixed    test_firmware_boundaries  SKIPPED
+esp32-s3-serial-fixed    test_spec_compliance      SKIPPED
+esp32-s3-serial-fixed    test_effect_model         SKIPPED
+esp32-s3-serial-fixed    test_serial_transport     SKIPPED
+esp32-s2-serial-mixed    test_firmware_boundaries  SKIPPED
+esp32-s2-serial-mixed    test_spec_compliance      SKIPPED
+esp32-s2-serial-mixed    test_effect_model         SKIPPED
+esp32-s2-serial-mixed    test_serial_transport     SKIPPED
+native-serial-benchmark  test_firmware_boundaries  SKIPPED
+native-serial-benchmark  test_spec_compliance      SKIPPED
+native-serial-benchmark  test_effect_model         SKIPPED
+native-serial-benchmark  test_serial_transport     PASSED    00:00:01.439
+================= 10 test cases: 10 succeeded in 00:00:01.439 =================

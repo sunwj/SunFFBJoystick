@@ -3,7 +3,9 @@
 
 #include <stdint.h>
 #include <cstring>
-#include "config_ffb.h"
+#include <type_traits>
+#include <utility>
+#include "motor_payload.h"
 
 namespace SunFFB
 {
@@ -50,150 +52,207 @@ namespace SunFFB
     static constexpr uint8_t SERIAL_MSG_POSITION  = 0x02;
     static constexpr uint8_t SERIAL_MSG_HEARTBEAT = 0x03;
 
-    #pragma pack(push, 1)
-    struct ForcePayload
-    {
-        int32_t force[NUM_AXIS];
+    enum class SerialFraming : uint8_t { Variable, Fixed, Mixed };
+    enum class SerialFrameFormat : uint8_t { Variable, Fixed };
+
+    // Fixed frames have a length determined by their message ID, never by received bytes.
+    // Custom protocols can supply a different constexpr length(uint8_t) policy.
+    struct FFBFixedLayout {
+        static constexpr uint16_t length(uint8_t id) {
+            return id == SERIAL_MSG_FORCE ? sizeof(ForcePayload) :
+                   id == SERIAL_MSG_POSITION ? sizeof(PositionPayload) :
+                   id == SERIAL_MSG_HEARTBEAT ? 0 : 0xFFFF;
+        }
     };
 
-    struct PositionPayload
-    {
-        uint16_t position[NUM_AXIS];
+    struct SerialFrameView {
+        uint8_t messageId = 0;
+        uint8_t length = 0;
+        const uint8_t* payload = nullptr;
+        SerialFrameFormat format = SerialFrameFormat::Variable;
     };
-    #pragma pack(pop)
 
-    template <typename Hal>
+    template <typename T, typename = void> struct SerialHasBulkRead : std::false_type {};
+    template <typename T> struct SerialHasBulkRead<T, std::void_t<decltype(
+        std::declval<T&>().readSome(std::declval<uint8_t*>(), size_t{}))>> : std::true_type {};
+
+    // One RX owner and one TX owner are allowed concurrently. Multiple owners of
+    // either direction require external locking. RX views live until the next receive.
+    template <typename Hal, SerialFraming Framing = SerialFraming::Variable,
+              size_t MaxPayload = 64, typename FixedLayout = FFBFixedLayout>
     class FFBSerialLink
     {
-        public:
-        static constexpr uint8_t SERIAL_SYNC      = 0xAA;
-        static constexpr uint8_t SERIAL_MAX_PAYLOAD = 64;
+    public:
+        static_assert(MaxPayload > 0 && MaxPayload <= 255, "Payload length is an 8-bit field");
+        static constexpr uint8_t SERIAL_SYNC = 0xAA;
+        static constexpr uint8_t SERIAL_FIXED_SYNC = 0xAB;
+        static constexpr size_t SERIAL_MAX_PAYLOAD = MaxPayload;
+        static constexpr SerialFrameFormat DEFAULT_FORMAT = Framing == SerialFraming::Fixed ?
+            SerialFrameFormat::Fixed : SerialFrameFormat::Variable;
 
-        explicit FFBSerialLink(Hal& hal)
-            : mHal(hal), mState(SerialState_IDLE) {}
+        explicit FFBSerialLink(Hal& hal) : mHal(hal) {}
 
-        bool sendForce(const int32_t* forces)
-        {
-            ForcePayload p;
-            memcpy(p.force, forces, sizeof(p.force));
-            return sendRaw(SERIAL_MSG_FORCE, reinterpret_cast<const uint8_t*>(&p), sizeof(p));
+        bool sendForce(const int32_t* forces, SerialFrameFormat format = DEFAULT_FORMAT) {
+            return sendRaw(SERIAL_MSG_FORCE, reinterpret_cast<const uint8_t*>(forces), sizeof(ForcePayload), format);
         }
-
-        void sendPosition(const uint16_t* positions)
-        {
-            PositionPayload p;
-            memcpy(p.position, positions, sizeof(p.position));
-            sendRaw(SERIAL_MSG_POSITION, reinterpret_cast<const uint8_t*>(&p), sizeof(p));
+        bool sendPosition(const uint16_t* positions, SerialFrameFormat format = DEFAULT_FORMAT) {
+            return sendRaw(SERIAL_MSG_POSITION, reinterpret_cast<const uint8_t*>(positions), sizeof(PositionPayload), format);
         }
+        bool sendHeartbeat() { return sendRaw(SERIAL_MSG_HEARTBEAT, nullptr, 0); }
 
-        uint8_t receive(uint8_t* payload)
-        {
-            // Report only frames completed during this call. Keeping the previous
-            // message ID would make an idle/partial receive look like a new frame.
-            mLastMsgId = 0;
-            mLastPayloadLen = 0;
-            // Bound work even if the UART continuously receives corrupt bytes.
-            uint16_t budget = SERIAL_MAX_PAYLOAD + 4;
-            while (budget-- > 0 && mHal.available() > 0) {
-                uint8_t b = mHal.read();
-                processByte(b, payload);
-                if (mLastMsgId != 0) return mLastMsgId;
+        bool sendRaw(uint8_t id, const uint8_t* payload, size_t length,
+                     SerialFrameFormat format = DEFAULT_FORMAT) {
+            if (length > MaxPayload || (length && !payload)) return false;
+            if constexpr (Framing == SerialFraming::Variable)
+                if (format != SerialFrameFormat::Variable) return false;
+            if constexpr (Framing == SerialFraming::Fixed)
+                if (format != SerialFrameFormat::Fixed) return false;
+            const bool fixed = format == SerialFrameFormat::Fixed;
+            if (fixed && FixedLayout::length(id) != length) return false;
+            mTx[0] = fixed ? SERIAL_FIXED_SYNC : SERIAL_SYNC;
+            mTx[1] = id;
+            size_t cursor = 2;
+            uint8_t crc = CRC8_TABLE[id];
+            if (!fixed) {
+                mTx[cursor++] = uint8_t(length);
+                crc = CRC8_TABLE[crc ^ uint8_t(length)];
             }
-            return mLastMsgId;
+            // Copy and checksum in one pass; one HAL write per complete frame.
+            for (size_t i = 0; i < length; ++i) {
+                const uint8_t byte = payload[i];
+                mTx[cursor++] = byte;
+                crc = CRC8_TABLE[crc ^ byte];
+            }
+            mTx[cursor++] = crc;
+            return mHal.write(mTx, cursor) == cursor;
         }
 
-        bool receivePosition(PositionPayload& out)
-        {
-            uint8_t payload[SERIAL_MAX_PAYLOAD];
-            uint8_t msgId = receive(payload);
-            if (msgId == SERIAL_MSG_POSITION && mLastPayloadLen == sizeof(out)) {
-                memcpy(&out, payload, sizeof(out));
-                return true;
+        bool receiveFrame(SerialFrameView& out, size_t byteBudget = MaxPayload + 4) {
+            out = {};
+            mLastPayloadLen = 0;
+            while (byteBudget) {
+                if (mRxBegin == mRxEnd) {
+                    const int available = mHal.available();
+                    if (available <= 0) return false;
+                    size_t count = size_t(available);
+                    if (count > sizeof(mRx)) count = sizeof(mRx);
+                    if (count > byteBudget) count = byteBudget;
+                    if constexpr (SerialHasBulkRead<Hal>::value) {
+                        mRxEnd = mHal.readSome(mRx, count);
+                    } else {
+                        // Legacy HALs still work; production HAL uses a nonblocking bulk read.
+                        mRxEnd = 0;
+                        while (mRxEnd < count) mRx[mRxEnd++] = mHal.read();
+                    }
+                    mRxBegin = 0;
+                    if (!mRxEnd) return false;
+                }
+                --byteBudget;
+                if (processByte(mRx[mRxBegin++])) {
+                    mLastPayloadLen = mLength;
+                    out = {mId, mLength, mPayload, mFormat};
+                    return true;
+                }
             }
             return false;
         }
 
+        uint8_t receive(uint8_t* out, size_t capacity = MaxPayload) {
+            SerialFrameView frame;
+            if (!receiveFrame(frame)) return 0;
+            if (frame.length > capacity || (frame.length && !out)) {
+                ++mOutputErrors;
+                return 0;
+            }
+            if (frame.length) memcpy(out, frame.payload, frame.length);
+            return frame.messageId;
+        }
+        bool receivePosition(PositionPayload& out) {
+            SerialFrameView frame;
+            if (!receiveFrame(frame) || frame.messageId != SERIAL_MSG_POSITION || frame.length != sizeof(out))
+                return false;
+            memcpy(&out, frame.payload, sizeof(out));
+            return true;
+        }
+        bool hasPendingInput() { return mRxBegin < mRxEnd || mHal.available() > 0; }
+        uint8_t getLastPayloadLength() const { return mLastPayloadLen; }
         uint32_t getCrcErrors() const { return mCrcErrors; }
         uint32_t getLenErrors() const { return mLenErrors; }
-        void resetStats() { mCrcErrors = 0; mLenErrors = 0; }
+        uint32_t getOutputErrors() const { return mOutputErrors; }
+        void resetStats() { mCrcErrors = mLenErrors = mOutputErrors = 0; }
+        // Call after a known peer reset or a timed-out partial frame. Keeps prefetched bytes.
+        void resetReceiver() { mState = State::Idle; mLastPayloadLen = 0; }
 
-        private:
-        static constexpr uint8_t SerialState_IDLE      = 0;
-        static constexpr uint8_t SerialState_HAVE_SYNC = 1;
-        static constexpr uint8_t SerialState_HAVE_ID   = 2;
-        static constexpr uint8_t SerialState_RECEIVING = 3;
-        static constexpr uint8_t SerialState_CHECK_CRC = 4;
-
-        bool sendRaw(uint8_t msgId, const uint8_t* payload, uint8_t len)
-        {
-            if (len > SERIAL_MAX_PAYLOAD) return false;
-
-            uint8_t frame[SERIAL_MAX_PAYLOAD + 4];
-            frame[0] = SERIAL_SYNC;
-            frame[1] = msgId;
-            frame[2] = len;
-            memcpy(&frame[3], payload, len);
-            frame[3 + len] = calc_frame_crc8(msgId, payload, len);
-            return mHal.write(frame, 4 + len) == size_t(4 + len);
-        }
-
-        void processByte(uint8_t b, uint8_t* payload)
-        {
-            switch (mState) {
-                case SerialState_IDLE:
-                    if (b == SERIAL_SYNC)
-                        mState = SerialState_HAVE_SYNC;
-                    break;
-
-                case SerialState_HAVE_SYNC:
-                    mMsgId = b;
-                    mState = SerialState_HAVE_ID;
-                    break;
-
-                case SerialState_HAVE_ID:
-                    mPayloadLen = b;
-                    if (mPayloadLen > SERIAL_MAX_PAYLOAD) {
-                        ++mLenErrors;
-                        mState = SerialState_IDLE;
-                        mLastMsgId = 0;
-                        break;
-                    }
-                    mIdx = 0;
-                    mState = (mPayloadLen == 0) ? SerialState_CHECK_CRC : SerialState_RECEIVING;
-                    break;
-
-                case SerialState_RECEIVING:
-                    mBuffer[mIdx++] = b;
-                    if (mIdx == mPayloadLen)
-                        mState = SerialState_CHECK_CRC;
-                    break;
-
-                case SerialState_CHECK_CRC: {
-                    const uint8_t expected = calc_frame_crc8(mMsgId, mBuffer, mPayloadLen);
-                    if (b == expected) {
-                        memcpy(payload, mBuffer, mPayloadLen);
-                        mLastMsgId = mMsgId;
-                        mLastPayloadLen = mPayloadLen;
-                    } else {
-                        ++mCrcErrors;
-                        mLastMsgId = 0;
-                    }
-                    mState = SerialState_IDLE;
-                    break;
+    private:
+        enum class State : uint8_t { Idle, Id, Length, Payload, Crc };
+        void seekSync(uint8_t byte) {
+            if constexpr (Framing != SerialFraming::Fixed) {
+                if (byte == SERIAL_SYNC) {
+                    mFormat = SerialFrameFormat::Variable;
+                    mState = State::Id;
+                    return;
+                }
+            }
+            if constexpr (Framing != SerialFraming::Variable) {
+                if (byte == SERIAL_FIXED_SYNC) {
+                    mFormat = SerialFrameFormat::Fixed;
+                    mState = State::Id;
                 }
             }
         }
-
+        void acceptLength(uint16_t length, uint8_t byte) {
+            if (length > MaxPayload) {
+                ++mLenErrors;
+                mState = State::Idle;
+                seekSync(byte);
+                return;
+            }
+            mLength = uint8_t(length);
+            mIndex = 0;
+            mState = length ? State::Payload : State::Crc;
+        }
+        bool processByte(uint8_t byte) {
+            switch (mState) {
+                case State::Idle: seekSync(byte); break;
+                case State::Id:
+                    mId = byte;
+                    mCrc = CRC8_TABLE[byte];
+                    if constexpr (Framing == SerialFraming::Fixed)
+                        acceptLength(FixedLayout::length(byte), byte);
+                    else if constexpr (Framing == SerialFraming::Variable)
+                        mState = State::Length;
+                    else {
+                        if (mFormat == SerialFrameFormat::Fixed) acceptLength(FixedLayout::length(byte), byte);
+                        else mState = State::Length;
+                    }
+                    break;
+                case State::Length:
+                    mCrc = CRC8_TABLE[mCrc ^ byte];
+                    acceptLength(byte, byte);
+                    break;
+                case State::Payload:
+                    mPayload[mIndex++] = byte;
+                    mCrc = CRC8_TABLE[mCrc ^ byte];
+                    if (mIndex == mLength) mState = State::Crc;
+                    break;
+                case State::Crc:
+                    mState = State::Idle;
+                    if (byte == mCrc) return true;
+                    ++mCrcErrors;
+                    seekSync(byte);
+                    break;
+            }
+            return false;
+        }
         Hal& mHal;
-        uint8_t mBuffer[SERIAL_MAX_PAYLOAD];
-        uint8_t mMsgId = 0;
-        uint8_t mPayloadLen = 0;
-        uint8_t mIdx = 0;
-        uint8_t mLastMsgId = 0;
-        uint8_t mLastPayloadLen = 0;
-        uint8_t mState;
-        uint32_t mCrcErrors = 0;
-        uint32_t mLenErrors = 0;
+        uint8_t mPayload[MaxPayload] = {};
+        uint8_t mTx[MaxPayload + 4];
+        uint8_t mRx[32];
+        size_t mRxBegin = 0, mRxEnd = 0;
+        State mState = State::Idle;
+        SerialFrameFormat mFormat = SerialFrameFormat::Variable;
+        uint8_t mId = 0, mLength = 0, mIndex = 0, mCrc = 0, mLastPayloadLen = 0;
+        uint32_t mCrcErrors = 0, mLenErrors = 0, mOutputErrors = 0;
     };
 }
 

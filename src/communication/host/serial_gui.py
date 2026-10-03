@@ -1,6 +1,7 @@
 import sys
 import serial
 import threading
+import time
 from serial.tools import list_ports
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
@@ -51,6 +52,17 @@ class SerialGUI(QWidget):
         settings_layout.addWidget(self.baud_label)
         settings_layout.addWidget(self.baud_box)
 
+        self.framing_box = QComboBox()
+        self.framing_box.addItems(["variable", "fixed", "mixed"])
+        self.axes_box = QComboBox()
+        self.axes_box.addItems(["1", "2", "3"])
+        self.axes_box.setCurrentText("2")
+        protocol_layout = QHBoxLayout()
+        protocol_layout.addWidget(QLabel("Framing:"))
+        protocol_layout.addWidget(self.framing_box)
+        protocol_layout.addWidget(QLabel("Axes:"))
+        protocol_layout.addWidget(self.axes_box)
+
         # Display
         self.text_display = QTextEdit()
         self.text_display.setReadOnly(True)
@@ -69,6 +81,7 @@ class SerialGUI(QWidget):
         button_layout.addWidget(self.connect_button)
 
         layout.addLayout(settings_layout)
+        layout.addLayout(protocol_layout)
         layout.addWidget(self.text_display)
         layout.addWidget(self.input_line)
         layout.addLayout(button_layout)
@@ -87,7 +100,10 @@ class SerialGUI(QWidget):
             self.serial = serial.Serial(port, baud, timeout=0.05)
             self.serial.reset_input_buffer()
             self.serial.reset_output_buffer()
-            self.link = SerialLink(self.serial)
+            self.link = SerialLink(self.serial, framing=self.framing_box.currentText(),
+                                   num_axes=int(self.axes_box.currentText()))
+            self.framing_box.setEnabled(False)
+            self.axes_box.setEnabled(False)
             self.running = True
             self.read_thread = threading.Thread(target=self.read_serial, daemon=True)
             self.read_thread.start()
@@ -103,6 +119,8 @@ class SerialGUI(QWidget):
             self.log("[INFO] Disconnected.")
         self.connect_button.setText("Connect")
         self.link = None
+        self.framing_box.setEnabled(True)
+        self.axes_box.setEnabled(True)
 
     def read_serial(self):
         while self.running:
@@ -123,6 +141,8 @@ class SerialGUI(QWidget):
                     else:
                         self.signals.data_received.emit(
                             f"[0x{msg_id:02X}] {' '.join(f'{b:02X}' for b in payload)}")
+                else:
+                    time.sleep(0.001)
             except Exception as e:
                 self.signals.data_received.emit(f"[ERROR] {e}")
                 self.running = False
