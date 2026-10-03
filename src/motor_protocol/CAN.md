@@ -1,3 +1,5 @@
+通用 CAN 帧、收发接口和 TWAI 驱动已迁移到 [`lib/EmbeddedComm`](../../lib/EmbeddedComm/README.md)。本目录的 `MotorCANLink` 与编解码函数仅负责项目电机协议；原 `FFBCANLink` 名称保留为兼容别名。
+
 CAN 通信
 
 ESP32-S2/S3 使用 Arduino 核心所附 ESP-IDF TWAI 驱动，不增加第三方固件库。默认仍为 UART；CAN 显式启用。纯 C++ CAN codec/link 与硬件 HAL 分离，其他 MCU 可提供非阻塞 `send(CANFrame)` / `receive(CANFrame&)` 适配器。
@@ -65,7 +67,7 @@ C++ codec：`encode_can_force` / `decode_can_force`、`encode_can_position` / `d
 
 按每帧 160bit 的保守预算，力和位置各 500Hz 共约 160kbit/s，默认 500kbit/s 留有余量。低波特率、其他节点优先级和总线占用会影响更新率；编译和桌面测试不能证明 500Hz。应使用 CAN 分析仪/电机端计数，并结合 `fresh`、`usb_done` 测量实际接收率、延迟和最坏负载抖动。
 
-Python 编解码在 `host/can_packet.py`，不依赖 python-can：
+Python 编解码在 `lib/EmbeddedComm/host/can_packet.py`，不依赖 python-can：
 
 ```python
 from can_packet import encode_position, decode
@@ -83,3 +85,5 @@ python3 -m unittest discover -s python_apis
 ```
 
 本轮 184 次严格 C++ 回归、65 项 Python 回归、8 个 MCU 配置构建通过。C++ 包含黄金字节、力范围、标准 ID/DLC/版本/轴数、重复序号与时间回绕、发送背压、TWAI 初始化失败清理、bus-off 恢复/重启失败和可选单次发送。TWAI 单元测试使用 mock SDK 检查控制逻辑；真实 SDK 则由 S2/S3 构建验证，电气链路、仲裁、ACK 与恢复时序尚未实机验证。
+
+主机监视、单帧发送和协议解码工具：[`lib/EmbeddedComm/host/can_cli.py`](../../lib/EmbeddedComm/host/can_cli.py)，使用方法见[主机工具说明](../../lib/EmbeddedComm/host/README.md)。

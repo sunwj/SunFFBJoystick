@@ -1,8 +1,8 @@
 #include <unity.h>
 #include <deque>
 #include <cstring>
-#include "communication/can_link.h"
-#include "communication/can_hal_esp32.h"
+#include "motor_protocol/can_link.h"
+#include <EmbeddedComm/Esp32TwaiHal.h>
 
 using namespace SunFFB;
 extern "C" uint32_t _millis()
@@ -170,7 +170,7 @@ void test_custom_ids_heartbeat_and_unrelated_frames()
 
 void test_twiai_config_and_nonblocking_transmit()
 {
-    ESP32CANHal hal;
+    EmbeddedComm::Esp32TwaiHal hal;
     TEST_ASSERT_TRUE(hal.begin(4, 5, 500000, 0x181));
     TEST_ASSERT_EQUAL_UINT32(0, TwaiStub::general.tx_queue_len);
     TEST_ASSERT_EQUAL_UINT32(16, TwaiStub::general.rx_queue_len);
@@ -189,7 +189,7 @@ void test_twiai_config_and_nonblocking_transmit()
 
 void test_optional_single_shot_and_invalid_dlc_receive()
 {
-    ESP32CANHal hal;
+    EmbeddedComm::Esp32TwaiHal hal;
     TEST_ASSERT_TRUE(hal.begin(4, 5, 500000, 0x181, true));
     CANFrame frame;
     frame.id = 0x201;
@@ -210,7 +210,7 @@ void test_optional_single_shot_and_invalid_dlc_receive()
 
 void test_bus_off_recovery_and_restart_failure()
 {
-    ESP32CANHal hal;
+    EmbeddedComm::Esp32TwaiHal hal;
     TEST_ASSERT_TRUE(hal.begin(4, 5, 500000, 0x181));
     TwaiStub::state = TWAI_STATE_BUS_OFF;
     TwaiStub::alerts = TWAI_ALERT_BUS_OFF | TWAI_ALERT_TX_FAILED;
@@ -234,7 +234,7 @@ void test_bus_off_recovery_and_restart_failure()
 
 void test_start_failure_cleanup_and_bad_configuration()
 {
-    ESP32CANHal hal;
+    EmbeddedComm::Esp32TwaiHal hal;
     TEST_ASSERT_FALSE(hal.begin(4, 4, 500000, 0x181));
     TEST_ASSERT_FALSE(hal.begin(4, 5, 333333, 0x181));
     TwaiStub::startFails = true;
@@ -245,9 +245,18 @@ void test_start_failure_cleanup_and_bad_configuration()
     TEST_ASSERT_FALSE(hal.begin(4, 5, 500000, 0x181));
 }
 
+void test_generic_twiai_accept_all_filter()
+{
+    EmbeddedComm::Esp32TwaiHal hal;
+    TEST_ASSERT_TRUE(hal.begin(4, 5, 500000));
+    TEST_ASSERT_EQUAL_HEX32(0, TwaiStub::filter.acceptance_code);
+    TEST_ASSERT_EQUAL_HEX32(0xFFFFFFFFu, TwaiStub::filter.acceptance_mask);
+}
+
 int main()
 {
     UNITY_BEGIN();
+    RUN_TEST(test_generic_twiai_accept_all_filter);
     RUN_TEST(test_force_vector_wire_and_bounds);
     RUN_TEST(test_position_vector_little_endian_and_validation);
     RUN_TEST(test_position_duplicates_wrap_and_peer_reset);

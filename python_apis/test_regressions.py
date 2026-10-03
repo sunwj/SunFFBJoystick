@@ -13,7 +13,7 @@ from sunffb_hid import DIRECTION_ENABLE, NUM_AXIS
 from test_main import FakeController
 import example_cli
 
-packet_path = Path(__file__).resolve().parents[1] / 'src/communication/host/packet.py'
+packet_path = Path(__file__).resolve().parents[1] / 'lib/EmbeddedComm/host/packet.py'
 spec = importlib.util.spec_from_file_location('sunffb_packet_tests', packet_path)
 packet = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(packet)

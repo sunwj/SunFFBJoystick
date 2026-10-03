@@ -7,7 +7,7 @@
 #include <cstdio>
 
 #endif
-#include "communication/serial_link.h"
+#include "motor_protocol/serial_link.h"
 
 using namespace SunFFB;
 extern "C" uint32_t _millis()

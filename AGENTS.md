@@ -41,13 +41,14 @@ src/                          — All firmware source (SunFFB namespace)
   math_utils.h                — clamp, fast math stubs
   hid_pid.h                   — HID PID usage constants
 
-src/communication/            — Serial protocol to external motor controller
+src/motor_protocol/           — Project motor protocol adapters
   serial_link.h               — 0xAA + ID + length + payload + CRC8 framing
-  serial_hal_arduino.h         — HardwareSerial adapter
   can_protocol.h / can_link.h — Classic CAN vector codec and nonblocking link
-  can_hal_esp32.h              — ESP32-S2/S3 TWAI driver, filtering and bus-off recovery
   motor_payload.h             — Shared motor/position payload types
-  host/                       — Python UART/CAN codecs and serial terminal
+
+lib/EmbeddedComm/             — Reusable communication library
+  src/EmbeddedComm/           — Serial/CAN cores and hardware adapters
+  host/                      — Python UART/CAN codecs, serial GUI and CAN CLI
 
 python_apis/                  — Host-side Python test client (hidapi-based)
   sunffb_hid.py               — Mirrors firmware report structs for host testing
@@ -58,7 +59,7 @@ doc/                          — HID/PID spec PDFs, reference documentation
 ```
 
 - **`include/`** is an empty placeholder (contains only a README).
-- All code lives under `namespace SunFFB`.
+- Firmware and motor-protocol adapters use `namespace SunFFB`; the independent communication library uses `namespace EmbeddedComm`.
 
 ## FreeRTOS Task Architecture
 
@@ -83,8 +84,8 @@ Tasks communicate via FreeRTOS queues and mutexes. `hid_command_task` processes 
 - **Format**: default variable `0xAA + ID + LEN + payload + CRC8`; fixed `0xAB + ID + payload + CRC8` (length from ID). CRC-8/MAXIM-DOW covers ID and payload, plus LEN in variable mode. `SERIAL_FRAMING_MODE=0/1/2` selects variable/fixed/mixed; mixed receives both and transmits variable by default. Both peers must agree on fixed lengths and axis count.
 - **Outbound**: `int32_t forces[NUM_AXIS]` — computed force values
 - **Inbound**: `uint16_t pos[NUM_AXIS]` — encoder position feedback
-- Transport uses bounded nonblocking batch reads, incremental CRC, fixed-capacity buffers and per-call byte budgets. `receiveFrame` borrows the payload until the next receive; one RX and one TX owner are supported, multiple same-direction owners need external locking. See `src/communication/README.md` for APIs and benchmark limitations.
-- See `src/communication/serial_link.h`; motor output and serial position input are opt-in (`ENABLE_MOTOR_OUTPUT` / `USE_SERIAL_POSITION`, both default 0). Position 0..65535 maps around center 32768 into the signed HID range.
+- Transport uses bounded nonblocking batch reads, incremental CRC, fixed-capacity buffers and per-call byte budgets. `receiveFrame` borrows the payload until the next receive; one RX and one TX owner are supported, multiple same-direction owners need external locking. See `src/motor_protocol/README.md` for APIs and benchmark limitations.
+- See `src/motor_protocol/serial_link.h`; motor output and serial position input are opt-in (`ENABLE_MOTOR_OUTPUT` / `USE_SERIAL_POSITION`, both default 0). Position 0..65535 maps around center 32768 into the signed HID range.
 
 ## TFT_eSPI Dependency
 
@@ -128,7 +129,7 @@ Automated tests are available via `pio test -e native -e native-axis1 -e native-
 - Custom protocol uses version+axis-count, 8-bit sequence and int16 forces / uint16 positions, all little-endian. Three-axis vectors fit one classic 8-byte CAN frame. Do not treat this as a CANopen or vendor protocol.
 - TX queue is disabled and API calls use zero wait. Hardware retransmission is enabled by default (`CAN_SINGLE_SHOT=0`); opt-in single-shot may lose frames to arbitration. RX is bounded to 8 frames per 1ms and handles nonblocking bus-off recovery.
 - `motor_tx` measures acceptance, not wire completion; driver alerts can coalesce. Validate actual 500Hz on the CAN/motor side and USB host.
-- Build environments: `esp32-s2-can`, `esp32-s3-can`, `esp32-s2-can-axis1`, `esp32-s3-can-axis3`, `esp32-s2-can-timing`, `esp32-s2-can-adc`. Protocol and wiring details: `src/communication/CAN.md`.
+- Build environments: `esp32-s2-can`, `esp32-s3-can`, `esp32-s2-can-axis1`, `esp32-s3-can-axis3`, `esp32-s2-can-timing`, `esp32-s2-can-adc`. Protocol and wiring details: `src/motor_protocol/CAN.md`.
 
 ## C/C++ Code Style
 
@@ -137,3 +138,11 @@ Automated tests are available via `pio test -e native -e native-axis1 -e native-
 - Separate function definitions with a blank line. In classes, group related function declarations and data members by purpose, and separate the groups with a blank line.
 - Inside functions, separate logical stages (validation, preparation, processing, state updates, and output) with a blank line where it helps reading. Keep related statements together; do not add a blank line after every statement. Keep explanatory comments attached to their block.
 - Preserve each file's LF/CRLF convention. Formatting must not change logic, wire layouts or report descriptors. Do not format the forwarding `src/constants.h`.
+
+## Reusable Communication Library
+
+- `lib/EmbeddedComm` is a standalone header-only C++17 library, with PlatformIO and Arduino metadata. Core headers must not depend on firmware configuration, FreeRTOS, USB, axis count, or motor message types.
+- `SerialLink` handles generic fixed/variable/mixed framing; fixed lengths come from an application policy. `CanLink` handles raw classic CAN frames. Arduino UART and ESP-IDF 4.x TWAI are separate hardware adapters.
+- Motor payloads, message IDs, sequence/deduplication rules and force scaling stay in `src/motor_protocol`, using `MotorSerialLink` and `MotorCANLink`. Old FFB names are compatibility aliases.
+- `pio test -e native-comm` compiles independent library tests with C++17 and no firmware sources. Normal native environments exclude this standalone suite.
+- Porting instructions and HAL contracts: `lib/EmbeddedComm/README.md`.

@@ -1,7 +1,7 @@
 import importlib.util
 from pathlib import Path
 import unittest
-spec = importlib.util.spec_from_file_location('serial_transport_packet', Path(__file__).resolve().parents[1] / 'src/communication/host/packet.py')
+spec = importlib.util.spec_from_file_location('serial_transport_packet', Path(__file__).resolve().parents[1] / 'lib/EmbeddedComm/host/packet.py')
 packet = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(packet)
 

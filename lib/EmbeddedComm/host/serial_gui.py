@@ -19,7 +19,7 @@ class SerialSignalBridge(QObject):
 class SerialGUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("SunFFB Serial Terminal")
+        self.setWindowTitle("EmbeddedComm Serial Terminal")
         self.resize(700, 450)
 
         self.link: SerialLink | None = None

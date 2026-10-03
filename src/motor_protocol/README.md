@@ -1,3 +1,5 @@
+通用 C++ 传输核心已迁移到 [`lib/EmbeddedComm`](../../lib/EmbeddedComm/README.md)，移植到其他项目时复制该库目录。本目录保留电机协议；串口/CAN 主机工具位于 [`lib/EmbeddedComm/host`](../../lib/EmbeddedComm/host/README.md)。固件使用 `MotorSerialLink`，`FFBSerialLink` 是兼容别名。
+
 串口传输
 
 默认保持原变长帧的字节格式。固定帧和混合模式需要显式启用，不进行自动协商。

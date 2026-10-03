@@ -2,20 +2,12 @@
 #define SUNFFB_CAN_PROTOCOL_H
 
 #include <stdint.h>
+#include <EmbeddedComm/CanFrame.h>
 #include "motor_payload.h"
 
 namespace SunFFB
 {
-    // Classic CAN, standard IDs, one atomic vector per frame. Hardware handles CRC.
-    struct CANFrame
-    {
-        uint32_t id = 0;
-        uint8_t length = 0;
-        bool extended = false;
-        bool remote = false;
-
-        uint8_t data[8] = {};
-    };
+    using CANFrame = EmbeddedComm::CANFrame;
 
     struct CANIds
     {

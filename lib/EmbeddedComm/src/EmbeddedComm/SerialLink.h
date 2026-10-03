@@ -1,13 +1,13 @@
-#ifndef _SERIAL_LINK_H_
-#define _SERIAL_LINK_H_
+#ifndef EMBEDDED_COMM_SERIAL_LINK_H
+#define EMBEDDED_COMM_SERIAL_LINK_H
 
 #include <stdint.h>
 #include <cstring>
 #include <type_traits>
 #include <utility>
-#include "motor_payload.h"
+#include <cstddef>
 
-namespace SunFFB
+namespace EmbeddedComm
 {
     // CRC-8/MAXIM-DOW (poly 0x31, reflected poly 0x8C, init/xorout 0x00).
     static constexpr uint8_t CRC8_TABLE[256] = {
@@ -30,7 +30,7 @@ namespace SunFFB
         0x74, 0x2A, 0xC8, 0x96, 0x15, 0x4B, 0xA9, 0xF7, 0xB6, 0xE8, 0x0A, 0x54, 0xD7, 0x89, 0x6B,
         0x35};
 
-    __attribute__((always_inline)) static inline uint8_t calc_crc8(const uint8_t* data, uint8_t len)
+    static inline uint8_t calc_crc8(const uint8_t* data, uint8_t len)
     {
         uint8_t crc = 0;
 
@@ -39,8 +39,7 @@ namespace SunFFB
         return crc;
     }
 
-    __attribute__((always_inline)) static inline uint8_t
-    calc_frame_crc8(uint8_t msgId, const uint8_t* payload, uint8_t len)
+    static inline uint8_t calc_frame_crc8(uint8_t msgId, const uint8_t* payload, uint8_t len)
     {
         uint8_t crc = CRC8_TABLE[msgId];
         crc = CRC8_TABLE[crc ^ len];
@@ -49,10 +48,6 @@ namespace SunFFB
             crc = CRC8_TABLE[crc ^ payload[i]];
         return crc;
     }
-
-    static constexpr uint8_t SERIAL_MSG_FORCE = 0x01;
-    static constexpr uint8_t SERIAL_MSG_POSITION = 0x02;
-    static constexpr uint8_t SERIAL_MSG_HEARTBEAT = 0x03;
 
     enum class SerialFraming : uint8_t
     {
@@ -69,14 +64,11 @@ namespace SunFFB
 
     // Fixed frames have a length determined by their message ID, never by received bytes.
     // Custom protocols can supply a different constexpr length(uint8_t) policy.
-    struct FFBFixedLayout
+    struct NoFixedLayout
     {
-        static constexpr uint16_t length(uint8_t id)
+        static constexpr uint16_t length(uint8_t)
         {
-            return id == SERIAL_MSG_FORCE       ? sizeof(ForcePayload)
-                   : id == SERIAL_MSG_POSITION  ? sizeof(PositionPayload)
-                   : id == SERIAL_MSG_HEARTBEAT ? 0
-                                                : 0xFFFF;
+            return 0xFFFF;
         }
     };
 
@@ -93,7 +85,6 @@ namespace SunFFB
     };
 
     template <typename T>
-
     struct SerialHasBulkRead<
         T, std::void_t<decltype(std::declval<T&>().readSome(std::declval<uint8_t*>(), size_t{}))>>
         : std::true_type
@@ -103,9 +94,8 @@ namespace SunFFB
     // One RX owner and one TX owner are allowed concurrently. Multiple owners of
     // either direction require external locking. RX views live until the next receive.
     template <typename Hal, SerialFraming Framing = SerialFraming::Variable, size_t MaxPayload = 64,
-              typename FixedLayout = FFBFixedLayout>
-
-    class FFBSerialLink
+              typename FixedLayout = NoFixedLayout>
+    class SerialLink
     {
         public:
         static_assert(MaxPayload > 0 && MaxPayload <= 255, "Payload length is an 8-bit field");
@@ -116,25 +106,8 @@ namespace SunFFB
                                                                 ? SerialFrameFormat::Fixed
                                                                 : SerialFrameFormat::Variable;
 
-        explicit FFBSerialLink(Hal& hal) : mHal(hal)
+        explicit SerialLink(Hal& hal) : mHal(hal)
         {
-        }
-
-        bool sendForce(const int32_t* forces, SerialFrameFormat format = DEFAULT_FORMAT)
-        {
-            return sendRaw(SERIAL_MSG_FORCE, reinterpret_cast<const uint8_t*>(forces),
-                           sizeof(ForcePayload), format);
-        }
-
-        bool sendPosition(const uint16_t* positions, SerialFrameFormat format = DEFAULT_FORMAT)
-        {
-            return sendRaw(SERIAL_MSG_POSITION, reinterpret_cast<const uint8_t*>(positions),
-                           sizeof(PositionPayload), format);
-        }
-
-        bool sendHeartbeat()
-        {
-            return sendRaw(SERIAL_MSG_HEARTBEAT, nullptr, 0);
         }
 
         bool sendRaw(uint8_t id, const uint8_t* payload, size_t length,
@@ -240,17 +213,6 @@ namespace SunFFB
             if (frame.length)
                 memcpy(out, frame.payload, frame.length);
             return frame.messageId;
-        }
-
-        bool receivePosition(PositionPayload& out)
-        {
-            SerialFrameView frame;
-            if (!receiveFrame(frame) || frame.messageId != SERIAL_MSG_POSITION ||
-                frame.length != sizeof(out))
-                return false;
-
-            memcpy(&out, frame.payload, sizeof(out));
-            return true;
         }
 
         bool hasPendingInput()
@@ -397,6 +359,6 @@ namespace SunFFB
 
         uint32_t mCrcErrors = 0, mLenErrors = 0, mOutputErrors = 0;
     };
-} // namespace SunFFB
+} // namespace EmbeddedComm
 
 #endif

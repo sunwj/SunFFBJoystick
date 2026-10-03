@@ -15,15 +15,15 @@
 #include "ffb_report_dispatch.h"
 #include "ffb_device_input.h"
 #include "ffb_force_calculator.h"
-#include "communication/motor_payload.h"
+#include "motor_protocol/motor_payload.h"
 
 #if MOTOR_TRANSPORT == 1
-#include "communication/can_hal_esp32.h"
-#include "communication/can_link.h"
+#include <EmbeddedComm/Esp32TwaiHal.h>
+#include "motor_protocol/can_link.h"
 
 #else
-#include "communication/serial_hal_arduino.h"
-#include "communication/serial_link.h"
+#include <EmbeddedComm/ArduinoSerialHal.h>
+#include "motor_protocol/serial_link.h"
 
 #endif
 #include "realtime_timing.h"
@@ -126,14 +126,14 @@ QueueHandle_t gForces;
 QueueHandle_t gJoystickReportData;
 
 #if MOTOR_TRANSPORT == 1
-SunFFB::ESP32CANHal canHal;
-SunFFB::FFBCANLink<SunFFB::ESP32CANHal> motorLink(canHal, {CAN_FORCE_ID, CAN_POSITION_ID,
-                                                           CAN_HEARTBEAT_ID});
+EmbeddedComm::Esp32TwaiHal canHal;
+SunFFB::MotorCANLink<EmbeddedComm::Esp32TwaiHal> motorLink(canHal, {CAN_FORCE_ID, CAN_POSITION_ID,
+                                                                    CAN_HEARTBEAT_ID});
 #else
 HardwareSerial comSerial(1);
-SunFFB::ArduinoSerialHal serialHal(comSerial);
-SunFFB::FFBSerialLink<SunFFB::ArduinoSerialHal,
-                      static_cast<SunFFB::SerialFraming>(SERIAL_FRAMING_MODE)>
+EmbeddedComm::ArduinoSerialHal serialHal(comSerial);
+SunFFB::MotorSerialLink<EmbeddedComm::ArduinoSerialHal,
+                        static_cast<SunFFB::SerialFraming>(SERIAL_FRAMING_MODE)>
     motorLink(serialHal);
 
 #endif

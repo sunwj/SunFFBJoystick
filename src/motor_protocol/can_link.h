@@ -2,6 +2,7 @@
 #define SUNFFB_CAN_LINK_H
 
 #include "can_protocol.h"
+#include <EmbeddedComm/CanLink.h>
 
 namespace SunFFB
 {
@@ -13,10 +14,10 @@ namespace SunFFB
     };
 
     // One TX owner / one RX owner. No per-frame allocation or waiting.
-    template <typename Hal> class FFBCANLink
+    template <typename Hal> class MotorCANLink
     {
         public:
-        explicit FFBCANLink(Hal& hal, CANIds ids = {}, uint32_t resyncUs = 100000)
+        explicit MotorCANLink(Hal& hal, CANIds ids = {}, uint32_t resyncUs = 100000)
             : mHal(hal), mIds(ids), mResyncUs(resyncUs)
         {
         }
@@ -108,7 +109,7 @@ namespace SunFFB
         }
 
         private:
-        Hal& mHal;
+        EmbeddedComm::CanLink<Hal> mHal;
         CANIds mIds;
 
         uint32_t mResyncUs, mLastRxUs = 0, mIgnored = 0, mDuplicates = 0;
@@ -116,5 +117,7 @@ namespace SunFFB
         uint8_t mTxSequence = 0, mRxSequence = 0;
         bool mHasSequence = false;
     };
+    template <typename Hal> using FFBCANLink = MotorCANLink<Hal>;
+
 } // namespace SunFFB
 #endif

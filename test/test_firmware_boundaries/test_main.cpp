@@ -4,7 +4,7 @@
 #include <vector>
 #include "ffb_force_calculator.h"
 #include "ffb_report_dispatch.h"
-#include "communication/serial_link.h"
+#include "motor_protocol/serial_link.h"
 
 using namespace SunFFB;
 static uint32_t nowMs, nowUs;

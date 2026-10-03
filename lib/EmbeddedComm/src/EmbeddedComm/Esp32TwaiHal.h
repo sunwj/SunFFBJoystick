@@ -1,12 +1,12 @@
-#ifndef SUNFFB_CAN_HAL_ESP32_H
-#define SUNFFB_CAN_HAL_ESP32_H
+#ifndef EMBEDDED_COMM_ESP32_TWAI_HAL_H
+#define EMBEDDED_COMM_ESP32_TWAI_HAL_H
 
 #include <atomic>
 #include <cstring>
 #include <driver/twai.h>
-#include "can_protocol.h"
+#include "CanFrame.h"
 
-namespace SunFFB
+namespace EmbeddedComm
 {
     struct CANDriverStats
     {
@@ -15,13 +15,13 @@ namespace SunFFB
     };
 
     // Arduino-ESP32 2.x / ESP-IDF 4.x TWAI. The peripheral requires an external transceiver.
-    class ESP32CANHal
+    class Esp32TwaiHal
     {
         public:
-        bool begin(int txPin, int rxPin, uint32_t bitrate, uint16_t positionId,
+        bool begin(int txPin, int rxPin, uint32_t bitrate, uint16_t receiveId = 0xFFFF,
                    bool singleShot = false)
         {
-            if (mInstalled || positionId > 0x7FF || txPin == rxPin)
+            if (mInstalled || (receiveId > 0x7FF && receiveId != 0xFFFF) || txPin == rxPin)
                 return false;
 
             twai_timing_config_t timing{};
@@ -46,16 +46,17 @@ namespace SunFFB
             twai_general_config_t general =
                 TWAI_GENERAL_CONFIG_DEFAULT(gpio_num_t(txPin), gpio_num_t(rxPin), TWAI_MODE_NORMAL);
             general.tx_queue_len =
-                0; // Latest force only: never queue older commands behind the bus.
+                0; // No software TX backlog: retry backpressure in the application.
             general.rx_queue_len = 16;
             general.alerts_enabled = TWAI_ALERT_TX_SUCCESS | TWAI_ALERT_TX_FAILED |
                                      TWAI_ALERT_BUS_OFF | TWAI_ALERT_BUS_RECOVERED |
                                      TWAI_ALERT_RX_QUEUE_FULL;
 
-            // Single standard-ID filter; RTR/extended validation also occurs in the codec.
+            // 0xFFFF accepts all IDs; otherwise filter one standard ID.
+            // Application validates RTR/extended format as needed.
             twai_filter_config_t filter{};
-            filter.acceptance_code = uint32_t(positionId) << 21;
-            filter.acceptance_mask = 0x001FFFFF;
+            filter.acceptance_code = receiveId == 0xFFFF ? 0 : uint32_t(receiveId) << 21;
+            filter.acceptance_mask = receiveId == 0xFFFF ? 0xFFFFFFFFu : 0x001FFFFFu;
             filter.single_filter = true;
             if (twai_driver_install(&general, &timing, &filter) != ESP_OK)
                 return false;
@@ -181,5 +182,5 @@ namespace SunFFB
         std::atomic<uint32_t> mAccepted{0}, mRejected{0}, mSuccess{0}, mFailure{0}, mBusOff{0},
             mRecoveries{0}, mOverflow{0};
     };
-} // namespace SunFFB
+} // namespace EmbeddedComm
 #endif

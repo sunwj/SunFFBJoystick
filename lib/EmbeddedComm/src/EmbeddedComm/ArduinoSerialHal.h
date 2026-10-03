@@ -1,14 +1,14 @@
-#ifndef _SERIAL_HAL_ARDUINO_H_
-#define _SERIAL_HAL_ARDUINO_H_
+#ifndef EMBEDDED_COMM_ARDUINO_SERIAL_HAL_H
+#define EMBEDDED_COMM_ARDUINO_SERIAL_HAL_H
 
 #include <Arduino.h>
 
-namespace SunFFB
+namespace EmbeddedComm
 {
-    class ArduinoSerialHal
+    template <typename Serial> class BasicArduinoSerialHal
     {
         public:
-        explicit ArduinoSerialHal(HardwareSerial& serial) : mSerial(serial)
+        explicit BasicArduinoSerialHal(Serial& serial) : mSerial(serial)
         {
         }
 
@@ -52,8 +52,10 @@ namespace SunFFB
         }
 
         private:
-        HardwareSerial& mSerial;
+        Serial& mSerial;
     };
-} // namespace SunFFB
+    using ArduinoSerialHal = BasicArduinoSerialHal<HardwareSerial>;
+
+} // namespace EmbeddedComm
 
 #endif

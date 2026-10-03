@@ -1,0 +1,10 @@
+{
+    "name": "EmbeddedComm",
+    "version": "1.0.0",
+    "description": "Allocation-free serial framing and classic CAN transport with hardware adapters.",
+    "frameworks": "*",
+    "platforms": "*",
+    "build": {
+        "includeDir": "src"
+    }
+}

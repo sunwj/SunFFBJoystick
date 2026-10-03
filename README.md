@@ -298,6 +298,8 @@ Condition center and deadband now use the same nominal 10000 scale as coefficien
 
 Actuator disable mutes output while playback timers continue; Pause freezes playback. A trigger release does not stop a running effect. Sample Period holds condition output as well as waveform output. LCD remains disabled by default; enable it only for debugging.
 
-Serial transport now supports backward-compatible variable frames, compact fixed frames, and mixed reception. See [serial transport APIs and performance validation](src/communication/README.md).
+Serial transport now supports backward-compatible variable frames, compact fixed frames, and mixed reception. See [serial transport APIs and performance validation](src/motor_protocol/README.md).
 
-Classic CAN communication is available through the ESP32-S2/S3 TWAI controller, with default 500kbit/s and atomic force/position vectors for up to three axes. See [CAN protocol, configuration and validation](src/communication/CAN.md). UART remains the default.
+Classic CAN communication is available through the ESP32-S2/S3 TWAI controller, with default 500kbit/s and atomic force/position vectors for up to three axes. See [CAN protocol, configuration and validation](src/motor_protocol/CAN.md). UART remains the default.
+
+Reusable communication core and UART/CAN host tools: [EmbeddedComm](lib/EmbeddedComm/README.md) and [host tools](lib/EmbeddedComm/host/README.md).
