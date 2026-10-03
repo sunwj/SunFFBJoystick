@@ -8,13 +8,16 @@ namespace SunFFB
     class ArduinoSerialHal
     {
         public:
-        explicit ArduinoSerialHal(HardwareSerial& serial)
-            : mSerial(serial) {}
+        explicit ArduinoSerialHal(HardwareSerial& serial) : mSerial(serial)
+        {
+        }
 
         size_t write(const uint8_t* data, uint16_t len)
         {
             // One TX owner: defer instead of blocking a real-time task on a full FIFO.
-            if (mSerial.availableForWrite() < len) return 0;
+            if (mSerial.availableForWrite() < len)
+                return 0;
+
             return mSerial.write(data, len);
         }
 
@@ -30,11 +33,15 @@ namespace SunFFB
             return mSerial.read(out, capacity);
 #else
             size_t count = 0;
-            while (count < capacity && mSerial.available() > 0) {
+
+            while (count < capacity && mSerial.available() > 0)
+            {
                 const int byte = mSerial.read();
-                if (byte < 0) break;
+                if (byte < 0)
+                    break;
                 out[count++] = uint8_t(byte);
             }
+
             return count;
 #endif
         }
@@ -47,6 +54,6 @@ namespace SunFFB
         private:
         HardwareSerial& mSerial;
     };
-}
+} // namespace SunFFB
 
 #endif

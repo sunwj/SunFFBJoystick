@@ -129,3 +129,11 @@ Automated tests are available via `pio test -e native -e native-axis1 -e native-
 - TX queue is disabled and API calls use zero wait. Hardware retransmission is enabled by default (`CAN_SINGLE_SHOT=0`); opt-in single-shot may lose frames to arbitration. RX is bounded to 8 frames per 1ms and handles nonblocking bus-off recovery.
 - `motor_tx` measures acceptance, not wire completion; driver alerts can coalesce. Validate actual 500Hz on the CAN/motor side and USB host.
 - Build environments: `esp32-s2-can`, `esp32-s3-can`, `esp32-s2-can-axis1`, `esp32-s3-can-axis3`, `esp32-s2-can-timing`, `esp32-s2-can-adc`. Protocol and wiring details: `src/communication/CAN.md`.
+
+## C/C++ Code Style
+
+- Follow `.clang-format`: Allman braces, with code-block opening `{` on its own line.
+- Expand short functions, if/else, loops and case bodies; do not compress multiple statements onto one line. Use 4-space indentation and wrap long expressions for readability.
+- Separate function definitions with a blank line. In classes, group related function declarations and data members by purpose, and separate the groups with a blank line.
+- Inside functions, separate logical stages (validation, preparation, processing, state updates, and output) with a blank line where it helps reading. Keep related statements together; do not add a blank line after every statement. Keep explanatory comments attached to their block.
+- Preserve each file's LF/CRLF convention. Formatting must not change logic, wire layouts or report descriptors. Do not format the forwarding `src/constants.h`.

@@ -8,16 +8,28 @@ using namespace SunFFB;
 
 static uint32_t fakeMillis;
 static uint32_t fakeMicros;
-extern "C" uint32_t _millis(void) { return fakeMillis; }
-extern "C" uint32_t _micros(void) { return fakeMicros; }
-extern "C" void _debug_printf(const char*, ...) {}
+extern "C" uint32_t _millis(void)
+{
+    return fakeMillis;
+}
 
-struct Fixture {
+extern "C" uint32_t _micros(void)
+{
+    return fakeMicros;
+}
+
+extern "C" void _debug_printf(const char*, ...)
+{
+}
+
+struct Fixture
+{
     FFBReportHandler handler;
     FFBDeviceInput input;
     FFBForceCalculator calculator;
 
-    Fixture() {
+    Fixture()
+    {
         fakeMillis = fakeMicros = 0;
         input.reset();
         DeviceControlReportData reset{4};
@@ -25,7 +37,10 @@ struct Fixture {
     }
 
     uint8_t create(uint8_t type, uint16_t duration = 1000, uint16_t direction = 0,
-                   uint16_t startDelay = 0, uint8_t gain = USB_MAX_EFFECT_GAIN, uint16_t samplePeriod = 0, uint8_t axisEnable = DIRECTION_ENABLE, uint8_t triggerButton = USB_NO_TRIGGER_BUTTON) {
+                   uint16_t startDelay = 0, uint8_t gain = USB_MAX_EFFECT_GAIN,
+                   uint16_t samplePeriod = 0, uint8_t axisEnable = DIRECTION_ENABLE,
+                   uint8_t triggerButton = USB_NO_TRIGGER_BUTTON)
+    {
         CreateNewEffectReportData request{type};
         handler.create_new_effect(&request);
         uint8_t index = handler.get_block_load_report_data()->effectBlockIndex;
@@ -44,57 +59,78 @@ struct Fixture {
         return index;
     }
 
-    void start(uint8_t index, uint8_t loops = 1) {
+    void start(uint8_t index, uint8_t loops = 1)
+    {
         EffectOperationReportData operation{index, 1, loops};
         handler.set_effect_operation(&operation);
     }
 
-    void at(uint32_t ms) {
+    void at(uint32_t ms)
+    {
         fakeMillis = ms;
         fakeMicros = ms * 1000;
     }
 
-    void calculate(int32_t (&forces)[NUM_AXIS]) {
-        for(uint8_t i = 0; i < NUM_AXIS; ++i) forces[i] = 0;
+    void calculate(int32_t (&forces)[NUM_AXIS])
+    {
+        for (uint8_t i = 0; i < NUM_AXIS; ++i)
+            forces[i] = 0;
         calculator.force_calculator(handler, input, forces);
     }
 };
 
-static void constant(Fixture& f, uint8_t index, int16_t magnitude) {
+static void constant(Fixture& f, uint8_t index, int16_t magnitude)
+{
     SetConstantForceReportData data{index, magnitude};
     f.handler.set_constant_force(&data);
 }
 
-static void ramp(Fixture& f, uint8_t index, int16_t start, int16_t end) {
+static void ramp(Fixture& f, uint8_t index, int16_t start, int16_t end)
+{
     SetRampForceReportData data{index, start, end};
     f.handler.set_ramp_force(&data);
 }
 
-static void periodic(Fixture& f, uint8_t index, uint16_t magnitude,
-                     int16_t offset, uint16_t phase, uint16_t period) {
+static void periodic(Fixture& f, uint8_t index, uint16_t magnitude, int16_t offset, uint16_t phase,
+                     uint16_t period)
+{
     SetPeriodicReportData data{index, magnitude, offset, phase, period};
     f.handler.set_periodic(&data);
 }
 
-static void condition(Fixture& f, uint8_t index, uint8_t parameterBlockOffset,
-                      int16_t cpOffset, int16_t positiveCoefficient,
-                      int16_t negativeCoefficient, uint16_t positiveSaturation = 10000,
-                      uint16_t negativeSaturation = 10000, uint16_t deadBand = 0) {
-    SetConditionReportData data{index, parameterBlockOffset, cpOffset,
-                                positiveCoefficient, negativeCoefficient,
-                                positiveSaturation, negativeSaturation, deadBand};
+static void condition(Fixture& f, uint8_t index, uint8_t parameterBlockOffset, int16_t cpOffset,
+                      int16_t positiveCoefficient, int16_t negativeCoefficient,
+                      uint16_t positiveSaturation = 10000, uint16_t negativeSaturation = 10000,
+                      uint16_t deadBand = 0)
+{
+    SetConditionReportData data{index,
+                                parameterBlockOffset,
+                                cpOffset,
+                                positiveCoefficient,
+                                negativeCoefficient,
+                                positiveSaturation,
+                                negativeSaturation,
+                                deadBand};
     f.handler.set_condition(&data);
 }
 
-static void set_input(Fixture& f, int16_t axis0, int16_t axis1, uint32_t dtUs = 10000) {
+static void set_input(Fixture& f, int16_t axis0, int16_t axis1, uint32_t dtUs = 10000)
+{
     fakeMicros += dtUs;
     int16_t axes[NUM_AXIS] = {axis0, axis1};
     f.input.update_axis(axes);
 }
-void setUp() {}
-void tearDown() {}
 
-static void test_constant_force_and_direction() {
+void setUp()
+{
+}
+
+void tearDown()
+{
+}
+
+static void test_constant_force_and_direction()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_CONSTANT);
@@ -118,23 +154,29 @@ static void test_constant_force_and_direction() {
     TEST_ASSERT_INT_WITHIN(1, 0, force[1]);
 }
 
-static void test_ramp_restarts_each_loop() {
+static void test_ramp_restarts_each_loop()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_RAMP, 100);
     ramp(f, index, 0, 10000);
     f.start(index, 3);
-    f.at(50); f.calculate(force);
+    f.at(50);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 5000, force[1]);
-    f.at(100); f.calculate(force);
+    f.at(100);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 0, force[1]);
-    f.at(250); f.calculate(force);
+    f.at(250);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 5000, force[1]);
-    f.at(300); f.calculate(force);
+    f.at(300);
+    f.calculate(force);
     TEST_ASSERT_EQUAL_INT32(0, force[1]);
 }
 
-static void test_sine_quadrants() {
+static void test_sine_quadrants()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_SINE);
@@ -142,14 +184,16 @@ static void test_sine_quadrants() {
     f.start(index);
     const uint32_t times[] = {0, 25, 50, 75};
     const int32_t expected[] = {0, 8000, 0, -8000};
-    for(unsigned i = 0; i < 4; ++i) {
+    for (unsigned i = 0; i < 4; ++i)
+    {
         f.at(times[i]);
         f.calculate(force);
         TEST_ASSERT_INT_WITHIN(2, expected[i], force[1]);
     }
 }
 
-static void test_envelope_preserves_periodic_offset() {
+static void test_envelope_preserves_periodic_offset()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_SQUARE, 200);
@@ -157,13 +201,16 @@ static void test_envelope_preserves_periodic_offset() {
     SetEnvelopeReportData envelope{index, 0, 0, 100, 0};
     f.handler.set_envelope(&envelope);
     f.start(index);
-    f.at(0); f.calculate(force);
+    f.at(0);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 2000, force[1]);
-    f.at(50); f.calculate(force);
+    f.at(50);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, -1000, force[1]);
 }
 
-static void test_infinite_loop_remains_active() {
+static void test_infinite_loop_remains_active()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_CONSTANT, 100);
@@ -175,7 +222,8 @@ static void test_infinite_loop_remains_active() {
     TEST_ASSERT_TRUE(f.handler.is_effect_playing(index, 0, fakeMillis));
 }
 
-static void test_pause_freezes_start_delay() {
+static void test_pause_freezes_start_delay()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_CONSTANT, 1000, 0, 500);
@@ -187,13 +235,16 @@ static void test_pause_freezes_start_delay() {
     f.at(1200);
     DeviceControlReportData resume{6};
     f.handler.set_device_control(&resume);
-    f.at(1499); f.calculate(force);
+    f.at(1499);
+    f.calculate(force);
     TEST_ASSERT_EQUAL_INT32(0, force[1]);
-    f.at(1500); f.calculate(force);
+    f.at(1500);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 3000, force[1]);
 }
 
-static void test_reset_and_pool_capabilities() {
+static void test_reset_and_pool_capabilities()
+{
     Fixture f;
     uint8_t index = f.create(ET_CONSTANT);
     constant(f, index, 3000);
@@ -211,7 +262,8 @@ static void test_reset_and_pool_capabilities() {
                              f.handler.get_block_load_report_data()->ramPoolAvailable);
 }
 
-static void test_combined_force_is_clamped() {
+static void test_combined_force_is_clamped()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t a = f.create(ET_CONSTANT);
@@ -224,7 +276,8 @@ static void test_combined_force_is_clamped() {
     TEST_ASSERT_EQUAL_INT32(USB_MAX_MAGNITUDE, force[1]);
 }
 
-static void test_gain_scales_constant_force() {
+static void test_gain_scales_constant_force()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_CONSTANT, 1000, 0, 0, 128);
@@ -234,19 +287,23 @@ static void test_gain_scales_constant_force() {
     TEST_ASSERT_INT_WITHIN(2, 2008, force[1]);
 }
 
-static void test_sample_period_quantizes_waveform() {
+static void test_sample_period_quantizes_waveform()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_SINE, 1000, 0, 0, USB_MAX_EFFECT_GAIN, 20);
     periodic(f, index, 8000, 0, 0, 100);
     f.start(index);
-    f.at(10); f.calculate(force);
+    f.at(10);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 0, force[1]);
-    f.at(20); f.calculate(force);
+    f.at(20);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(3, 7608, force[1]);
 }
 
-static void test_spring_position_condition() {
+static void test_spring_position_condition()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     f.input.set_tf_position(0.f);
@@ -259,7 +316,8 @@ static void test_spring_position_condition() {
     TEST_ASSERT_EQUAL_INT32(0, force[0]);
 }
 
-static void test_damper_uses_speed_metric() {
+static void test_damper_uses_speed_metric()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     f.input.set_tf_position(0.f);
@@ -273,7 +331,8 @@ static void test_damper_uses_speed_metric() {
     TEST_ASSERT_INT_WITHIN(4, -305, force[1]);
 }
 
-static void test_inertia_uses_acceleration_metric() {
+static void test_inertia_uses_acceleration_metric()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     f.input.set_tf_position(0.f);
@@ -288,7 +347,8 @@ static void test_inertia_uses_acceleration_metric() {
     TEST_ASSERT_INT_WITHIN(20, 2960, force[1]);
 }
 
-static void test_friction_is_sign_based() {
+static void test_friction_is_sign_based()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     f.input.set_tf_position(0.f);
@@ -302,7 +362,8 @@ static void test_friction_is_sign_based() {
     TEST_ASSERT_INT_WITHIN(1, -10000, force[1]);
 }
 
-static void test_fade_envelope_reduces_constant_force() {
+static void test_fade_envelope_reduces_constant_force()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_CONSTANT, 200);
@@ -310,10 +371,13 @@ static void test_fade_envelope_reduces_constant_force() {
     SetEnvelopeReportData envelope{index, 0, 0, 0, 100};
     f.handler.set_envelope(&envelope);
     f.start(index);
-    f.at(150); f.calculate(force);
+    f.at(150);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 3000, force[1]);
 }
-static void test_triangle_waveform_quadrants() {
+
+static void test_triangle_waveform_quadrants()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_TRIANGLE);
@@ -321,14 +385,16 @@ static void test_triangle_waveform_quadrants() {
     f.start(index);
     const uint32_t times[] = {0, 25, 50, 75};
     const int32_t expected[] = {0, 8000, 0, -8000};
-    for(unsigned i = 0; i < 4; ++i) {
+    for (unsigned i = 0; i < 4; ++i)
+    {
         f.at(times[i]);
         f.calculate(force);
         TEST_ASSERT_INT_WITHIN(2, expected[i], force[1]);
     }
 }
 
-static void test_sawtooth_waveforms_boundaries() {
+static void test_sawtooth_waveforms_boundaries()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t down = f.create(ET_SAWTOOTH_DOWN);
@@ -337,17 +403,21 @@ static void test_sawtooth_waveforms_boundaries() {
     periodic(f, up, 8000, 0, 0, 100);
     f.start(down);
     f.start(up);
-    f.at(0); f.calculate(force);
+    f.at(0);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(2, 0, force[1]);
-    f.at(50); f.calculate(force);
+    f.at(50);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(2, 0, force[1]);
     EffectOperationReportData stopUp{up, 3, 1};
     f.handler.set_effect_operation(&stopUp);
-    f.at(100); f.calculate(force);
+    f.at(100);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(2, 8000, force[1]);
 }
 
-static void test_sine_phase_quarter_cycle() {
+static void test_sine_phase_quarter_cycle()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_SINE);
@@ -357,7 +427,8 @@ static void test_sine_phase_quarter_cycle() {
     TEST_ASSERT_INT_WITHIN(2, 8000, force[1]);
 }
 
-static void test_condition_deadband_and_saturation() {
+static void test_condition_deadband_and_saturation()
+{
     Fixture deadband;
     int32_t force[NUM_AXIS];
     deadband.input.set_tf_position(0.f);
@@ -378,24 +449,27 @@ static void test_condition_deadband_and_saturation() {
     TEST_ASSERT_INT_WITHIN(1, -2000, force[1]);
 }
 
-static void test_effect_duration_boundary() {
+static void test_effect_duration_boundary()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
     uint8_t index = f.create(ET_CONSTANT, 100);
     constant(f, index, 3000);
     f.start(index);
-    f.at(99); f.calculate(force);
+    f.at(99);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 3000, force[1]);
-    f.at(100); f.calculate(force);
+    f.at(100);
+    f.calculate(force);
     TEST_ASSERT_INT_WITHIN(1, 0, force[1]);
     TEST_ASSERT_FALSE(f.handler.is_effect_playing(index, 0, fakeMillis));
 }
 
-static void test_button_trigger_lifecycle() {
+static void test_button_trigger_lifecycle()
+{
     Fixture f;
     int32_t force[NUM_AXIS];
-    uint8_t index = f.create(ET_CONSTANT, 100, 0, 0, USB_MAX_EFFECT_GAIN, 0,
-                             DIRECTION_ENABLE, 1);
+    uint8_t index = f.create(ET_CONSTANT, 100, 0, 0, USB_MAX_EFFECT_GAIN, 0, DIRECTION_ENABLE, 1);
     constant(f, index, 3000);
     f.start(index);
     f.input.update_buttons(0);
@@ -407,10 +481,13 @@ static void test_button_trigger_lifecycle() {
     f.input.update_buttons(0);
     f.calculate(force);
     TEST_ASSERT_EQUAL_INT32(3000, force[1]);
-    f.at(100); f.calculate(force);
+    f.at(100);
+    f.calculate(force);
     TEST_ASSERT_EQUAL_INT32(0, force[1]);
 }
-int main(int, char**) {
+
+int main(int, char**)
+{
     UNITY_BEGIN();
     RUN_TEST(test_constant_force_and_direction);
     RUN_TEST(test_ramp_restarts_each_loop);

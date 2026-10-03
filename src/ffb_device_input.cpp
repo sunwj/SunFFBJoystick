@@ -19,33 +19,34 @@ namespace SunFFB
         const float alphaPos = dtClamped / (tF_position + dtClamped);
         const float alphaSpeed = dtClamped / (tF_speed + dtClamped);
 
-        #pragma unroll
-        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+#pragma unroll
+        for (uint8_t i = 0; i < NUM_AXIS; ++i)
         {
             const float position = lpfPosition[i] += alphaPos * (axis[i] - lpfPosition[i]);
 
             float newSpeed = (position - metrics.position[i]) / dt;
             newSpeed = lpfSpeed[i] += alphaSpeed * (newSpeed - lpfSpeed[i]);
-            if(newSpeed > metrics.maxSpeed[i])
+            if (newSpeed > metrics.maxSpeed[i])
                 newSpeed = metrics.maxSpeed[i];
-            else if(newSpeed < -metrics.maxSpeed[i])
+            else if (newSpeed < -metrics.maxSpeed[i])
                 newSpeed = -metrics.maxSpeed[i];
 
             float newAccel = (newSpeed - metrics.speed[i]) / dt;
             newAccel = lpfAccel[i] += alphaSpeed * (newAccel - lpfAccel[i]);
-            if(newAccel > metrics.maxAcceleration[i])
+            if (newAccel > metrics.maxAcceleration[i])
                 newAccel = metrics.maxAcceleration[i];
-            else if(newAccel < -metrics.maxAcceleration[i])
+            else if (newAccel < -metrics.maxAcceleration[i])
                 newAccel = -metrics.maxAcceleration[i];
 
             inputData.axis[i] = position;
-            if(position > -metrics.positionDeadBand[i] && position < metrics.positionDeadBand[i])
+            if (position > -metrics.positionDeadBand[i] && position < metrics.positionDeadBand[i])
                 inputData.axis[i] = 0;
 
-            if(newSpeed > -metrics.speedDeadBand[i] && newSpeed < metrics.speedDeadBand[i])
+            if (newSpeed > -metrics.speedDeadBand[i] && newSpeed < metrics.speedDeadBand[i])
                 newSpeed = 0;
 
-            if(newAccel > -metrics.accelerationDeadBand[i] && newAccel < metrics.accelerationDeadBand[i])
+            if (newAccel > -metrics.accelerationDeadBand[i] &&
+                newAccel < metrics.accelerationDeadBand[i])
                 newAccel = 0;
 
             metrics.acceleration[i] = newAccel;
@@ -61,8 +62,8 @@ namespace SunFFB
         memset((void*)&inputData, 0, sizeof(JoystickInputReportData));
         memset((void*)&metrics, 0, sizeof(Metrics));
 
-        #pragma unroll
-        for(uint8_t i = 0; i < NUM_AXIS; ++i)
+#pragma unroll
+        for (uint8_t i = 0; i < NUM_AXIS; ++i)
         {
             metrics.maxPosition[i] = (float)USB_AXIS_MAX_ABSOLUTE;
             metrics.maxSpeed[i] = (float)USB_AXIS_MAX_ABSOLUTE * DEFAULT_MAX_SPEED_SCALE;
@@ -71,6 +72,7 @@ namespace SunFFB
             lpfSpeed[i] = 0;
             lpfAccel[i] = 0;
         }
+
         tPrev = _micros();
     }
-}
+} // namespace SunFFB
