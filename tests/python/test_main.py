@@ -109,6 +109,31 @@ class FakeController:
 
 
 class SpringBlockTests(unittest.TestCase):
+    def test_background_spring_is_independent_of_main_settings(self):
+        w = self._window()
+        try:
+            w.spn_gain.setValue(0)
+            w.spn_cond_sat.setValue(0)
+            w.apply_main_effect()
+            self.assertTrue(w.apply_spring())
+            self.assertEqual(w._spring_params.gain, 255)
+            self.assertEqual(w._spring_params.pos_sat_y, 10000)
+            self.assertEqual(w.controller.dev.sets[-1].duration, 0xFFFF)
+        finally:
+            w.close()
+
+    def test_preview_applies_device_gain(self):
+        w = self._window()
+        try:
+            w.spn_mag.setValue(10000)
+            w.apply_main_effect()
+            w.spn_device_gain.setValue(0)
+            self.assertEqual(w.canvas._fx, 0)
+            w.spn_device_gain.setValue(10000)
+            self.assertAlmostEqual(w.canvas._fx, 10000)
+        finally:
+            w.close()
+
     def test_condition_effects_keep_both_axis_blocks(self):
         for effect_type in CONDITION_TYPES:
             with self.subTest(effect_type=effect_type):

@@ -382,9 +382,7 @@ class MainWindow(QMainWindow):
         self.spn_device_gain = QSpinBox(device_group)
         self.spn_device_gain.setRange(0, 10000)
         self.spn_device_gain.setValue(10000)
-        self.spn_device_gain.valueChanged.connect(
-            lambda value: self.controller.set_device_gain(round(value * 255 / 10000))
-            if self.controller.is_connected else None)
+        self.spn_device_gain.valueChanged.connect(self._on_device_gain)
         device_layout.addWidget(self._slider_row("Device gain", self.spn_device_gain, device_group))
         control_layout.addWidget(device_group)
 
@@ -504,12 +502,19 @@ class MainWindow(QMainWindow):
         self.grp_envelope.setEnabled(effect_type not in CONDITION_TYPES)
         is_condition = effect_type in CONDITION_TYPES
         is_ramp = effect_type == RAMP
+        self.spn_mag.setMinimum(0 if effect_type in PERIODIC_TYPES else -10000)
         self.duration_row.setEnabled(not is_condition and not is_ramp)
         self.spn_mag.parentWidget().setEnabled(not is_condition and not is_ramp)
         self.grp_ramp.setToolTip("Ramp uses start/end force and its own duration; Magnitude does not apply.")
-        if is_condition:
-            self.chk_infinite.setChecked(True)
         self.chk_infinite.setEnabled(not is_condition and not is_ramp)
+
+    def _on_device_gain(self, *_args):
+        if self.controller.is_connected:
+            try:
+                self.controller.set_device_gain(round(self.spn_device_gain.value() * 255 / 10000))
+            except Exception as exc:
+                self._log(f"device gain failed: {exc}")
+        self._update_canvas()
 
     # Enumeration updates the selector only; it neither opens a device nor starts effects.
     def rescan_devices(self):
@@ -580,8 +585,8 @@ class MainWindow(QMainWindow):
             self._timer.stop()
             self.btn_connect.setText("Connect")
             self.lbl_status.setText("not connected")
-            self._desired_effect_on = restore_effect
-            self._desired_spring_on = restore_spring
+            self._set_toggle_silent(self.chk_effect_on, restore_effect)
+            self._set_toggle_silent(self.chk_spring_on, restore_spring)
             self._log("disconnected")
             return
         selected = self.cmb_devices.currentData()
@@ -595,8 +600,9 @@ class MainWindow(QMainWindow):
                 worker.error.connect(self._on_error)
             self.controller.start_worker()
             self._log("connected")
-            restore_spring = getattr(self, "_desired_spring_on", self.chk_spring_on.isChecked())
-            restore_effect = getattr(self, "_desired_effect_on", self.chk_effect_on.isChecked())
+            self._on_device_gain()
+            restore_spring = self.chk_spring_on.isChecked()
+            restore_effect = self.chk_effect_on.isChecked()
             self._set_toggle_silent(self.chk_spring_on, restore_spring)
             if restore_spring:
                 self.apply_spring()
@@ -647,8 +653,6 @@ class MainWindow(QMainWindow):
         self._log(f"worker error: {msg}")
         self.stop_effect()
         self.controller.disconnect()
-        self._desired_effect_on = False
-        self._desired_spring_on = False
         self.btn_connect.setText("Connect")
         self.lbl_status.setText("not connected")
 
@@ -676,6 +680,10 @@ class MainWindow(QMainWindow):
             if 0 < duration < 0xFFFF:
                 elapsed %= duration
             fx, fy = self._model.evaluate_combined(self._last_kin, elapsed)
+        # Firmware applies device gain after summing effects, then saturates.
+        gain = round(self.spn_device_gain.value() * 255 / 10000) / 255.0
+        fx = max(-10000, min(10000, fx * gain))
+        fy = max(-10000, min(10000, fy * gain))
         self.canvas.set_force(fx, fy)
         if hasattr(self, "lbl_debug"):
             mag = math.hypot(fx, fy)
@@ -843,11 +851,11 @@ class MainWindow(QMainWindow):
             effect_type=SPRING,
             pos_coeff_x=self.spn_bg_spring.value(), neg_coeff_x=self.spn_bg_spring.value(),
             pos_coeff_y=self.spn_bg_spring.value(), neg_coeff_y=self.spn_bg_spring.value(),
-            pos_sat_x=self.spn_cond_sat.value(), neg_sat_x=self.spn_cond_sat.value(),
-            pos_sat_y=self.spn_cond_sat.value(), neg_sat_y=self.spn_cond_sat.value(),
+            pos_sat_x=10000, neg_sat_x=10000,
+            pos_sat_y=10000, neg_sat_y=10000,
             dead_band_x=0, dead_band_y=0,
             center_x=self.spn_spring_x.value(), center_y=self.spn_spring_y.value(),
-            duration_ms=main.duration_ms, gain=main.gain,
+            duration_ms=0xFFFF, gain=255, apply_y=NUM_AXIS >= 2,
         )
         if not self._ensure_spring():
             return False
